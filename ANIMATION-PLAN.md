@@ -259,6 +259,50 @@ Staff use the admin all day, so motion stays minimal:
 > - **Table rows:** new admin table rows fade in.
 > - **Save buttons:** a button that started a successful save shows a ✓ for 1.2 s. This is done once, in the admin's React Query `MutationCache`, so every save button gets it without changes to each form.
 
+## GSAP layer
+
+Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, all plugins included) is used where CSS cannot do the job well.
+
+**Loading (`apps/storefront/lib/gsap.ts`)**
+
+- GSAP and its plugins (ScrollTrigger, SplitText, MotionPath, Physics2D, CustomEase) are loaded with a dynamic import after the page is interactive. They are not in the first-load JavaScript.
+- GSAP is never loaded at all with Reduce motion.
+- House easings are `ag.out` (0.16, 1, 0.3, 1) and `ag.pop`.
+
+**Scroll scenes (`components/gsap-scenes.tsx`)**
+
+- Switched on with `data-gsap` attributes, so server components can use them:
+  - `split`: heading words rise out of a mask, line by line.
+  - `reveal`: a block fades and rises into place.
+  - `stagger`: children arrive one by one, in ScrollTrigger batches.
+  - `zoom`: a panel grows into place, tied to the scroll.
+  - `parallax`: the photo inside moves slower than the page.
+  - `tilt`: 3D tilt towards the pointer.
+  - `magnetic`: a button is pulled towards the pointer and springs back.
+- They are set up again after each page change and for content that arrives later, and cleaned up with `gsap.context().revert()`.
+- Content on screen at load is never hidden or delayed, and nothing is hidden before GSAP has loaded.
+- SplitText keeps the heading's accessible name (`aria-label` on the heading, and the split pieces are `aria-hidden`).
+
+**Hero**
+
+- As the page scrolls, the text lifts away (with a slight blur instead of a fade, so contrast stays) and the photo moves slower.
+- Each new slide's headline comes in letter by letter.
+- The main button is magnetic.
+
+**Promise ticker** (`components/home/promise-marquee.tsx`)
+
+- An endless navy ticker that speeds up while scrolling, runs backwards when scrolling up, and slows on hover.
+- Without GSAP it is a still, wrapping row.
+
+**Fly to cart:** the photo pops, then follows a MotionPath curve into the cart icon, spinning and shrinking. A ring and a "+1" answer at the icon. If GSAP cannot load, the Web Animations version is used instead.
+
+**Order placed:** about 90 pieces of confetti in the logo colours, thrown up and falling with gravity (Physics2D).
+
+**Checks**
+
+- axe passes with GSAP running on the home, shop, category and product pages (after scrolling through every scene).
+- Full-motion tests cover GSAP loading, scroll-triggered entrances and the ticker.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

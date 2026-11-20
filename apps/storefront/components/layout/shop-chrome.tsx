@@ -2,6 +2,7 @@ import type { CategoryDTO, CollectionDTO, HomeContentDTO } from "@store/types";
 import type { ReactNode } from "react";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { GsapScenes } from "@/components/gsap-scenes";
 import { Footer } from "@/components/layout/footer";
 import { Header, TopBar } from "@/components/layout/header";
 import { NavigationFeedback, RouteView } from "@/components/layout/navigation-feedback";
@@ -36,6 +37,7 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
             Skip to content
           </a>
           <NavigationFeedback />
+          <GsapScenes />
           <TopBar text={home?.announcement ?? null} phone={contact.phone} />
           <Header categories={categories} collections={collections} />
           <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">

@@ -332,7 +332,13 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
         {/* Price */}
         <div className="bg-surface mt-5 rounded-2xl p-4">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className={cn("text-3xl font-extrabold", compareAt && "text-accent-700")}>
+            <span
+              key={price}
+              className={cn(
+                "animate-price-in inline-block text-3xl font-extrabold",
+                compareAt && "text-accent-700",
+              )}
+            >
               {!variant && product.hasPriceRange && (
                 <span className="text-muted text-base font-medium">From </span>
               )}

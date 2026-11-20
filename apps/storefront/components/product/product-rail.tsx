@@ -57,7 +57,7 @@ export function ProductRail({
     <Reveal as="section" stagger aria-labelledby={headingId}>
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="reveal-item">
-          <h2 id={headingId} className="text-2xl font-bold tracking-tight">
+          <h2 id={headingId} data-gsap="split" className="text-2xl font-bold tracking-tight">
             {title}
           </h2>
           {subtitle && <p className="text-muted mt-1 text-sm">{subtitle}</p>}

@@ -2,7 +2,8 @@
 
 import { formatMoney } from "@store/types";
 import { cn } from "@store/ui";
-import type { CSSProperties } from "react";
+import { type CSSProperties, useEffect, useRef } from "react";
+import { loadGsap } from "@/lib/gsap";
 import { usePrevious, useTweenedNumber } from "@/lib/motion";
 
 /**
@@ -84,40 +85,66 @@ export function Burst() {
   );
 }
 
-const CONFETTI_COLOURS = [
-  "var(--color-accent-500)",
-  "var(--color-brand-600)",
-  "var(--color-accent-700)",
-  "var(--color-brand-500)",
-  "#ffc400",
-];
+const CONFETTI_COLOURS = ["#f47b20", "#ffc400", "#1b2d52", "#c2410c", "#3b5a94", "#ffffff"];
 
-/** A short burst of confetti in the brand colours (put inside a `relative` element). */
-export function Confetti({ pieces = 36 }: { pieces?: number }) {
-  return (
-    <span className="confetti" aria-hidden>
-      {Array.from({ length: pieces }, (_, i) => {
-        // Spread evenly left and right, with a little variety (deterministic, so SSR matches).
-        const side = i % 2 ? 1 : -1;
-        const x = side * (40 + ((i * 37) % 260));
-        const r = ((i * 97) % 720) - 360;
-        return (
-          <i
-            key={i}
-            style={
-              {
-                "--i": i,
-                "--x": `${x}px`,
-                "--r": `${r}deg`,
-                "--c": CONFETTI_COLOURS[i % CONFETTI_COLOURS.length],
-                width: i % 3 ? 8 : 6,
-                height: i % 3 ? 12 : 6,
-                borderRadius: i % 3 ? 2 : 9999,
-              } as CSSProperties
-            }
-          />
+/**
+ * A burst of confetti in the logo's colours, thrown up and falling with
+ * gravity (GSAP Physics2D). Put it inside a `relative` element; it fires once
+ * on mount. Nothing happens with Reduce motion (GSAP never loads).
+ */
+export function Confetti({ pieces = 90 }: { pieces?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const ready = loadGsap();
+    const box = ref.current;
+    if (!ready || !box) return;
+    let kill: (() => void) | undefined;
+    void ready.then(({ gsap }) => {
+      const bits = Array.from({ length: pieces }, (_, i) => {
+        const bit = document.createElement("i");
+        const round = i % 4 === 0;
+        Object.assign(bit.style, {
+          position: "absolute",
+          left: "48px",
+          top: "48px",
+          width: round ? "7px" : "8px",
+          height: round ? "7px" : "13px",
+          borderRadius: round ? "9999px" : "2px",
+          background: CONFETTI_COLOURS[i % CONFETTI_COLOURS.length],
+          boxShadow: "0 0 0 0.5px rgb(15 29 56 / 0.15)",
+        });
+        box.appendChild(bit);
+        return bit;
+      });
+      const tl = gsap.timeline({ onComplete: () => bits.forEach((b) => b.remove()) });
+      bits.forEach((bit, i) => {
+        tl.fromTo(
+          bit,
+          { autoAlpha: 1, scale: gsap.utils.random(0.6, 1.2) },
+          {
+            physics2D: {
+              velocity: gsap.utils.random(380, 820),
+              angle: gsap.utils.random(-150, -20),
+              gravity: 900,
+              friction: 0.02,
+            },
+            rotation: gsap.utils.random(-900, 900),
+            rotationX: gsap.utils.random(-360, 360),
+            duration: gsap.utils.random(1.6, 2.6),
+            ease: "none",
+          },
+          i * 0.004,
         );
-      })}
-    </span>
+        tl.to(bit, { autoAlpha: 0, duration: 0.5 }, `>-0.5`);
+      });
+      kill = () => {
+        tl.kill();
+        bits.forEach((b) => b.remove());
+      };
+    });
+    return () => kill?.();
+  }, [pieces]);
+  return (
+    <span ref={ref} aria-hidden className="pointer-events-none absolute inset-0 overflow-visible" />
   );
 }

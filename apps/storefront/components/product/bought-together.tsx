@@ -98,9 +98,10 @@ export function BoughtTogether({
   return (
     <section
       aria-labelledby="together-heading"
+      data-gsap="reveal"
       className="border-line mt-14 rounded-3xl border p-5 sm:p-7"
     >
-      <h2 id="together-heading" className="text-xl font-bold tracking-tight">
+      <h2 id="together-heading" data-gsap="split" className="text-xl font-bold tracking-tight">
         Frequently bought together
       </h2>
       <div className="mt-5 grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">

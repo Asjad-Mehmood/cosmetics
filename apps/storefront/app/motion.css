@@ -19,6 +19,7 @@
   --animate-slide-in-step-next: step-next var(--duration-slow) var(--ease-out) both;
   --animate-slide-in-step-back: step-back var(--duration-slow) var(--ease-out) both;
   --animate-fill-x: fill-x 600ms var(--ease-out) both;
+  --animate-price-in: price-in 520ms var(--ease-spring) both;
   --animate-badge-in: badge-in 420ms var(--ease-spring) 150ms both;
 
   /* Numbers that change: the new value rolls in from below (up) or above (down). */
@@ -90,6 +91,12 @@
       transform: translateX(-24px);
     }
   }
+  @keyframes price-in {
+    from {
+      transform: translateY(-40%) scale(0.9);
+      opacity: 0;
+    }
+  }
   @keyframes badge-in {
     from {
       opacity: 0;
@@ -129,39 +136,6 @@
     100% {
       opacity: 0;
       transform: rotate(calc(var(--i) * 60deg)) translateY(-22px) scale(0.4);
-    }
-  }
-
-  /* Confetti for the "order placed" page: <i> pieces with --i, --x, --r and --c. */
-  .confetti {
-    position: absolute;
-    inset: 0;
-    overflow: visible;
-    pointer-events: none;
-  }
-  .confetti > i {
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    width: 8px;
-    height: 12px;
-    border-radius: 2px;
-    background: var(--c);
-    opacity: 0;
-    animation: confetti-fall 1.4s cubic-bezier(0.2, 0.7, 0.4, 1) calc(var(--i) * 18ms) both;
-  }
-  @keyframes confetti-fall {
-    0% {
-      opacity: 1;
-      transform: translate(0, 0) rotate(0);
-    }
-    35% {
-      opacity: 1;
-      transform: translate(calc(var(--x) * 0.8), -140px) rotate(calc(var(--r) * 0.5));
-    }
-    100% {
-      opacity: 0;
-      transform: translate(var(--x), 220px) rotate(var(--r));
     }
   }
 
@@ -249,6 +223,19 @@
     transform: scaleX(0);
   }
 }
+/* GSAP scrubs --hero-lift from 0 to 1 as the hero scrolls away. */
+[data-gsap-hero] .hero-copy {
+  translate: 0 calc(var(--hero-lift, 0) * -90px);
+  /* Blur rather than fade, so the text keeps its contrast. */
+  filter: blur(calc(var(--hero-lift, 0) * 3px));
+}
+[data-gsap-hero] .hero-photo {
+  translate: 0 calc(var(--hero-lift, 0) * 14%);
+}
+/* With GSAP, the headline's letters animate instead of the whole line. */
+[data-gsap-hero] .hero-copy > h2 {
+  animation: none !important;
+}
 @keyframes hero-in {
   from {
     opacity: 0;
@@ -294,22 +281,6 @@
   animation-delay: 270ms;
 }
 
-/* <Reveal>: hidden only once JavaScript knows the block is below the fold. */
-.reveal-block,
-.reveal-group .reveal-item {
-  transition:
-    opacity 700ms var(--ease-out),
-    transform 700ms var(--ease-out);
-}
-.reveal-group .reveal-item {
-  transition-delay: calc(min(var(--i, 0), 8) * 70ms);
-}
-.reveal-block[data-reveal="hidden"],
-.reveal-group[data-reveal="hidden"] .reveal-item {
-  opacity: 0;
-  transform: translateY(32px);
-}
-
 /*
  * Admin (kept calm, staff use it all day): new table rows fade in, and a save
  * button shows a ✓ for a moment after it worked.
@@ -334,7 +305,6 @@ button[data-done]::after {
 /* Reduce motion: no flying, bursting or confetti at all (not just shortened). */
 @media (prefers-reduced-motion: reduce) {
   .burst,
-  .confetti,
   [data-fly-ghost] {
     display: none !important;
   }

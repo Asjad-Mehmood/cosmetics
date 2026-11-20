@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Gsap } from "./gsap";
 
 /** True when the visitor asked their device for less motion. */
 export const reducedMotion = () =>
@@ -20,9 +21,10 @@ function cartTarget(): HTMLElement | null {
 }
 
 /**
- * "Fly to cart": a small copy of the product photo arcs from `from` to the
- * cart icon (about 600 ms), then the icon jiggles. Resolves when it lands, or
- * at once when motion is reduced, the screen is tiny or nothing is on screen.
+ * "Fly to cart": a small copy of the product photo pops, then flies along a
+ * curved path into the cart icon (GSAP MotionPath), spinning and shrinking;
+ * the icon answers with a ring and a "+1". Resolves when it lands, or at once
+ * when motion is reduced, the screen is tiny or nothing is on screen.
  */
 export async function flyToCart(from: Element | null | undefined, imageUrl?: string) {
   const done = () => window.dispatchEvent(new Event(CART_LANDED));
@@ -55,7 +57,94 @@ export async function flyToCart(from: Element | null | undefined, imageUrl?: str
   const dx = end.left + end.width / 2 - (start.left + start.width / 2);
   const dy = end.top + end.height / 2 - (start.top + start.height / 2);
   // Up and over: the midpoint is lifted, so the path is an arc.
-  const lift = Math.min(160, Math.abs(dx) * 0.35 + 60);
+  const lift = Math.min(180, Math.abs(dx) * 0.35 + 80);
+
+  try {
+    const { gsapNow } = await import("./gsap");
+    const lib = await gsapNow();
+    if (!lib) throw new Error("no gsap");
+    const { gsap } = lib;
+    await gsap
+      .timeline()
+      .to(ghost, { scale: 1.08, duration: 0.18, ease: "power2.out" })
+      .to(ghost, {
+        motionPath: {
+          path: [
+            { x: 0, y: 0 },
+            { x: dx * 0.45, y: dy * 0.4 - lift },
+            { x: dx, y: dy },
+          ],
+          curviness: 1.25,
+        },
+        scale: 18 / size,
+        rotation: dx > 0 ? 28 : -28,
+        borderRadius: "50%",
+        duration: 0.8,
+        ease: "power2.inOut",
+      })
+      .to(ghost, { autoAlpha: 0, duration: 0.12 }, "-=0.08");
+    ghost.remove();
+    landingFlourish(gsap, end);
+  } catch {
+    await flyWithoutGsap(ghost, dx, dy, lift, size);
+    ghost.remove();
+  }
+  done();
+}
+
+/** At the cart icon: a ring spreads out and a "+1" floats up. */
+function landingFlourish(gsap: Gsap, at: DOMRect) {
+  const cx = at.left + at.width / 2;
+  const cy = at.top + at.height / 2;
+  const ring = document.createElement("span");
+  const plus = document.createElement("span");
+  for (const el of [ring, plus]) {
+    el.setAttribute("aria-hidden", "true");
+    el.dataset.flyGhost = "";
+    Object.assign(el.style, { position: "fixed", zIndex: "100", pointerEvents: "none" });
+    document.body.appendChild(el);
+  }
+  Object.assign(ring.style, {
+    left: `${cx - 18}px`,
+    top: `${cy - 18}px`,
+    width: "36px",
+    height: "36px",
+    borderRadius: "9999px",
+    border: "2px solid var(--color-accent-500)",
+  });
+  plus.textContent = "+1";
+  Object.assign(plus.style, {
+    left: `${cx + 6}px`,
+    top: `${cy - 26}px`,
+    font: "800 13px/1 var(--font-sans)",
+    color: "var(--color-accent-700)",
+  });
+  gsap.fromTo(
+    ring,
+    { scale: 0.4, autoAlpha: 1 },
+    { scale: 2, autoAlpha: 0, duration: 0.7, ease: "power2.out", onComplete: () => ring.remove() },
+  );
+  gsap.fromTo(
+    plus,
+    { y: 6, scale: 0.6, autoAlpha: 0 },
+    {
+      keyframes: [
+        { y: -8, scale: 1.1, autoAlpha: 1, duration: 0.3, ease: "back.out(3)" },
+        { y: -26, autoAlpha: 0, duration: 0.6, delay: 0.25, ease: "power1.in" },
+      ],
+      onComplete: () => plus.remove(),
+    },
+  );
+}
+
+/** The same flight with the Web Animations API, if GSAP could not load. */
+async function flyWithoutGsap(
+  ghost: HTMLElement,
+  dx: number,
+  dy: number,
+  lift: number,
+  size: number,
+) {
   const anim = ghost.animate(
     [
       { transform: "translate(0, 0) scale(1)", opacity: 1, borderRadius: "24px" },
@@ -76,9 +165,6 @@ export async function flyToCart(from: Element | null | undefined, imageUrl?: str
     await anim.finished;
   } catch {
     // Cancelled (page changed): nothing to do.
-  } finally {
-    ghost.remove();
-    done();
   }
 }
 

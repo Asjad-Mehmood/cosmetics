@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BuyAgain } from "@/components/home/buy-again";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { JustForYou } from "@/components/home/just-for-you";
+import { PromiseMarquee } from "@/components/home/promise-marquee";
 import {
   ChevronRightIcon,
   ClockIcon,
@@ -100,6 +101,10 @@ export default async function HomePage() {
         )}
       </Container>
 
+      <div className="pt-6">
+        <PromiseMarquee />
+      </div>
+
       <Container className="pt-6">
         <VoucherStrip title="Collect vouchers" />
       </Container>
@@ -108,7 +113,11 @@ export default async function HomePage() {
         <section aria-labelledby="categories-heading">
           <Container className="pt-12">
             <div className="mb-6 flex items-end justify-between">
-              <h2 id="categories-heading" className="text-2xl font-bold tracking-tight">
+              <h2
+                id="categories-heading"
+                data-gsap="split"
+                className="text-2xl font-bold tracking-tight"
+              >
                 Shop by category
               </h2>
               <Link href="/shop" className="text-brand-700 text-sm font-semibold hover:underline">
@@ -172,7 +181,11 @@ export default async function HomePage() {
 
       <section aria-labelledby="concerns-heading">
         <Container className="pt-14">
-          <h2 id="concerns-heading" className="mb-6 text-2xl font-bold tracking-tight">
+          <h2
+            id="concerns-heading"
+            data-gsap="split"
+            className="mb-6 text-2xl font-bold tracking-tight"
+          >
             Shop by concern
           </h2>
           <Reveal as="ul" stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -230,6 +243,7 @@ export default async function HomePage() {
                   key={c.id}
                   href={`/categories/${c.slug}`}
                   style={{ "--i": i } as CSSProperties}
+                  data-gsap="tilt"
                   className={`${bg} reveal-item hover:shadow-(--shadow-card) group relative flex min-h-56 overflow-hidden rounded-3xl active:scale-[.99]`}
                 >
                   <div className="relative z-10 flex w-3/5 flex-col justify-center p-6 sm:p-8">
@@ -247,7 +261,10 @@ export default async function HomePage() {
                     </span>
                   </div>
                   {c.imageUrl && (
-                    <div className="absolute inset-y-0 right-0 w-2/5">
+                    <div
+                      data-gsap="parallax"
+                      className="absolute inset-y-0 right-0 w-2/5 overflow-hidden"
+                    >
                       <Image
                         src={c.imageUrl}
                         alt=""
@@ -276,8 +293,8 @@ export default async function HomePage() {
       )}
 
       <Container className="pt-14">
-        <Reveal
-          as="section"
+        <section
+          data-gsap="zoom"
           aria-labelledby="pharmacy-heading"
           className="bg-brand-700 grid gap-6 overflow-hidden rounded-3xl px-6 py-8 text-white sm:px-10 md:grid-cols-[auto_1fr_auto] md:items-center"
         >
@@ -295,7 +312,7 @@ export default async function HomePage() {
             </span>
           </span>
           <div>
-            <h2 id="pharmacy-heading" className="text-2xl font-bold">
+            <h2 id="pharmacy-heading" data-gsap="split" className="text-2xl font-bold">
               Prescription medicines are coming soon
             </h2>
             <p className="mt-2 max-w-2xl text-white/85">
@@ -317,7 +334,7 @@ export default async function HomePage() {
               How it will work
             </Link>
           </div>
-        </Reveal>
+        </section>
       </Container>
 
       <Container className="pt-14">
