@@ -14,7 +14,7 @@ export function SortSelect({ value, search = false }: { value: ProductSort; sear
       <select
         value={value}
         onChange={(e) => update({ sort: e.target.value === fallback ? null : e.target.value })}
-        className="border-line bg-canvas h-9 rounded-lg border px-2 text-sm"
+        className="border-line bg-canvas focus:border-brand-600 h-10 rounded-full border pl-4 pr-8 text-sm font-medium focus:outline-none"
         aria-label="Sort products"
       >
         {PRODUCT_SORTS.filter((s) => search || s !== "relevance").map((s) => (
@@ -28,7 +28,7 @@ export function SortSelect({ value, search = false }: { value: ProductSort; sear
 }
 
 /** Removable chips for each active filter. */
-export function ActiveFilters() {
+export function ActiveFilters({ lockedOnSale = false }: { lockedOnSale?: boolean }) {
   const { params, update } = useListingNav();
   const chips: { label: string; remove: () => void }[] = [];
 
@@ -51,6 +51,8 @@ export function ActiveFilters() {
   }
   if (params.get("inStock") === "true")
     chips.push({ label: "In stock", remove: () => update({ inStock: null }) });
+  if (params.get("onSale") === "true" && !lockedOnSale)
+    chips.push({ label: "On sale", remove: () => update({ onSale: null }) });
 
   if (!chips.length) return null;
   return (
@@ -60,7 +62,7 @@ export function ActiveFilters() {
           key={c.label}
           type="button"
           onClick={c.remove}
-          className="border-line hover:border-ink flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
+          className="bg-brand-50 text-brand-700 hover:bg-brand-100 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
           aria-label={`Remove filter: ${c.label}`}
         >
           {c.label} <span aria-hidden>×</span>
@@ -68,8 +70,17 @@ export function ActiveFilters() {
       ))}
       <button
         type="button"
-        onClick={() => update({ size: null, color: null, min: null, max: null, inStock: null })}
-        className="text-muted text-xs underline"
+        onClick={() =>
+          update({
+            size: null,
+            color: null,
+            min: null,
+            max: null,
+            inStock: null,
+            ...(lockedOnSale ? {} : { onSale: null }),
+          })
+        }
+        className="text-muted hover:text-ink text-xs font-medium underline"
       >
         Clear all
       </button>

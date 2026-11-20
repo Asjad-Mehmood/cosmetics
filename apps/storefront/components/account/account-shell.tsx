@@ -41,7 +41,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
 
   return (
     <Container className="py-10 sm:py-14">
-      <h1 className="text-3xl font-bold tracking-tight">My account</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">My account</h1>
       <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Account">
           <ul className="flex gap-1 overflow-x-auto lg:flex-col">
@@ -51,8 +51,8 @@ export function AccountShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   aria-current={pathname === item.href ? "page" : undefined}
                   className={cn(
-                    "block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium",
-                    pathname === item.href ? "bg-ink text-white" : "hover:bg-surface",
+                    "block whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium",
+                    pathname === item.href ? "bg-brand-600 text-white" : "hover:bg-surface",
                   )}
                 >
                   {item.label}

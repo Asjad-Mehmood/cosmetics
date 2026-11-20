@@ -2,14 +2,15 @@ import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
+import { PageHeader } from "@/components/content/page-header";
 
 export const metadata: Metadata = { title: "About us" };
 
 export default function AboutPage() {
   return (
-    <Container className="max-w-3xl py-12">
-      <h1 className="text-3xl font-bold tracking-tight">About {siteConfig.name}</h1>
-      <div className="mt-8 space-y-4 text-lg leading-relaxed">
+    <Container className="max-w-4xl py-8 sm:py-12">
+      <PageHeader title={`About ${siteConfig.name}`} eyebrow="Our story" />
+      <div className="space-y-4 text-lg leading-relaxed">
         <p>
           {siteConfig.name} is an online beauty and pharmacy store for Pakistan: skincare, makeup,
           hair care, fragrance, vitamins and everyday health essentials in one place.
@@ -30,7 +31,7 @@ export default function AboutPage() {
       </div>
       <Link
         href="/shop"
-        className="bg-ink mt-10 inline-flex h-11 items-center rounded-lg px-6 text-sm font-semibold text-white"
+        className="bg-brand-600 hover:bg-brand-700 mt-10 inline-flex h-12 items-center rounded-full px-7 text-sm font-semibold text-white"
       >
         Shop all products
       </Link>

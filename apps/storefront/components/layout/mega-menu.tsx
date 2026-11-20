@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@store/ui";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDownIcon } from "../icons";
+import { ChevronDownIcon, GridIcon } from "../icons";
 import type { NavData } from "./header";
 
-/** "Shop" dropdown listing categories and collections. Opens on hover, click or keyboard. */
+/** "All categories" dropdown: category tiles with photos, plus collections. */
 export function MegaMenu({ categories, collections }: NavData) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -31,7 +32,7 @@ export function MegaMenu({ categories, collections }: NavData) {
   return (
     <div
       ref={ref}
-      className="relative"
+      className="shrink-0"
       onMouseEnter={() => {
         openedByHover.current = !open;
         setOpen(true);
@@ -49,54 +50,81 @@ export function MegaMenu({ categories, collections }: NavData) {
           }
           setOpen((o) => !o);
         }}
-        className="hover:bg-surface flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium"
+        className="bg-brand-600 hover:bg-brand-700 mr-2 flex h-9 items-center gap-2 rounded-full pl-3 pr-3.5 text-sm font-semibold text-white"
       >
-        Shop <ChevronDownIcon className={cn("transition-transform", open && "rotate-180")} />
+        <GridIcon width={16} height={16} />
+        All categories
+        <ChevronDownIcon className={cn("transition-transform", open && "rotate-180")} />
       </button>
-      <div
-        id="mega-menu"
-        hidden={!open}
-        className="border-line bg-canvas absolute left-0 top-full z-50 w-[560px] rounded-2xl border p-6 shadow-xl"
-      >
-        <div className="grid grid-cols-2 gap-8">
-          <div>
-            <p className="text-muted text-xs font-semibold uppercase tracking-wider">Categories</p>
-            <ul className="mt-3 space-y-1">
-              <li>
-                <Link
-                  href="/shop"
-                  className="hover:bg-surface block rounded-lg px-2 py-1.5 text-sm font-semibold"
-                >
-                  All products
-                </Link>
-              </li>
-              {categories.map((c) => (
-                <li key={c.id}>
+      <div id="mega-menu" hidden={!open} className="absolute inset-x-0 top-full z-50 pt-px">
+        <div className="border-line bg-canvas shadow-(--shadow-pop) border-b">
+          <div className="mx-auto grid max-w-7xl grid-cols-[1fr_220px] gap-10 px-8 py-8">
+            <div>
+              <p className="text-muted text-xs font-semibold uppercase tracking-wider">
+                Shop by category
+              </p>
+              <ul className="mt-4 grid grid-cols-3 gap-3 xl:grid-cols-5">
+                {categories.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={`/categories/${c.slug}`}
+                      className="hover:border-brand-600 border-line group flex items-center gap-3 rounded-2xl border p-2.5 transition"
+                    >
+                      <span className="bg-surface relative size-12 shrink-0 overflow-hidden rounded-xl">
+                        {c.imageUrl && (
+                          <Image
+                            src={c.imageUrl}
+                            alt=""
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        )}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold group-hover:underline">
+                          {c.name}
+                        </span>
+                        <span className="text-muted block text-xs">
+                          {c.productCount} {c.productCount === 1 ? "product" : "products"}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/shop"
+                className="text-brand-700 mt-5 inline-block text-sm font-semibold hover:underline"
+              >
+                Browse all products →
+              </Link>
+            </div>
+            <div>
+              <p className="text-muted text-xs font-semibold uppercase tracking-wider">
+                Collections
+              </p>
+              <ul className="mt-4 space-y-1">
+                <li>
                   <Link
-                    href={`/categories/${c.slug}`}
-                    className="hover:bg-surface flex justify-between rounded-lg px-2 py-1.5 text-sm"
+                    href="/offers"
+                    className="text-accent-700 hover:bg-surface block rounded-lg px-2 py-1.5 text-sm font-semibold"
                   >
-                    {c.name}
-                    <span className="text-muted">{c.productCount}</span>
+                    Offers
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-muted text-xs font-semibold uppercase tracking-wider">Collections</p>
-            <ul className="mt-3 space-y-1">
-              {collections.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href={`/collections/${c.slug}`}
-                    className="hover:bg-surface block rounded-lg px-2 py-1.5 text-sm"
-                  >
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                {collections.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={`/collections/${c.slug}`}
+                      className="hover:bg-surface block rounded-lg px-2 py-1.5 text-sm"
+                    >
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>

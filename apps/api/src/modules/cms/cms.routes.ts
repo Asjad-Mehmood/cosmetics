@@ -3,6 +3,7 @@ import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@store
 import { ok } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";
 import { prisma } from "../../lib/prisma";
+import { storeInfo } from "../../lib/settings";
 import { defineRoutes, route } from "../../lib/route";
 import { AppError } from "../../utils/app-error";
 import { newsletterWelcomeEmail } from "../engagement/emails";
@@ -16,12 +17,13 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
   route({
     method: "get",
     path: "/home",
-    summary: "Homepage content: announcement bar and active banners",
+    summary:
+      "Site-wide content: announcement bar, active banners, contact details and delivery zones",
     description: "Banners are filtered by their active flag and optional start/end dates.",
     access: "public",
     handler: async () => {
       const now = new Date();
-      const [banners, enabled, text] = await Promise.all([
+      const [banners, enabled, text, store, zones] = await Promise.all([
         prisma.banner.findMany({
           where: {
             isActive: true,
@@ -34,6 +36,8 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
         }),
         getSetting<boolean>("announcement.enabled"),
         getSetting<string>("announcement.text"),
+        storeInfo(),
+        prisma.shippingZone.findMany({ where: { isActive: true }, orderBy: { position: "asc" } }),
       ]);
       return ok<HomeContentDTO>({
         announcement: enabled && text ? text : null,
@@ -44,6 +48,14 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           imageUrl: b.imageUrl,
           link: b.link,
           ctaLabel: b.ctaLabel,
+        })),
+        contact: { phone: store.phone || null, email: store.email || null },
+        delivery: zones.map((z) => ({
+          name: z.name,
+          estimatedDays: z.estimatedDays,
+          standardRate: z.standardRate,
+          freeOverAmount: z.freeOverAmount,
+          codFee: z.codEnabled ? z.codFee : 0,
         })),
       });
     },

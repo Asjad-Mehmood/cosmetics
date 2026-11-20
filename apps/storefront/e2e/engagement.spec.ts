@@ -12,7 +12,6 @@ async function signIn(page: Page, email: string, password: string) {
 
 test("search suggests products as you type, even with a typo", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Open search" }).click();
   await page.getByRole("combobox", { name: "Search products" }).fill("sunscren");
   const option = page.getByRole("option", { name: /Daily Sunscreen Lotion/ });
   await expect(option).toBeVisible();

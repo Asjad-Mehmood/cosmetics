@@ -26,6 +26,8 @@ function listWhere(q: ProductListQuery, searchIds?: string[]): Prisma.ProductWhe
   if (q.slugs?.length) and.push({ slug: { in: q.slugs } });
   if (q.category) and.push(inCategory(q.category));
   if (q.collection) and.push(inCollection(q.collection));
+  // A compare-at price is always above the price (validated), so "has one" = on sale.
+  if (q.onSale) and.push({ compareAtPrice: { not: null } });
   // Price filters use the product's base price (variant overrides are rare).
   if (q.minPrice !== undefined || q.maxPrice !== undefined) {
     and.push({ basePrice: { gte: q.minPrice, lte: q.maxPrice } });

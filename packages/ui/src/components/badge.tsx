@@ -7,6 +7,7 @@ const tones = {
   success: "bg-success/10 text-success border-success/20",
   warning: "bg-warning/15 text-ink border-warning/30",
   danger: "bg-danger/10 text-danger border-danger/20",
+  accent: "bg-accent-50 text-accent-700 border-accent-100",
 } as const;
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

@@ -3,7 +3,8 @@ import { toMajor } from "@store/types";
 import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ProductGrid } from "@/components/product/product-card";
+import { ProductDetails, type DetailSection } from "@/components/product/product-details";
+import { ProductRail } from "@/components/product/product-rail";
 import { ProductView } from "@/components/product/product-view";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { Reviews } from "@/components/product/reviews";
@@ -64,36 +65,17 @@ function productJsonLd(p: ProductDetailDTO) {
   };
 }
 
-function Details({ product }: { product: ProductDetailDTO }) {
-  const sections = [
+function detailSections(product: ProductDetailDTO): DetailSection[] {
+  return [
     { title: "Description", body: product.description },
     product.ingredients && { title: "Ingredients", body: product.ingredients },
     product.howToUse && { title: "How to use", body: product.howToUse },
     product.warnings && { title: "Warnings", body: product.warnings },
     {
       title: "Delivery & returns",
-      body: "Delivered in 1-2 working days in Lahore and 2-5 working days elsewhere. Unopened beauty and personal care items can be returned within 7 days of delivery. For hygiene and safety, opened items and medicines can only be returned if faulty or wrong.",
+      body: "Delivered in 1-2 working days in Lahore and 2-5 working days elsewhere, with Cash on Delivery everywhere.\n\nUnopened beauty and personal care items can be returned within 7 days of delivery. For hygiene and safety, opened items and medicines can only be returned if they arrive damaged, expired or wrong.",
     },
-  ].filter(Boolean) as { title: string; body: string }[];
-
-  return (
-    <div className="divide-line border-line mt-12 max-w-3xl divide-y border-y">
-      {sections.map((s, i) => (
-        <details key={s.title} open={i === 0} className="group py-4">
-          <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
-            {s.title}
-            <span
-              aria-hidden
-              className="text-muted text-xl transition-transform group-open:rotate-45"
-            >
-              +
-            </span>
-          </summary>
-          <p className="text-muted mt-3 leading-relaxed">{s.body}</p>
-        </details>
-      ))}
-    </div>
-  );
+  ].filter(Boolean) as DetailSection[];
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -107,7 +89,7 @@ export default async function ProductPage({ params }: Props) {
   const category = product.categories[0];
 
   return (
-    <Container className="py-8 sm:py-12">
+    <Container className="pb-8 pt-4 sm:py-8">
       <script
         type="application/ld+json"
         // JSON.stringify output is safe here apart from "<", which is escaped.
@@ -125,14 +107,13 @@ export default async function ProductPage({ params }: Props) {
         ]}
       />
       <ProductView product={product} />
-      <Details product={product} />
+      <ProductDetails sections={detailSections(product)} />
       <Reviews slug={product.slug} />
 
       {related.length > 0 && (
-        <section className="mt-20">
-          <h2 className="mb-6 text-2xl font-bold tracking-tight">You may also like</h2>
-          <ProductGrid products={related.slice(0, 4)} />
-        </section>
+        <div className="mt-16">
+          <ProductRail title="You may also like" products={related} />
+        </div>
       )}
       <RecentlyViewed current={product.slug} />
     </Container>

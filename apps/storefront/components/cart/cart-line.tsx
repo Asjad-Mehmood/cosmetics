@@ -23,7 +23,7 @@ export function CartLine({ item, compact = false }: { item: CartItemDTO; compact
     <li data-testid="cart-line" className={cn("flex gap-4 py-4", busy && "opacity-60")}>
       <Link
         href={`/products/${item.slug}`}
-        className="bg-surface relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-lg sm:w-24"
+        className="bg-surface relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl sm:w-24"
       >
         {item.image && (
           <Image
@@ -45,7 +45,7 @@ export function CartLine({ item, compact = false }: { item: CartItemDTO; compact
               {item.title}
             </Link>
             <p className="text-muted mt-0.5 text-xs">
-              {item.color} · {item.size}
+              {item.color === "Standard" ? item.size : `${item.color} · ${item.size}`}
             </p>
           </div>
           <p className="text-sm font-semibold tabular-nums">{formatMoney(item.lineTotal)}</p>

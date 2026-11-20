@@ -9,5 +9,13 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  return <ProductListing title="All products" pathname="/shop" searchParams={await searchParams} />;
+  return (
+    <ProductListing
+      title="All products"
+      eyebrow="Shop"
+      description="Genuine skincare, makeup, hair care, fragrance, vitamins and health essentials, delivered across Pakistan."
+      pathname="/shop"
+      searchParams={await searchParams}
+    />
+  );
 }

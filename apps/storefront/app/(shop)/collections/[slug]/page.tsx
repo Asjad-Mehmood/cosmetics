@@ -29,6 +29,8 @@ export default async function CollectionPage({ params, searchParams }: Props) {
     <ProductListing
       title={collection.name}
       description={collection.description}
+      image={collection.bannerUrl}
+      eyebrow="Collection"
       pathname={`/collections/${slug}`}
       searchParams={await searchParams}
       scope={{ collection: slug }}

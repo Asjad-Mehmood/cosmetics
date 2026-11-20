@@ -1,6 +1,7 @@
 import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { TrackOrder } from "@/components/orders/track-order";
+import { PageHeader } from "@/components/content/page-header";
 
 export const metadata: Metadata = {
   title: "Track your order",
@@ -9,10 +10,11 @@ export const metadata: Metadata = {
 
 export default function TrackOrderPage() {
   return (
-    <Container className="max-w-3xl py-12">
-      <h1 className="text-3xl font-bold tracking-tight">Track your order</h1>
-      <p className="text-muted mt-2">Enter the order number from your confirmation email.</p>
-      <div className="mt-8">
+    <Container className="max-w-4xl py-8 sm:py-12">
+      <PageHeader title="Track your order" eyebrow="Orders">
+        Enter the order number from your confirmation email.
+      </PageHeader>
+      <div>
         <TrackOrder />
       </div>
     </Container>

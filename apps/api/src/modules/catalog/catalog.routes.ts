@@ -15,7 +15,7 @@ export const productsRouter = defineRoutes("/products", "Catalog", [
     path: "",
     summary: "List published products",
     description:
-      "Filters: `q` (search), `category`, `collection`, `size` / `color` (comma-separated), `minPrice` / `maxPrice` (minor units), `inStock=true`. Size, colour and stock filters must match the same variant.",
+      "Filters: `q` (search), `category`, `collection`, `size` / `color` (comma-separated), `minPrice` / `maxPrice` (minor units), `inStock=true`, `onSale=true`. Size, colour and stock filters must match the same variant.",
     access: "public",
     query: productListQuerySchema,
     handler: ({ query }) => catalog.listProducts(query),

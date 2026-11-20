@@ -3,6 +3,7 @@ import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getData } from "@/lib/server-api";
+import { PageHeader } from "@/components/content/page-header";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -58,11 +59,12 @@ export default async function PolicyPage({ params }: Props) {
   if (!page) notFound();
 
   return (
-    <Container className="max-w-3xl py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{page.title}</h1>
-      <p className="text-muted mt-2 text-sm">
-        Last updated {new Date(page.updatedAt).toLocaleDateString("en-PK", { dateStyle: "long" })}
-      </p>
+    <Container className="max-w-4xl py-8 sm:py-12">
+      <PageHeader title={page.title} eyebrow="Policies">
+        <p className="text-sm">
+          Last updated {new Date(page.updatedAt).toLocaleDateString("en-PK", { dateStyle: "long" })}
+        </p>
+      </PageHeader>
       <PlainText content={page.content} />
     </Container>
   );

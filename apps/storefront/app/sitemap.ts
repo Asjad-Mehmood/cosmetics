@@ -46,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
     ...[
+      "/offers",
       "/faq",
       "/about",
       "/contact",

@@ -10,6 +10,7 @@ export interface ListingFilters {
   min?: number;
   max?: number;
   inStock: boolean;
+  onSale: boolean;
   sort: ProductSort;
   page: number;
 }
@@ -32,6 +33,7 @@ export function parseFilters(sp: SearchParams): ListingFilters {
     min: num(sp.min),
     max: num(sp.max),
     inStock: first(sp.inStock) === "true",
+    onSale: first(sp.onSale) === "true",
     sort: sort && PRODUCT_SORTS.includes(sort) ? sort : defaultSort(q),
     page: Math.max(1, Math.floor(num(sp.page) ?? 1)),
   };
@@ -56,6 +58,7 @@ export function toApiQuery(
   if (f.min !== undefined) p.set("minPrice", String(Math.round(f.min * 100)));
   if (f.max !== undefined) p.set("maxPrice", String(Math.round(f.max * 100)));
   if (f.inStock) p.set("inStock", "true");
+  if (f.onSale) p.set("onSale", "true");
   p.set("sort", f.sort);
   p.set("page", String(f.page));
   p.set("limit", String(PAGE_SIZE));
@@ -76,6 +79,7 @@ export function countActiveFilters(f: ListingFilters): number {
     f.size.length +
     f.color.length +
     (f.min !== undefined || f.max !== undefined ? 1 : 0) +
-    (f.inStock ? 1 : 0)
+    (f.inStock ? 1 : 0) +
+    (f.onSale ? 1 : 0)
   );
 }

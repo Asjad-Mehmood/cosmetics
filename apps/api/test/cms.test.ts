@@ -15,6 +15,18 @@ describe("content endpoints", () => {
     const res = await request(app).get("/api/v1/cms/home");
     expect(res.status).toBe(200);
     expect(res.body.data.announcement).toMatch(/genuine products/);
+    expect(res.body.data.contact).toEqual({
+      phone: expect.any(String),
+      email: expect.stringContaining("@"),
+    });
+    // Other tests add zones in parallel, so look the seeded one up by name.
+    expect(res.body.data.delivery.find((z: { name: string }) => z.name === "Lahore")).toEqual({
+      name: "Lahore",
+      estimatedDays: "1-2",
+      standardRate: 15000,
+      freeOverAmount: 300000,
+      codFee: 5000,
+    });
     const ids = res.body.data.banners.map((b: { id: string }) => b.id);
     expect(ids).toContain("banner_skincare");
     expect(ids).not.toContain(expired.id);

@@ -12,7 +12,7 @@ test("mega menu leads to a category page that only lists that category", async (
   await page.goto("/");
   await page
     .getByRole("navigation", { name: "Main" })
-    .getByRole("button", { name: "Shop" })
+    .getByRole("button", { name: "All categories" })
     .click();
   await page
     .locator("#mega-menu")
@@ -21,14 +21,14 @@ test("mega menu leads to a category page that only lists that category", async (
 
   await expect(page).toHaveURL(/\/categories\/skincare$/);
   await expect(page.getByRole("heading", { level: 1, name: "Skincare" })).toBeVisible();
-  await expect(page.getByText(/^3 products$/)).toBeVisible();
+  await expect(page.locator("#main").getByText(/^3 products$/)).toBeVisible();
 });
 
 test("filters update the URL and results, and can be cleared", async ({ page }) => {
   await page.goto("/shop");
   // The filters work once the page's scripts have loaded.
   await page.waitForLoadState("networkidle");
-  const count = page.getByText(/^\d+ products?$/);
+  const count = page.locator("#main").getByText(/^\d+ products?$/);
   const before = await count.textContent();
 
   await page.getByRole("checkbox", { name: "Nude Rose" }).check();
@@ -73,7 +73,7 @@ test("product page: pack sizes have their own prices, and details are listed", a
   await page.getByRole("button", { name: /^Size 30 ml/ }).click();
   await expect(page.getByText("Rs 3,999").first()).toBeVisible();
   for (const section of ["Ingredients", "How to use", "Warnings", "Delivery & returns"]) {
-    await expect(page.locator("summary", { hasText: section })).toBeVisible();
+    await expect(page.getByRole("tab", { name: section })).toBeVisible();
   }
 });
 
@@ -85,4 +85,11 @@ test("product page: shades switch with the swatches", async ({ page }) => {
     "aria-pressed",
     "true",
   );
+});
+
+test("offers page lists only discounted products", async ({ page }) => {
+  await page.goto("/offers");
+  await expect(page.getByRole("heading", { level: 1, name: "Offers" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Velvet Matte Lipstick" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Vitamin C Brightening Serum" })).toHaveCount(0);
 });

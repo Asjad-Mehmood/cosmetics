@@ -28,3 +28,13 @@ export const footerNav = {
     { label: "Terms of service", href: "/policies/terms" },
   ],
 };
+
+/** Suggested searches, shown under the empty search box and on the search page. */
+export const POPULAR_SEARCHES = [
+  "Sunscreen",
+  "Vitamin C serum",
+  "Lipstick",
+  "Shampoo",
+  "Omega 3",
+  "Thermometer",
+];

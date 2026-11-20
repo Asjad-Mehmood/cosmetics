@@ -29,6 +29,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     <ProductListing
       title={category.name}
       description={category.description}
+      image={category.imageUrl}
+      eyebrow="Category"
       pathname={`/categories/${slug}`}
       searchParams={await searchParams}
       scope={{ category: slug }}

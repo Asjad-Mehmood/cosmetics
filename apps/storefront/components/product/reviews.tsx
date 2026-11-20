@@ -267,7 +267,7 @@ export function Reviews({ slug }: { slug: string }) {
           ) : (
             summary && (
               <p className="text-muted text-sm">
-                No reviews yet. Be the first to share how it fits.
+                No reviews yet. Be the first to share how it worked for you.
               </p>
             )
           )}

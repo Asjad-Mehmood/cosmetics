@@ -223,9 +223,23 @@ export interface BannerDTO {
   ctaLabel: string | null;
 }
 
+export interface DeliveryZoneDTO {
+  name: string;
+  /** e.g. "1-2" (working days). */
+  estimatedDays: string;
+  standardRate: number;
+  /** Standard delivery is free from this subtotal (null = never free). */
+  freeOverAmount: number | null;
+  codFee: number;
+}
+
 export interface HomeContentDTO {
   announcement: string | null;
   banners: BannerDTO[];
+  /** Contact details shown in the header and footer. */
+  contact: { phone: string | null; email: string | null };
+  /** Active delivery zones in display order, for delivery estimates. */
+  delivery: DeliveryZoneDTO[];
 }
 
 export interface PageDTO {

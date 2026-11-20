@@ -29,3 +29,14 @@ test("no horizontal scrolling on key pages", async ({ page }) => {
     expect(overflow, path).toBe(false);
   }
 });
+
+test("the bottom tab bar opens categories and the cart", async ({ page }) => {
+  await page.goto("/");
+  const tabs = page.getByRole("navigation", { name: "Quick links" });
+  await tabs.getByRole("button", { name: "Categories" }).click();
+  const menu = page.getByRole("dialog", { name: "Menu" });
+  await expect(menu.getByRole("link", { name: "Skincare" })).toBeVisible();
+  await menu.getByRole("button", { name: "Close" }).click();
+  await tabs.getByRole("button", { name: /Cart/ }).click();
+  await expect(page.getByRole("dialog", { name: /Your cart/ })).toBeVisible();
+});

@@ -67,6 +67,13 @@ describe("GET /products", () => {
     expect(sizes.body.data.map((p: Card) => p.slug)).toEqual(["daily-sunscreen-spf-50"]);
   });
 
+  it("lists only discounted products with onSale=true", async () => {
+    const res = await get("/products?onSale=true&limit=50");
+    const slugs = res.body.data.map((p: Card) => p.slug);
+    expect(slugs).toContain("velvet-matte-lipstick");
+    expect(slugs).not.toContain("vitamin-c-brightening-serum");
+  });
+
   it("filters by price range (minor units)", async () => {
     const res = await get("/products?minPrice=400000&maxPrice=500000&limit=50");
     expect(res.body.data.length).toBeGreaterThan(0);

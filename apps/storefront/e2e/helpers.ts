@@ -39,12 +39,13 @@ export async function selectVariant(page: Page, slug: string, v: { color: string
   await page.goto(`/products/${slug}`);
   const shade = page.getByRole("button", { name: new RegExp(`^${v.color}`) });
   if (await shade.count()) await shade.click();
-  await page.getByRole("button", { name: new RegExp(`^Size ${v.size}(,|$)`) }).click();
+  const size = v.size.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  await page.getByRole("button", { name: new RegExp(`^Size ${size}( |$)`) }).click();
 }
 
 export async function addToCart(page: Page, slug: string, v: { color: string; size: string }) {
   await selectVariant(page, slug, v);
-  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
   const drawer = page.getByRole("dialog", { name: /Your cart/ });
   await expect(drawer).toBeVisible();
   return drawer;
