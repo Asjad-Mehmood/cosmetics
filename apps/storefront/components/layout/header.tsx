@@ -23,7 +23,7 @@ export function Header({ categories, collections }: NavData) {
       <Container className="flex h-16 items-center gap-3 lg:h-[72px] lg:gap-6">
         <MobileNavButton />
         <Link href="/" aria-label={`${siteConfig.name} home`} className="shrink-0">
-          <Logo markClassName="size-8" />
+          <Logo imgClassName="h-8 sm:h-9 lg:h-10" />
         </Link>
         <div className="hidden flex-1 md:block">
           <SearchBar />

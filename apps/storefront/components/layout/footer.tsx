@@ -35,7 +35,7 @@ export function Footer({
         <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:py-14 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div className="col-span-2 lg:col-span-1">
             <span className="text-ink inline-block rounded-xl bg-white px-3 py-2">
-              <Logo markClassName="size-7" />
+              <Logo imgClassName="h-9" />
             </span>
             <p className="mt-4 max-w-sm text-sm text-white/80">{siteConfig.description}</p>
             <ul className="mt-5 space-y-2 text-sm">

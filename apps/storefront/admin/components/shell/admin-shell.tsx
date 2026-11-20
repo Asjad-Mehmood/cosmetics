@@ -14,7 +14,7 @@ import { Topbar } from "./topbar";
 function Brand() {
   return (
     <Link href="/" title="Dashboard">
-      <Logo label="Admin" markClassName="size-7" />
+      <Logo label="Admin" imgClassName="h-8" />
     </Link>
   );
 }
