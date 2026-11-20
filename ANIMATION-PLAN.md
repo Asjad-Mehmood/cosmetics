@@ -1,6 +1,6 @@
 # Animation Plan: Amazon Group storefront
 
-> **Status: plan, not started.** Nothing below is built yet.
+> **Status: phases 1 and 2 are built** (see the notes under each). Phases 3–8 are not started.
 
 ## Goal
 
@@ -58,6 +58,11 @@ Add to `packages/ui/src/styles/theme.css`:
 **Done when:** tokens are documented in the file, the `Skeleton` component uses
 `shimmer`, and Reduce motion turns every one of them off.
 
+> **Built (phase 1).** The tokens, keyframes and `stagger` utility are in
+> `packages/ui/src/styles/theme.css`; `Skeleton` shimmers; `useReducedMotion()`
+> is exported from `@store/ui`. Under "Reduce motion" looping animations now run
+> once instead of flickering (`apps/storefront/app/globals.css`).
+
 ## Phase 2: Instant page switches (fixes the "jerk")
 
 Currently only `/shop` and `/search` have a `loading.tsx`. Every other page waits
@@ -81,6 +86,27 @@ on a blank screen until its data arrives.
 - **Later, optional:** View Transitions cross-fade between pages, and a product photo that "flies" from the card into the product page. This only works in supporting browsers, behind Next's `viewTransition` flag once it's stable.
 
 **Done when:** in a throttled Fast 3G Playwright run, every shop route shows its skeleton within 100 ms of the click. CLS stays 0.
+
+> **Built (phase 2), with one change from the plan.** A `loading.tsx` on a
+> page that can be "not found" (products, categories, collections, orders,
+> policies) makes a missing page answer 200 instead of 404, which hurts search
+> ranking. So the skeletons are shown on the client instead, the moment a link
+> is clicked, and the server's responses are unchanged:
+>
+> - `apps/storefront/lib/navigation.ts`: the page switch in progress.
+> - `apps/storefront/components/layout/navigation-feedback.tsx`:
+>   - It detects link clicks.
+>   - It prefetches the next page when a mouse rests on a link (80 ms), a finger touches one or a link gets keyboard focus.
+>   - It shows the progress bar (in the rose accent, so it shows on the teal bar too).
+>   - In `RouteView`, it swaps in the next page's skeleton after 100 ms and fades the new page in. The first page of a visit is not animated.
+> - `apps/storefront/components/skeletons/page-skeletons.tsx`: the home, product, listing, cart, account and content skeletons.
+> - `e2e/motion.spec.ts`: tests for the skeleton, the progress bar, hover prefetch and ignored clicks. The rest of the suite runs with Reduce motion.
+>
+> Measured with every page request delayed by 1.2 s:
+>
+> - The skeleton shows about 0.2 s after a click.
+> - A switch to a page prefetched on hover takes about 70 ms.
+> - A missing product still returns 404.
 
 ## Phase 3: Overlays: drawers, sheets, menus
 

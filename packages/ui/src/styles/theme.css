@@ -40,4 +40,113 @@
 
   --shadow-card: 0 1px 2px oklch(0.2 0.02 230 / 0.06), 0 8px 24px -12px oklch(0.2 0.02 230 / 0.18);
   --shadow-pop: 0 12px 40px -12px oklch(0.2 0.02 230 / 0.3);
+
+  /*
+   * Motion (see ANIMATION-PLAN.md). Animate transform and opacity only; exits
+   * run at about 70% of the entrance time. "Reduce motion" is handled globally
+   * by each app's CSS, so these need no motion-safe guard of their own.
+   */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-hero: 600ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  /* A light overshoot for "pop" feedback (badges, hearts). */
+  --ease-spring: linear(
+    0,
+    0.25 7%,
+    0.6 15%,
+    0.97 25%,
+    1.1 32%,
+    1.12 37%,
+    1.08 46%,
+    1 58%,
+    0.98 70%,
+    1
+  );
+
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-out) both;
+  --animate-fade-up: fade-up var(--duration-base) var(--ease-out) both;
+  --animate-scale-in: scale-in var(--duration-base) var(--ease-out) both;
+  --animate-slide-in-right: slide-in-right var(--duration-slow) var(--ease-out) both;
+  --animate-slide-in-left: slide-in-left var(--duration-slow) var(--ease-out) both;
+  --animate-slide-in-bottom: slide-in-bottom var(--duration-slow) var(--ease-out) both;
+  --animate-pop: pop 360ms var(--ease-spring) both;
+  --animate-shake: shake 300ms var(--ease-out) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-draw: draw 400ms var(--ease-out) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.25);
+    }
+  }
+  @keyframes shake {
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+  /* Draws an SVG stroke; set stroke-dasharray/offset to the path length (pathLength="1"). */
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+/* Staggered entrances: give each item style={{ "--i": index }} (capped at 6). */
+@utility stagger {
+  animation-delay: calc(min(var(--i, 0), 6) * 40ms);
 }

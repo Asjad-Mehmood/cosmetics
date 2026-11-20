@@ -7,3 +7,4 @@ export { Field, type FieldProps } from "./components/field";
 export { Input, Label, type InputProps } from "./components/input";
 export { Skeleton } from "./components/skeleton";
 export { cn } from "./lib/cn";
+export { useReducedMotion } from "./lib/use-reduced-motion";

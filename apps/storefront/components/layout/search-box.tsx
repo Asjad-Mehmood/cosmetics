@@ -8,6 +8,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { startNavigation } from "@/lib/navigation";
 import { POPULAR_SEARCHES } from "@/lib/config";
 import { SearchIcon, XIcon } from "../icons";
 import { useSite } from "../site-context";
@@ -102,6 +103,7 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
     setOpen(false);
     setQ("");
     input.current?.blur();
+    startNavigation(href);
     router.push(href);
   };
 

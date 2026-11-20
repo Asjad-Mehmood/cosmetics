@@ -4,6 +4,7 @@ import { CartDrawer } from "@/components/cart/cart-drawer";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { Header, TopBar } from "@/components/layout/header";
+import { NavigationFeedback, RouteView } from "@/components/layout/navigation-feedback";
 import { Providers } from "@/components/providers";
 import { SiteProvider } from "@/components/site-context";
 import { getDataSafe } from "@/lib/server-api";
@@ -34,10 +35,11 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           >
             Skip to content
           </a>
+          <NavigationFeedback />
           <TopBar text={home?.announcement ?? null} phone={contact.phone} />
           <Header categories={categories} collections={collections} />
           <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
-            {children}
+            <RouteView>{children}</RouteView>
           </main>
           <Footer categories={categories} contact={contact} />
           <BottomNav />
