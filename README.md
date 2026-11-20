@@ -18,7 +18,7 @@
 
 | Part                     | Tech                                                                                      |
 | ------------------------ | ----------------------------------------------------------------------------------------- |
-| Site (`apps/storefront`) | Next.js 15 (App Router), React 19, Tailwind CSS 4: the shop, `/admin` and `/api/v1`       |
+| Site (`apps/storefront`) | Next.js 15 (App Router), React 19, Tailwind CSS 4: the shop and `/admin`                  |
 | API (`apps/api`)         | Node 22, Express 5, Prisma 6, PostgreSQL 16, Zod 4, Pino                                  |
 | Shared                   | `@store/types`, `@store/validation`, `@store/ui`, `@store/config`                         |
 | Tooling                  | pnpm workspaces, Turborepo, ESLint 9, Prettier, Vitest, Husky, commitlint, GitHub Actions |
@@ -30,8 +30,7 @@ apps/
   storefront/   The site → http://localhost:3000
     app/(shop)/          customer pages
     app/admin/, admin/   admin panel (/admin) and its components
-    app/api/v1/          serves the API below at /api/v1
-  api/          Express REST API (served by the site) + Prisma schema, migrations, seed
+  api/          Express REST API at /api/v1 → http://localhost:4000 + Prisma schema, migrations, seed
 packages/
   config/       Shared tsconfig + ESLint presets
   types/        Shared enums, API response types, money helpers
@@ -56,17 +55,19 @@ pnpm env:init         # create .env files from the .env.example templates
 pnpm db:up            # start Postgres + Redis in Docker
 pnpm db:deploy        # apply database migrations
 pnpm db:seed          # load demo products, admin user, shipping zones, pages...
-pnpm dev              # start the site (shop, admin and API) at http://localhost:3000
+pnpm dev              # start the API (port 4000) and the site at http://localhost:3000
 ```
 
-| Part               | URL                                                                        |
-| ------------------ | -------------------------------------------------------------------------- |
-| Shop               | http://localhost:3000                                                      |
-| Admin              | http://localhost:3000/admin                                                |
-| API                | http://localhost:3000/api/v1 (health: `/api/v1/health`)                    |
-| API docs (Swagger) | `pnpm --filter @store/api dev:server`, then http://localhost:4000/api/docs |
+| Part               | URL                                                     |
+| ------------------ | ------------------------------------------------------- |
+| Shop               | http://localhost:3000                                   |
+| Admin              | http://localhost:3000/admin                             |
+| API                | http://localhost:3000/api/v1 (health: `/api/v1/health`) |
+| API docs (Swagger) | http://localhost:4000/api/docs                          |
 
-The site reads the API's settings (database, secrets) from `apps/api/.env`.
+The site proxies `/api/*` to the API on port 4000 (as Vercel's rewrites do in
+production) and reads the shared `JWT_ACCESS_SECRET` from `apps/api/.env`.
+`vercel dev` also runs both services together, with the `API_URL` binding.
 
 ### Demo accounts (development seed)
 

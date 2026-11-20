@@ -1,5 +1,22 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "echo 'Set this Vercel project'\"'\"'s Root Directory (Settings > Build and Deployment) to apps/storefront, then redeploy. See DEPLOYMENT.md.' && exit 1",
-  "installCommand": "echo 'Skipping install: Root Directory is not set.'"
+  "regions": ["sin1"],
+  "services": {
+    "api": {
+      "root": "apps/api",
+      "framework": "express",
+      "entrypoint": "dist/vercel.js",
+      "buildCommand": "node scripts/vercel-build.mjs"
+    },
+    "storefront": {
+      "root": "apps/storefront",
+      "framework": "nextjs",
+      "bindings": [{ "type": "service", "service": "api", "format": "url", "env": "API_URL" }]
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "storefront" } }
+  ],
+  "crons": [{ "path": "/api/v1/cron/daily", "schedule": "0 3 * * *" }]
 }

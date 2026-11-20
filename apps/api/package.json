@@ -3,14 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": {
-    "./embedded": {
-      "types": "./embedded.d.ts",
-      "default": "./dist/embedded.js"
-    }
-  },
   "scripts": {
-    "dev": "tsup --watch",
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "build": "tsup",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "lint": "eslint .",
@@ -23,7 +17,7 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
-    "dev:server": "tsx watch --env-file-if-exists=.env src/server.ts"
+    "vercel-build": "node scripts/vercel-build.mjs"
   },
   "dependencies": {
     "@store/types": "workspace:*",

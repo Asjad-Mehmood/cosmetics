@@ -1,16 +1,19 @@
 /**
- * Vercel build for the whole store (vercel.json `buildCommand`), run from
- * apps/storefront:
- *   1. build the API package (Prisma client + apps/api/dist);
+ * Vercel build for the `api` service (vercel.json → services.api.buildCommand),
+ * run from apps/api:
+ *   1. generate the Prisma client and bundle the API (dist/vercel.js is the
+ *      service's entrypoint; workspace packages are bundled in);
  *   2. production only: apply database migrations over the direct (unpooled)
  *      connection, then seed the essentials (admin account, settings,
- *      shipping, pages and, on the very first deploy, the catalogue);
- *   3. build this Next.js site (shop, /admin and /api/v1).
+ *      shipping, pages and, on the very first deploy, the catalogue).
+ *
+ * The storefront service builds separately (next build) and never touches
+ * the database at build time.
  */
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const api = fileURLToPath(new URL("../../api", import.meta.url));
+const api = fileURLToPath(new URL("..", import.meta.url));
 const run = (cmd, opts = {}) =>
   execSync(cmd, { stdio: "inherit", ...opts, env: { ...process.env, ...opts.env } });
 
@@ -54,5 +57,3 @@ if (!isProduction) {
     console.warn("SEED_ADMIN_PASSWORD is not set: skipping the seed (no admin account created).");
   }
 }
-
-run("pnpm exec next build");

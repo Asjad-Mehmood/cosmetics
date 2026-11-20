@@ -1,4 +1,5 @@
 import type { ApiResponse, PaginatedResponse } from "@store/types";
+import { createHmac } from "node:crypto";
 import { unstable_cache } from "next/cache";
 import { connection } from "next/server";
 
@@ -7,13 +8,41 @@ interface FetchOptions {
   revalidate?: number;
 }
 
-/** Reads from the API in this process (no HTTP round trip). 404 → null. */
+/**
+ * Base URL of the `api` service. On Vercel the `API_URL` service binding
+ * (vercel.json → services.storefront.bindings) injects it at runtime; with
+ * `vercel dev` it is injected too. For plain `pnpm dev` / e2e runs the API
+ * listens on port 4000.
+ */
+function apiBase(): string {
+  const base = process.env.API_URL ?? (process.env.VERCEL ? undefined : "http://localhost:4000");
+  if (!base) throw new Error("API_URL is not set: check the api service binding in vercel.json");
+  return base.endsWith("/") ? base : `${base}/`;
+}
+
+/**
+ * Lets these server-side reads skip the API's per-IP rate limits (they all
+ * come from the storefront's servers). Same derivation as the API's
+ * middleware/internal-request.ts, from the project's shared JWT_ACCESS_SECRET.
+ */
+function internalToken(): string | undefined {
+  const secret = process.env.JWT_ACCESS_SECRET;
+  return secret
+    ? createHmac("sha256", secret).update("amazon-group:internal-request").digest("hex")
+    : undefined;
+}
+
+/** GET from the api service. 404 → null. */
 async function load(path: string): Promise<string | null> {
-  const { request } = await import("@store/api/embedded");
-  const res = await request(path);
+  const token = internalToken();
+  const res = await fetch(new URL(`api/v1${path}`, apiBase()), {
+    headers: { accept: "application/json", ...(token ? { "x-internal-request": token } : {}) },
+    // Caching is done by unstable_cache below (errors are never cached).
+    cache: "no-store",
+  });
   if (res.status === 404) return null;
-  if (res.status >= 400) throw new Error(`API ${res.status} for GET ${path}`);
-  return res.body;
+  if (!res.ok) throw new Error(`API ${res.status} for GET ${path}`);
+  return res.text();
 }
 
 /**
