@@ -10,7 +10,12 @@ const DEV_JWT_SECRET = "dev-only-insecure-secret-change-me-0123456789";
 
 const envSchema = z
   .object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    // Vercel sets NODE_ENV only for Next.js, not for this Express service, so any
+    // run on Vercel (production or preview) counts as production. Without it the
+    // logger would load pino-pretty, a dev-only package the function doesn't ship.
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default(process.env.VERCEL ? "production" : "development"),
     PORT: z.coerce.number().int().positive().default(4000),
     LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])

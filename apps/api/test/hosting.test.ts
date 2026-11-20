@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import express from "express";
 import supertest from "supertest";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/app";
 import { databaseUrl } from "../src/lib/prisma";
 import vercelApp from "../src/vercel";
@@ -49,6 +49,32 @@ describe("Vercel api service entry", () => {
     expect(readFileSync(new URL("../scripts/vercel-build.mjs", import.meta.url), "utf8")).toContain(
       "--config tsup.vercel.config.ts",
     );
+  });
+});
+
+describe("NODE_ENV on Vercel", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  // Vercel sets NODE_ENV only for Next.js. Without this default the api
+  // function loaded pino-pretty (not shipped) and crashed on every request.
+  it("defaults to production when running on Vercel", async () => {
+    vi.stubEnv("NODE_ENV", undefined);
+    vi.stubEnv("VERCEL", "1");
+    vi.resetModules();
+    const { env, isProd } = await import("../src/config/env");
+    expect(env.NODE_ENV).toBe("production");
+    expect(isProd).toBe(true);
+  });
+
+  it("defaults to development elsewhere", async () => {
+    vi.stubEnv("NODE_ENV", undefined);
+    vi.stubEnv("VERCEL", undefined);
+    vi.resetModules();
+    const { env } = await import("../src/config/env");
+    expect(env.NODE_ENV).toBe("development");
   });
 });
 

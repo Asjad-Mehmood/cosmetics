@@ -7,7 +7,9 @@ export const logger = pino({
     paths: ["req.headers.authorization", "req.headers.cookie", "*.password", "*.passwordHash"],
     censor: "[redacted]",
   },
-  ...(isProd || isTest
+  // Pretty logs only for a developer's terminal: pino-pretty is a dev dependency
+  // and is not shipped to hosted functions (whose stdout is never a TTY).
+  ...(isProd || isTest || !process.stdout.isTTY
     ? {}
     : {
         transport: {
