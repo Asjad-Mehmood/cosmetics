@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ApiResponse, OrderTrackingDTO } from "@hoodie/types";
-import { trackOrderSchema } from "@hoodie/validation";
-import { Button, Card, Field, Input } from "@hoodie/ui";
+import type { ApiResponse, OrderTrackingDTO } from "@store/types";
+import { trackOrderSchema } from "@store/validation";
+import { Button, Card, Field, Input } from "@store/ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { api, ApiError } from "@/lib/api";
@@ -40,7 +40,7 @@ export function TrackOrder() {
         <Field label="Order number" htmlFor="track-number" error={errors.number?.message}>
           <Input
             id="track-number"
-            placeholder="US-10001"
+            placeholder="AG-10001"
             invalid={!!errors.number}
             {...register("number")}
           />

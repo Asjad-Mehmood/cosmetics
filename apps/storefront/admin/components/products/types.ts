@@ -1,4 +1,4 @@
-import type { AdminVariantDTO, Fit, ProductStatus } from "@hoodie/types";
+import type { AdminVariantDTO, ProductStatus } from "@store/types";
 
 /** GET /admin/products/:id */
 export interface AdminProduct {
@@ -6,9 +6,9 @@ export interface AdminProduct {
   title: string;
   slug: string;
   description: string;
-  fit: Fit;
-  fabric: string | null;
-  careInfo: string | null;
+  ingredients: string | null;
+  howToUse: string | null;
+  warnings: string | null;
   basePrice: number;
   compareAtPrice: number | null;
   status: ProductStatus;

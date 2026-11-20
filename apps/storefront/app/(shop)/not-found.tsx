@@ -1,4 +1,4 @@
-import { Container } from "@hoodie/ui";
+import { Container } from "@store/ui";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -7,7 +7,7 @@ export default function NotFound() {
       <p className="text-brand-600 text-sm font-semibold">404</p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight">We couldn’t find that page</h1>
       <p className="text-muted mt-3">
-        It may have moved, or the hoodie may no longer be available.
+        It may have moved, or the product may no longer be available.
       </p>
       <Link
         href="/"
@@ -19,7 +19,7 @@ export default function NotFound() {
         href="/shop"
         className="border-line ml-3 inline-flex h-11 items-center rounded-lg border px-5 text-sm font-semibold"
       >
-        Shop hoodies
+        Shop products
       </Link>
     </Container>
   );

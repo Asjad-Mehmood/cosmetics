@@ -24,7 +24,7 @@ const pay = (clientSecret: string, cardNumber: string, expiry = "12/30") =>
 
 describe("POST /checkout/quote", () => {
   it("prices delivery by city and adds the COD fee only for Cash on Delivery", async () => {
-    const product = await createTestProduct({ price: 300000 });
+    const product = await createTestProduct({ price: 200000 });
     const agent = await cartWith([[product.variants[0]!.id, 1]]);
 
     const lahoreCard = (
@@ -32,11 +32,11 @@ describe("POST /checkout/quote", () => {
     ).body.data;
     expect(lahoreCard).toMatchObject({
       zone: "Lahore",
-      subtotal: 300000,
+      subtotal: 200000,
       shipping: 15000,
       codFee: 0,
-      total: 315000,
-      amountToFreeShipping: 200000,
+      total: 215000,
+      amountToFreeShipping: 100000,
     });
     expect(lahoreCard.paymentOptions).toEqual([
       expect.objectContaining({ method: "STRIPE", available: true, demo: true }),
@@ -50,17 +50,17 @@ describe("POST /checkout/quote", () => {
       zone: "Rest of Pakistan",
       shipping: 30000,
       codFee: 10000,
-      total: 340000,
+      total: 240000,
     });
     expect(quettaCod.shippingOptions.map((o: { id: string }) => o.id)).toEqual(["standard"]); // no express there
   });
 
   it("gives free standard delivery over the threshold", async () => {
-    const product = await createTestProduct({ price: 300000 });
+    const product = await createTestProduct({ price: 200000 });
     const agent = await cartWith([[product.variants[0]!.id, 2]]);
     const q = (await agent.post("/api/v1/checkout/quote").send({ city: "Lahore" })).body.data;
     // Quotes default to Cash on Delivery, which adds the Lahore COD fee.
-    expect(q).toMatchObject({ shipping: 0, codFee: 5000, total: 605000, amountToFreeShipping: 0 });
+    expect(q).toMatchObject({ shipping: 0, codFee: 5000, total: 405000, amountToFreeShipping: 0 });
     expect(q.shippingOptions[0]).toMatchObject({ isFree: true });
   });
 
@@ -158,7 +158,7 @@ describe("Cash on Delivery checkout", () => {
     expect(res.status).toBe(201);
     const result = res.body.data;
     expect(result).toMatchObject({ status: "CONFIRMED", total: 900000 + 0 + 5000, payment: null });
-    expect(result.orderNumber).toMatch(/^US-\d{5,}$/);
+    expect(result.orderNumber).toMatch(/^AG-\d{5,}$/);
 
     expect(await variantRow(v1!.id)).toMatchObject({ stock: 3, reserved: 0 });
     expect(await variantRow(v2!.id)).toMatchObject({ stock: 4, reserved: 0 });

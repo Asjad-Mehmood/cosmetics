@@ -1,4 +1,4 @@
-import type { SearchSuggestionsDTO } from "@hoodie/types";
+import type { SearchSuggestionsDTO } from "@store/types";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { effectivePrice } from "./catalog.mapper";
@@ -6,7 +6,7 @@ import { effectivePrice } from "./catalog.mapper";
 /** Escapes LIKE wildcards so "50%" matches literally. */
 const like = (term: string) => `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 
-/** Minimum pg_trgm word similarity for a typo match ("hodie" ≈ "Hoodie"). */
+/** Minimum pg_trgm word similarity for a typo match ("serm" ≈ "Serum"). */
 const FUZZY = 0.5;
 
 export const searchTerms = (q: string) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import type { InputHTMLAttributes, Ref, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const control =

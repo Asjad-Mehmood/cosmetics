@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, cn } from "@hoodie/ui";
+import { Button, cn } from "@store/ui";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { formatMoney } from "@/admin/lib/format";
 

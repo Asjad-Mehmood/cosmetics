@@ -1,12 +1,14 @@
 "use client";
 
-import { Dialog } from "@hoodie/ui";
+import { Dialog } from "@store/ui";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useMe } from "@/hooks/use-auth";
 import { useUi } from "@/store/ui";
-import { MenuIcon } from "../icons";
+import { ChevronRightIcon, MenuIcon, PhoneIcon } from "../icons";
+import { useSite } from "../site-context";
 import type { NavData } from "./header";
 
 export function MobileNavButton() {
@@ -16,19 +18,21 @@ export function MobileNavButton() {
       type="button"
       aria-label="Open menu"
       onClick={() => setMenuOpen(true)}
-      className="hover:bg-surface -ml-2 rounded-lg p-2 lg:hidden"
+      className="hover:bg-surface -ml-2 rounded-full p-2 lg:hidden"
     >
       <MenuIcon />
     </button>
   );
 }
 
-const linkClass = "hover:bg-surface block rounded-lg px-3 py-2.5 font-medium";
+const linkClass =
+  "hover:bg-surface flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium";
 
 export function MobileNav({ categories, collections }: NavData) {
   const { menuOpen, setMenuOpen } = useUi();
   const pathname = usePathname();
   const me = useMe();
+  const { contact } = useSite();
 
   useEffect(() => setMenuOpen(false), [pathname, setMenuOpen]);
 
@@ -36,19 +40,34 @@ export function MobileNav({ categories, collections }: NavData) {
     <Dialog open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu" variant="left">
       <nav aria-label="Mobile" className="space-y-6">
         <div>
-          <Link href="/shop" className={linkClass}>
-            All hoodies
-          </Link>
+          <p className="text-muted px-3 pb-2 text-xs font-semibold uppercase tracking-wider">
+            Categories
+          </p>
           {categories.map((c) => (
             <Link key={c.id} href={`/categories/${c.slug}`} className={linkClass}>
-              {c.name}
+              <span className="flex items-center gap-3">
+                <span className="bg-surface relative size-9 overflow-hidden rounded-full">
+                  {c.imageUrl && (
+                    <Image src={c.imageUrl} alt="" fill sizes="36px" className="object-cover" />
+                  )}
+                </span>
+                {c.name}
+              </span>
+              <ChevronRightIcon className="text-muted" />
             </Link>
           ))}
+          <Link href="/shop" className={linkClass}>
+            All products
+            <ChevronRightIcon className="text-muted" />
+          </Link>
         </div>
         <div>
-          <p className="text-muted px-3 text-xs font-semibold uppercase tracking-wider">
+          <p className="text-muted px-3 pb-2 text-xs font-semibold uppercase tracking-wider">
             Collections
           </p>
+          <Link href="/offers" className={`${linkClass} text-accent-700`}>
+            Offers
+          </Link>
           {collections.map((c) => (
             <Link key={c.id} href={`/collections/${c.slug}`} className={linkClass}>
               {c.name}
@@ -59,12 +78,23 @@ export function MobileNav({ categories, collections }: NavData) {
           <Link href={me.data ? "/account" : "/login"} className={linkClass}>
             {me.data ? "My account" : "Sign in / Create account"}
           </Link>
-          <Link href="/size-guide" className={linkClass}>
-            Size guide
+          <Link href="/track-order" className={linkClass}>
+            Track your order
           </Link>
           <Link href="/faq" className={linkClass}>
             Help & FAQ
           </Link>
+          <Link href="/contact" className={linkClass}>
+            Contact us
+          </Link>
+          {contact.phone && (
+            <a
+              href={`tel:${contact.phone.replace(/\s/g, "")}`}
+              className="text-brand-700 mt-2 flex items-center gap-2 px-3 py-2 text-sm font-semibold"
+            >
+              <PhoneIcon /> {contact.phone}
+            </a>
+          )}
         </div>
       </nav>
     </Dialog>

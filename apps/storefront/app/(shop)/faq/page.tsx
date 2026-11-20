@@ -1,8 +1,9 @@
-import type { FaqDTO } from "@hoodie/types";
-import { Container } from "@hoodie/ui";
+import type { FaqDTO } from "@store/types";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataSafe } from "@/lib/server-api";
+import { PageHeader } from "@/components/content/page-header";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -27,19 +28,26 @@ export default async function FaqPage() {
   };
 
   return (
-    <Container className="max-w-3xl py-12">
+    <Container className="max-w-4xl py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
-      <h1 className="text-3xl font-bold tracking-tight">Frequently asked questions</h1>
-      <div className="mt-10 space-y-10">
+      <PageHeader title="Frequently asked questions" eyebrow="Help">
+        Answers about orders, delivery, returns and our products.
+      </PageHeader>
+      <div className="space-y-10">
         {[...groups].map(([group, items]) => (
           <section key={group}>
-            <h2 className="text-muted text-sm font-semibold uppercase tracking-wider">{group}</h2>
-            <div className="divide-line border-line mt-3 divide-y border-y">
+            <h2 className="text-brand-700 text-sm font-semibold uppercase tracking-wider">
+              {group}
+            </h2>
+            <div className="mt-3 space-y-3">
               {items.map((f) => (
-                <details key={f.id} className="group py-4">
+                <details
+                  key={f.id}
+                  className="border-line open:shadow-(--shadow-card) group rounded-2xl border px-5 py-4"
+                >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                     {f.question}
                     <span

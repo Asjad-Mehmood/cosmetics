@@ -9,8 +9,8 @@ export interface DialogProps {
   title: string;
   /** Visually hide the title (it is still announced to screen readers). */
   hideTitle?: boolean;
-  /** `center` = modal, `right` / `left` = slide-in drawer. */
-  variant?: "center" | "right" | "left";
+  /** `center` = modal, `right` / `left` = slide-in drawer, `bottom` = bottom sheet. */
+  variant?: "center" | "right" | "left" | "bottom";
   className?: string;
   children: ReactNode;
   footer?: ReactNode;
@@ -20,6 +20,7 @@ const variants = {
   center: "m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl max-h-[85dvh]",
   right: "ml-auto mr-0 my-0 h-dvh max-h-dvh w-full max-w-md",
   left: "mr-auto ml-0 my-0 h-dvh max-h-dvh w-full max-w-sm",
+  bottom: "mt-auto mb-0 mx-0 w-full max-w-none max-h-[88dvh] rounded-t-3xl",
 } as const;
 
 /**

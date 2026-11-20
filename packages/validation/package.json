@@ -1,5 +1,5 @@
 {
-  "name": "@hoodie/validation",
+  "name": "@store/validation",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,11 +13,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@hoodie/types": "workspace:*",
+    "@store/types": "workspace:*",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@hoodie/config": "workspace:*",
+    "@store/config": "workspace:*",
     "eslint": "^9.39.5",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"

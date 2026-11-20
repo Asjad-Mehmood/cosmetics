@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Providers } from "@/admin/components/providers";
 
 export const metadata: Metadata = {
-  title: { default: "Admin", template: "%s | Urban Store Admin" },
+  title: { default: "Admin", template: "%s | Amazon Group Admin" },
   // The shop's share image and description don't belong to admin pages.
   openGraph: null,
   description: null,

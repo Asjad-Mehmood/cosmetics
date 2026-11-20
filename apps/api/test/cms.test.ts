@@ -1,7 +1,7 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { prisma } from "../src/lib/prisma";
-import { app, createTestProduct, uniqueEmail } from "./helpers";
+import { app, createCoupon, createTestProduct, uniqueEmail } from "./helpers";
 
 describe("content endpoints", () => {
   it("returns the announcement and only currently active banners", async () => {
@@ -14,15 +14,40 @@ describe("content endpoints", () => {
     });
     const res = await request(app).get("/api/v1/cms/home");
     expect(res.status).toBe(200);
-    expect(res.body.data.announcement).toMatch(/Free shipping/);
+    expect(res.body.data.announcement).toMatch(/genuine products/);
+    expect(res.body.data.contact).toEqual({
+      phone: expect.any(String),
+      email: expect.stringContaining("@"),
+    });
+    // Other tests add zones in parallel, so look the seeded one up by name.
+    expect(res.body.data.delivery.find((z: { name: string }) => z.name === "Lahore")).toEqual({
+      name: "Lahore",
+      estimatedDays: "1-2",
+      standardRate: 15000,
+      freeOverAmount: 300000,
+      codFee: 5000,
+    });
     const ids = res.body.data.banners.map((b: { id: string }) => b.id);
-    expect(ids).toContain("banner_winter_drop");
+    expect(ids).toContain("banner_skincare");
     expect(ids).not.toContain(expired.id);
+  });
+
+  it("lists only public, usable discount codes as vouchers", async () => {
+    const shown = await createCoupon({ isPublic: true, description: "Shown" });
+    const hidden = await createCoupon({ isPublic: false });
+    const expired = await createCoupon({ isPublic: true, endsAt: new Date(Date.now() - 1000) });
+    const usedUp = await createCoupon({ isPublic: true, maxUses: 1, usedCount: 1 });
+
+    const codes = (await request(app).get("/api/v1/cms/home")).body.data.vouchers.map(
+      (v: { code: string }) => v.code,
+    );
+    expect(codes).toContain(shown.code);
+    for (const c of [hidden, expired, usedUp]) expect(codes).not.toContain(c.code);
   });
 
   it("serves published pages and the FAQ", async () => {
     expect((await request(app).get("/api/v1/cms/pages/returns")).body.data.title).toBe(
-      "Returns & Exchanges",
+      "Returns & Refunds",
     );
     expect((await request(app).get("/api/v1/cms/pages/nope")).status).toBe(404);
     const faq = await request(app).get("/api/v1/cms/faq");

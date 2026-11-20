@@ -1,4 +1,4 @@
-import { checkoutSchema, quoteSchema } from "@hoodie/validation";
+import { checkoutSchema, quoteSchema } from "@store/validation";
 import { ok } from "../../lib/http";
 import { defineRoutes, route } from "../../lib/route";
 import { owner } from "../cart/cart.routes";

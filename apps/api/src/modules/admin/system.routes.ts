@@ -4,8 +4,8 @@ import type {
   StaffMemberDTO,
   StoreSettingsDTO,
   StoreSettingsResponseDTO,
-} from "@hoodie/types";
-import { ADMIN_ROLES, ErrorCode } from "@hoodie/types";
+} from "@store/types";
+import { ADMIN_ROLES, ErrorCode } from "@store/types";
 import {
   auditLogQuerySchema,
   emailSettingsSchema,
@@ -13,7 +13,7 @@ import {
   inviteStaffSchema,
   updateStaffSchema,
   updateStoreSettingsSchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Prisma, User } from "@prisma/client";
 import { env } from "../../config/env";
 import { audit } from "../../lib/audit";
@@ -183,8 +183,8 @@ export const adminStaffRouter = defineRoutes("/admin/staff", "Admin: Staff & set
 ]);
 
 const SETTINGS_DEFAULTS: StoreSettingsDTO = {
-  "store.name": "Urban Store",
-  "store.email": "support@urbanstore.pk",
+  "store.name": "Amazon Group",
+  "store.email": "support@amazongroup.pk",
   "store.phone": "",
   "store.address": "",
   "tax.rate": 0,

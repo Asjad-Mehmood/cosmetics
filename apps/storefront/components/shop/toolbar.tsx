@@ -1,9 +1,8 @@
 "use client";
 
-import type { ProductSort } from "@hoodie/types";
-import { PRODUCT_SORTS } from "@hoodie/types";
+import type { ProductSort } from "@store/types";
+import { PRODUCT_SORTS } from "@store/types";
 import { defaultSort, SORT_LABELS } from "@/lib/listing";
-import { FIT_LABEL } from "@/lib/size-guide";
 import { useListingNav } from "./listing-nav";
 
 export function SortSelect({ value, search = false }: { value: ProductSort; search?: boolean }) {
@@ -15,7 +14,7 @@ export function SortSelect({ value, search = false }: { value: ProductSort; sear
       <select
         value={value}
         onChange={(e) => update({ sort: e.target.value === fallback ? null : e.target.value })}
-        className="border-line bg-canvas h-9 rounded-lg border px-2 text-sm"
+        className="border-line bg-canvas focus:border-brand-600 h-10 rounded-full border pl-4 pr-8 text-sm font-medium focus:outline-none"
         aria-label="Sort products"
       >
         {PRODUCT_SORTS.filter((s) => search || s !== "relevance").map((s) => (
@@ -29,20 +28,15 @@ export function SortSelect({ value, search = false }: { value: ProductSort; sear
 }
 
 /** Removable chips for each active filter. */
-export function ActiveFilters() {
+export function ActiveFilters({ lockedOnSale = false }: { lockedOnSale?: boolean }) {
   const { params, update } = useListingNav();
   const chips: { label: string; remove: () => void }[] = [];
 
-  for (const key of ["size", "color", "fit"] as const) {
+  for (const key of ["size", "color"] as const) {
     const values = params.get(key)?.split(",").filter(Boolean) ?? [];
     for (const v of values) {
       chips.push({
-        label:
-          key === "fit"
-            ? (FIT_LABEL[v as keyof typeof FIT_LABEL] ?? v)
-            : key === "size"
-              ? `Size ${v}`
-              : v,
+        label: key === "size" ? `Size ${v}` : v,
         remove: () => update({ [key]: values.filter((x) => x !== v).join(",") || null }),
       });
     }
@@ -57,6 +51,8 @@ export function ActiveFilters() {
   }
   if (params.get("inStock") === "true")
     chips.push({ label: "In stock", remove: () => update({ inStock: null }) });
+  if (params.get("onSale") === "true" && !lockedOnSale)
+    chips.push({ label: "On sale", remove: () => update({ onSale: null }) });
 
   if (!chips.length) return null;
   return (
@@ -66,7 +62,7 @@ export function ActiveFilters() {
           key={c.label}
           type="button"
           onClick={c.remove}
-          className="border-line hover:border-ink flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
+          className="bg-brand-50 text-brand-700 hover:bg-brand-100 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
           aria-label={`Remove filter: ${c.label}`}
         >
           {c.label} <span aria-hidden>×</span>
@@ -75,9 +71,16 @@ export function ActiveFilters() {
       <button
         type="button"
         onClick={() =>
-          update({ size: null, color: null, fit: null, min: null, max: null, inStock: null })
+          update({
+            size: null,
+            color: null,
+            min: null,
+            max: null,
+            inStock: null,
+            ...(lockedOnSale ? {} : { onSale: null }),
+          })
         }
-        className="text-muted text-xs underline"
+        className="text-muted hover:text-ink text-xs font-medium underline"
       >
         Clear all
       </button>

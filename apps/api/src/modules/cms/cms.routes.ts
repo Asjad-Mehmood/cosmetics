@@ -1,8 +1,9 @@
-import type { BannerDTO, FaqDTO, HomeContentDTO, PageDTO } from "@hoodie/types";
-import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@hoodie/validation";
+import type { BannerDTO, FaqDTO, HomeContentDTO, PageDTO } from "@store/types";
+import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@store/validation";
 import { ok } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";
 import { prisma } from "../../lib/prisma";
+import { storeInfo } from "../../lib/settings";
 import { defineRoutes, route } from "../../lib/route";
 import { AppError } from "../../utils/app-error";
 import { newsletterWelcomeEmail } from "../engagement/emails";
@@ -16,12 +17,13 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
   route({
     method: "get",
     path: "/home",
-    summary: "Homepage content: announcement bar and active banners",
+    summary:
+      "Site-wide content: announcement bar, active banners, contact details and delivery zones",
     description: "Banners are filtered by their active flag and optional start/end dates.",
     access: "public",
     handler: async () => {
       const now = new Date();
-      const [banners, enabled, text] = await Promise.all([
+      const [banners, enabled, text, store, zones, coupons] = await Promise.all([
         prisma.banner.findMany({
           where: {
             isActive: true,
@@ -34,9 +36,33 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
         }),
         getSetting<boolean>("announcement.enabled"),
         getSetting<string>("announcement.text"),
+        storeInfo(),
+        prisma.shippingZone.findMany({ where: { isActive: true }, orderBy: { position: "asc" } }),
+        prisma.coupon.findMany({
+          where: {
+            isActive: true,
+            isPublic: true,
+            AND: [
+              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+              { OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
+            ],
+          },
+          orderBy: { createdAt: "asc" },
+          take: 12,
+        }),
       ]);
       return ok<HomeContentDTO>({
         announcement: enabled && text ? text : null,
+        vouchers: coupons
+          .filter((c) => c.maxUses === null || c.usedCount < c.maxUses)
+          .map((c) => ({
+            code: c.code,
+            description: c.description,
+            type: c.type,
+            value: c.type === "FREE_SHIPPING" ? 0 : c.value,
+            minOrderAmount: c.minOrderAmount,
+            endsAt: c.endsAt?.toISOString() ?? null,
+          })),
         banners: banners.map((b): BannerDTO => ({
           id: b.id,
           title: b.title,
@@ -44,6 +70,14 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           imageUrl: b.imageUrl,
           link: b.link,
           ctaLabel: b.ctaLabel,
+        })),
+        contact: { phone: store.phone || null, email: store.email || null },
+        delivery: zones.map((z) => ({
+          name: z.name,
+          estimatedDays: z.estimatedDays,
+          standardRate: z.standardRate,
+          freeOverAmount: z.freeOverAmount,
+          codFee: z.codEnabled ? z.codFee : 0,
         })),
       });
     },

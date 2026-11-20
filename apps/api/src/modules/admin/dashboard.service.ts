@@ -1,4 +1,4 @@
-import type { AdminNotificationsDTO, DashboardDTO, PaymentMethod } from "@hoodie/types";
+import type { AdminNotificationsDTO, DashboardDTO, PaymentMethod } from "@store/types";
 import { addDays, dayOf, dayRange, startOfDay } from "../../lib/dates";
 import { prisma } from "../../lib/prisma";
 import { storeTimeZone } from "../../lib/settings";

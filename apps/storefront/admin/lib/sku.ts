@@ -1,6 +1,6 @@
 /**
  * Default SKU prefix: the title's initials plus a short code from the product id,
- * so two products with similar names don't clash ("Classic Pullover Hoodie" → "CPH-4XG").
+ * so two products with similar names don't clash ("Vitamin C Brightening Serum" → "VCBS-4XG").
  */
 export function skuPrefixFor(title: string, id: string): string {
   const initials =
@@ -9,7 +9,7 @@ export function skuPrefixFor(title: string, id: string): string {
       .map((w) => w.replace(/[^a-zA-Z0-9]/g, "").slice(0, 1))
       .join("")
       .toUpperCase()
-      .slice(0, 6) || "HD";
+      .slice(0, 6) || "AG";
   return `${initials}-${id
     .replace(/[^a-zA-Z0-9]/g, "")
     .slice(-3)

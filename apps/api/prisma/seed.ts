@@ -12,7 +12,6 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "argon2";
 import {
   banners,
-  CARE,
   categories,
   collections,
   coupons,
@@ -45,8 +44,13 @@ function colorCode(name: string): string {
     .toUpperCase();
 }
 
+/** "30 ml" → "30ML", "60 softgels" → "60SOFTGELS". */
+function sizeCode(size: string): string {
+  return size.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase();
+}
+
 async function seedAdmin() {
-  const email = (process.env.SEED_ADMIN_EMAIL ?? "admin@hoodie.local").toLowerCase();
+  const email = (process.env.SEED_ADMIN_EMAIL ?? "admin@amazongroup.local").toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD;
   if (!password) throw new Error("SEED_ADMIN_PASSWORD must be set");
   if (isProd && password === "ChangeMe123") {
@@ -68,7 +72,7 @@ async function seedAdmin() {
 }
 
 async function seedDemoCustomer() {
-  const email = "customer@hoodie.local";
+  const email = "customer@amazongroup.local";
   await prisma.user.upsert({
     where: { email },
     update: {},
@@ -156,16 +160,16 @@ async function seedCatalog() {
     const data = {
       title: p.title,
       description: p.description,
-      fit: p.fit,
-      fabric: p.fabric,
-      careInfo: CARE,
+      ingredients: p.ingredients ?? null,
+      howToUse: p.howToUse ?? null,
+      warnings: p.warnings ?? null,
       basePrice: p.basePrice,
       compareAtPrice: p.compareAtPrice ?? null,
       status: p.status,
       isFeatured: p.isFeatured,
       // Sales figures are made up, so only in development.
       soldCount: isProd ? 0 : p.soldCount,
-      seoTitle: `${p.title} | Urban Store`,
+      seoTitle: `${p.title} | Amazon Group`,
       seoDescription: p.description.slice(0, 155),
       publishedAt: p.status === "ACTIVE" ? new Date() : null,
       categories: { set: p.categories.map((slug) => ({ slug })) },
@@ -183,17 +187,14 @@ async function seedCatalog() {
       },
     });
 
-    // Photos: by colour (so the gallery follows the swatch), then extras.
-    const images = [
-      ...p.colors.flatMap((color) =>
-        color.photos.map((id, i) => ({
-          url: unsplash(id),
-          alt: `${p.title} in ${color.name}${i ? `, photo ${i + 1}` : ""}`,
-          color: color.name,
-        })),
-      ),
-      ...(p.extraPhotos ?? []).map((x) => ({ url: unsplash(x.id), alt: x.alt, color: null })),
-    ];
+    // Photos: by shade (so the gallery follows the swatch).
+    const images = p.colors.flatMap((color) =>
+      color.photos.map((id, i) => ({
+        url: unsplash(id),
+        alt: `${p.title}${p.colors.length > 1 ? ` in ${color.name}` : ""}${i ? `, photo ${i + 1}` : ""}`,
+        color: color.name,
+      })),
+    );
     await prisma.productImage.deleteMany({ where: { productId: product.id } });
     await prisma.productImage.createMany({
       data: images.map((img, position) => ({ ...img, productId: product.id, position })),
@@ -201,20 +202,22 @@ async function seedCatalog() {
 
     for (const [ci, color] of p.colors.entries()) {
       for (const [si, size] of p.sizes.entries()) {
-        const sku = `${p.skuPrefix}-${colorCode(color.name)}-${size}`;
+        const sku = `${p.skuPrefix}-${colorCode(color.name)}-${sizeCode(size)}`;
+        const price = p.sizePrices?.[size] ?? null;
         await prisma.productVariant.upsert({
           where: { sku },
-          update: { colorHex: color.hex },
+          update: { colorHex: color.hex, price },
           create: {
             productId: product.id,
             sku,
             size,
             color: color.name,
             colorHex: color.hex,
+            price,
             // Development gets sold-out and low-stock cases; production starts at 20
             // of each (set real stock in Admin → Inventory).
             stock: isProd ? 20 : stockFor(pi, ci, si),
-            weightGrams: p.fit === "SLIM" ? 450 : 650,
+            weightGrams: price ? Math.round(p.weightGrams * 1.8) : p.weightGrams,
           },
         });
         variantCount++;
@@ -246,7 +249,11 @@ async function seedBanners() {
 
 async function seedCoupons() {
   for (const coupon of coupons) {
-    await prisma.coupon.upsert({ where: { code: coupon.code }, update: {}, create: coupon });
+    await prisma.coupon.upsert({
+      where: { code: coupon.code },
+      update: { isPublic: coupon.isPublic },
+      create: coupon,
+    });
   }
   console.log(`  ✔ ${coupons.length} coupons`);
 }
@@ -254,9 +261,9 @@ async function seedCoupons() {
 /** A few approved reviews from demo shoppers, so ratings show up in development. */
 async function seedReviews() {
   const reviewers = [
-    { email: "ayesha.reviewer@hoodie.local", name: "Ayesha Malik" },
-    { email: "bilal.reviewer@hoodie.local", name: "Bilal Ahmed" },
-    { email: "sara.reviewer@hoodie.local", name: "Sara Khan" },
+    { email: "ayesha.reviewer@amazongroup.local", name: "Ayesha Malik" },
+    { email: "bilal.reviewer@amazongroup.local", name: "Bilal Ahmed" },
+    { email: "sara.reviewer@amazongroup.local", name: "Sara Khan" },
   ];
   const users = [];
   for (const r of reviewers) {
@@ -313,7 +320,7 @@ async function main() {
     await seedCoupons();
     await seedReviews();
   } else if ((await prisma.product.count()) === 0 || process.env.SEED_CATALOG === "true") {
-    // First deploy: start with the Urban Store catalogue. Later runs leave it alone.
+    // First deploy: start with the Amazon Group catalogue. Later runs leave it alone.
     await seedCatalog();
     await seedBanners();
   } else {

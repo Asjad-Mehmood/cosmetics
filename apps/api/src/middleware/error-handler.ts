@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ErrorCode, type ApiErrorBody } from "@hoodie/types";
+import { ErrorCode, type ApiErrorBody } from "@store/types";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { ZodError, z } from "zod";
 import { isProd } from "../config/env";

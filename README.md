@@ -1,6 +1,6 @@
-# Urban Store
+# Amazon Group
 
-**Urban Store** sells everyday streetwear hoodies across Pakistan. This one TypeScript monorepo holds a customer **storefront**, an **admin dashboard** and a **REST API**.
+**Amazon Group** is an online beauty and pharmacy store for Pakistan: skincare, makeup, hair care, fragrance, vitamins and health essentials. This one TypeScript monorepo holds a customer **storefront**, an **admin dashboard** and a **REST API**.
 
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)**: going live on Vercel with a free Neon Postgres database, step by step.
 - **[PLAN.md](./PLAN.md)**: the full project plan and roadmap.
@@ -20,7 +20,7 @@
 | ------------------------ | ----------------------------------------------------------------------------------------- |
 | Site (`apps/storefront`) | Next.js 15 (App Router), React 19, Tailwind CSS 4: the shop, `/admin` and `/api/v1`       |
 | API (`apps/api`)         | Node 22, Express 5, Prisma 6, PostgreSQL 16, Zod 4, Pino                                  |
-| Shared                   | `@hoodie/types`, `@hoodie/validation`, `@hoodie/ui`, `@hoodie/config`                     |
+| Shared                   | `@store/types`, `@store/validation`, `@store/ui`, `@store/config`                         |
 | Tooling                  | pnpm workspaces, Turborepo, ESLint 9, Prettier, Vitest, Husky, commitlint, GitHub Actions |
 
 ## Repository layout
@@ -55,34 +55,34 @@ pnpm install          # install all workspaces
 pnpm env:init         # create .env files from the .env.example templates
 pnpm db:up            # start Postgres + Redis in Docker
 pnpm db:deploy        # apply database migrations
-pnpm db:seed          # load demo hoodies, admin user, shipping zones, pages...
+pnpm db:seed          # load demo products, admin user, shipping zones, pages...
 pnpm dev              # start the site (shop, admin and API) at http://localhost:3000
 ```
 
-| Part               | URL                                                                         |
-| ------------------ | --------------------------------------------------------------------------- |
-| Shop               | http://localhost:3000                                                       |
-| Admin              | http://localhost:3000/admin                                                 |
-| API                | http://localhost:3000/api/v1 (health: `/api/v1/health`)                     |
-| API docs (Swagger) | `pnpm --filter @hoodie/api dev:server`, then http://localhost:4000/api/docs |
+| Part               | URL                                                                        |
+| ------------------ | -------------------------------------------------------------------------- |
+| Shop               | http://localhost:3000                                                      |
+| Admin              | http://localhost:3000/admin                                                |
+| API                | http://localhost:3000/api/v1 (health: `/api/v1/health`)                    |
+| API docs (Swagger) | `pnpm --filter @store/api dev:server`, then http://localhost:4000/api/docs |
 
 The site reads the API's settings (database, secrets) from `apps/api/.env`.
 
 ### Demo accounts (development seed)
 
-| Role        | Email                   | Password                                                                  |
-| ----------- | ----------------------- | ------------------------------------------------------------------------- |
-| Super Admin | `admin@hoodie.local`    | value of `SEED_ADMIN_PASSWORD` in `apps/api/.env` (default `ChangeMe123`) |
-| Customer    | `customer@hoodie.local` | `Customer123`                                                             |
+| Role        | Email                        | Password                                                                  |
+| ----------- | ---------------------------- | ------------------------------------------------------------------------- |
+| Super Admin | `admin@amazongroup.local`    | value of `SEED_ADMIN_PASSWORD` in `apps/api/.env` (default `ChangeMe123`) |
+| Customer    | `customer@amazongroup.local` | `Customer123`                                                             |
 
 Sign in to the admin panel at http://localhost:3000/admin with the Super Admin account. Invite more staff from **Staff** in the admin panel.
 
 ### What the seed loads
 
-- 5 categories (pullover, zip-up, oversized, custom, women's), 3 collections
-- 9 hoodies (8 active, 1 draft) priced like Pakistani streetwear brands, with real photos (Unsplash, free for commercial use) per colour and **114 size × colour variants**, including sold-out and low-stock variants to exercise those UI states
+- 5 categories (skincare, makeup, hair care, fragrance, health & wellness), 3 collections
+- 9 demo products (8 active, 1 draft) at Pakistani retail prices, with photos (Unsplash, free for commercial use, no brand names) and **16 pack size × shade variants**. Larger pack sizes have their own prices, and some variants are sold out or low on stock to exercise those UI states. This is a temporary starter catalogue; the real one replaces it later
 - 3 shipping zones (Lahore, major cities, rest of Pakistan) with COD fees
-- 3 coupons (`WELCOME10`, `FREESHIP`, `WINTER500`), 3 homepage banners
+- 3 coupons (`WELCOME10`, `FREESHIP`, `GLOW500`), 3 homepage banners
 - Shipping, returns, privacy and terms pages, FAQs, and store settings (Cash on Delivery only)
 - 7 approved demo reviews on 4 products (from three demo reviewer accounts without passwords)
 
@@ -107,7 +107,7 @@ Run from the repo root:
 | `pnpm db:reset`                     | Drop, re-migrate and re-seed the dev database                    |
 | `pnpm db:studio`                    | Open Prisma Studio to browse data                                |
 
-Run one app or package with a filter, e.g. `pnpm --filter @hoodie/api dev`.
+Run one app or package with a filter, e.g. `pnpm --filter @store/api dev`.
 
 ## Storefront
 
@@ -128,16 +128,16 @@ How it is built:
 - **Catalogue pages render on the server** and call the API with a short cache (60 seconds for products, 5 minutes for menus and content). The build never needs a running API.
 - **Filters live in the URL** (`/shop?size=M&color=Navy&sort=price_asc`), so filtered pages can be shared and indexed. Controls update instantly while results load.
 - **The session and cart are client-side** (TanStack Query) and talk to the API with cookies. An expired session is refreshed automatically.
-- **Forms use the same Zod schemas as the API** (`@hoodie/validation`), and API field errors appear next to the right field.
+- **Forms use the same Zod schemas as the API** (`@store/validation`), and API field errors appear next to the right field.
 - **SEO:** per-page metadata, Product and FAQ JSON-LD (with review ratings), `sitemap.xml`, `robots.txt`, and real 404 status codes for missing products, categories and pages.
 
 Engagement features (Phase 5):
 
-- **Search** opens from the header with suggestions as you type (products and categories, keyboard navigable). It tolerates typos ("hodie", "sherpaa") using PostgreSQL trigram matching, and full results sort by best match.
+- **Search** opens from the header with suggestions as you type (products and categories, keyboard navigable). It tolerates typos ("serm", "sunscren") using PostgreSQL trigram matching, and full results sort by best match.
 - **Reviews** on product pages: rating summary with a filter per star rating, sorting, and a form for customers whose order containing the product was delivered. Reviews appear after staff publish them (or straight away if auto-publish is on). Product cards show the average rating.
 - **Wishlist:** a heart on every product card and product page; saved items at `/account/wishlist`. Guests are asked to sign in.
 - **Recently viewed** products are remembered on the device (localStorage) and shown on product pages and the home page.
-- **Returns:** on a delivered order, within the return window (14 days by default), customers choose items and a reason; the order page then shows each return's progress.
+- **Returns:** on a delivered order, within the return window (7 days by default), customers choose items and a reason; the order page then shows each return's progress.
 - **Google sign-in** appears on the login and register pages once `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set on the API.
 - **"You may also like"** shows products often bought together first, then best sellers from the same category.
 
@@ -148,7 +148,7 @@ pnpm build      # all apps must be built
 pnpm e2e        # starts the site if it isn't running, then runs Playwright
 ```
 
-There are 51 tests on desktop, mobile (Pixel 7) and the admin panel. They cover browsing, filters, sorting, search (including suggestions with a typo), the size guide, the cart, sold-out and low-stock states, registering with a guest cart, addresses, signing out and in, the mobile menu and filters, checkout (Cash on Delivery, demo card payments with a decline then success, coupons, saved addresses, tracking and cancelling), wishlist, recently viewed, reviews, returns, unsubscribe links, and the admin (sign-in and access rules, fulfilling and refunding orders, creating a product with variants and stock, coupons, the dashboard, publishing a review, and a return from approval to refund), plus automated **accessibility checks** (axe, WCAG 2.1 AA) on 14 storefront pages and 10 admin pages. Card tests switch demo card payments on for the run and off again afterwards. They run against the database in `apps/api/.env`, create uniquely named `@test.local` users, and sign in to the admin with `SEED_ADMIN_PASSWORD` (or `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`). If the site is already running, start it with `RATE_LIMIT_ENABLED=false` and `ALLOW_DEMO_PAYMENTS=true`, because the tests sign in more than five times a minute and use demo cards.
+There are 60 tests on desktop, mobile (Pixel 7) and the admin panel. They cover browsing, filters, sorting, search (including suggestions with a typo), pack sizes with their own prices, shades, quick add from product cards, Buy now, the Offers page, the mobile tab bar, vouchers, frequently bought together, delivery dates, category search, the cart, sold-out and low-stock states, registering with a guest cart, addresses, signing out and in, the mobile menu and filters, checkout (Cash on Delivery, demo card payments with a decline then success, coupons, saved addresses, tracking and cancelling), wishlist, recently viewed, reviews, returns, unsubscribe links, and the admin (sign-in and access rules, fulfilling and refunding orders, creating a product with variants and stock, coupons, the dashboard, publishing a review, and a return from approval to refund), plus automated **accessibility checks** (axe, WCAG 2.1 AA) on 13 storefront pages and 10 admin pages. Card tests switch demo card payments on for the run and off again afterwards. They run against the database in `apps/api/.env`, create uniquely named `@test.local` users, and sign in to the admin with `SEED_ADMIN_PASSWORD` (or `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD`). If the site is already running, start it with `RATE_LIMIT_ENABLED=false` and `ALLOW_DEMO_PAYMENTS=true`, because the tests sign in more than five times a minute and use demo cards.
 
 ## Admin panel
 
@@ -193,7 +193,7 @@ With `REDIS_URL` set, the API runs a **BullMQ** worker. Emails are queued and re
 | Cart reminders       | Every 15 minutes   | Emails signed-in customers who left items in their cart: after 1 hour, then after 1 day. Any cart change restarts it |
 | Daily summary        | 08:00 store time   | Yesterday's sales and what needs attention, to managers and Super Admins (switch off in Store settings)              |
 | Back-in-stock        | When stock goes up | Emails everyone who asked to be told about that size and colour, once                                                |
-| Review requests      | Every hour         | "How's your hoodie?" a week after delivery, with links to review what they haven't reviewed yet                      |
+| Review requests      | Every hour         | "How are you finding it?" a week after delivery, with links to review what they haven't reviewed yet                 |
 
 Every marketing email (newsletter welcome, cart reminders) has a signed unsubscribe link; the storefront asks for a click before unsubscribing, because some email scanners open every link. Order emails are always sent.
 
@@ -205,7 +205,7 @@ The worker runs inside the API by default. To run it separately, set `RUN_WORKER
 2. **Place the order** (`POST /checkout`). In one database transaction every line is **sold** (Cash on Delivery) or **reserved** (card) with an atomic conditional update, so if any line is short the whole order rolls back. Orders get sequential numbers (`US-10001`…). Re-sending the same `idempotencyKey` returns the same order, so a double click can't create two.
 3. **Cash on Delivery** (the only method unless Stripe keys are added) orders are confirmed immediately, and the customer gets a confirmation email once email is set up.
 4. **Card** orders wait for payment for 15 minutes. Success turns the reservation into a sale and sends the confirmation email. A declined card can be retried. If the time runs out, a job releases the stock.
-5. **After the order:** the customer sees it at `/orders/US-…?token=…` (the link in the email) or in their account. They can track it at `/track-order`, cancel it before it's prepared, and download a PDF invoice. Staff move orders along in the admin panel (processing → shipped → delivered), which emails the customer.
+5. **After the order:** the customer sees it at `/orders/AG-…?token=…` (the link in the email) or in their account. They can track it at `/track-order`, cancel it before it's prepared, and download a PDF invoice. Staff move orders along in the admin panel (processing → shipped → delivered), which emails the customer.
 
 ### Demo payment mode (default)
 
@@ -257,15 +257,15 @@ Interactive docs are at **`/api/docs`**, and the raw OpenAPI 3.1 spec at `/api/d
 
 ### Tests
 
-`pnpm test` runs the API tests against a **separate database**: `hoodie_store_test`, or `TEST_DATABASE_URL` if set. It is migrated and seeded automatically and never wiped. Each test creates uniquely named data, so the suite can be re-run at any time without touching development data.
+`pnpm test` runs the API tests against a **separate database**: `amazon_group_test`, or `TEST_DATABASE_URL` if set. It is migrated and seeded automatically and never wiped. Each test creates uniquely named data, so the suite can be re-run at any time without touching development data.
 
 ## Conventions
 
-- **Money is always an integer in minor units** (paisa): `349900` = Rs 3,499. Use `formatMoney()` from `@hoodie/types` for display. Never use floats.
-- **Validation lives in `@hoodie/validation`.** The same Zod schema validates the frontend form and the API request.
+- **Money is always an integer in minor units** (paisa): `349900` = Rs 3,499. Use `formatMoney()` from `@store/types` for display. Never use floats.
+- **Validation lives in `@store/validation`.** The same Zod schema validates the frontend form and the API request.
   - Zod 4 applies `.default()` values even inside `.partial()`. Define each resource's fields once without defaults, add defaults only in the create schema, and keep the update schema a plain `.partial()`. Otherwise a PATCH silently resets fields. A test enforces this.
 - **Routes are declared with `defineRoutes()`** (`apps/api/src/lib/route.ts`). Each route states its access level, body/query schema and rate limit. Validation, auth and the API docs all come from that one definition.
-- **Enums live in two places**: the Prisma schema and `@hoodie/types`. A test (`apps/api/test/enums.test.ts`) fails if they drift apart.
+- **Enums live in two places**: the Prisma schema and `@store/types`. A test (`apps/api/test/enums.test.ts`) fails if they drift apart.
 - **API responses** use `{ data }` / `{ data, meta }` on success and `{ error: { code, message, details, requestId } }` on failure. Throw `AppError` from services; the error handler formats the response.
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `chore:`…), enforced by commitlint. Prettier runs on staged files before each commit.
 - **Branches:** `main` (production), `develop` (staging), `feature/*` with pull requests.

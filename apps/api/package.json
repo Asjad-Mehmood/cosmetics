@@ -1,5 +1,5 @@
 {
-  "name": "@hoodie/api",
+  "name": "@store/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -26,8 +26,8 @@
     "dev:server": "tsx watch --env-file-if-exists=.env src/server.ts"
   },
   "dependencies": {
-    "@hoodie/types": "workspace:*",
-    "@hoodie/validation": "workspace:*",
+    "@store/types": "workspace:*",
+    "@store/validation": "workspace:*",
     "@prisma/client": "6.19.3",
     "@vercel/functions": "^3.11.0",
     "argon2": "^0.45.2",
@@ -50,7 +50,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@hoodie/config": "workspace:*",
+    "@store/config": "workspace:*",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",

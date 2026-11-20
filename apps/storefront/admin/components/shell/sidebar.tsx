@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminNotificationsDTO, Role } from "@hoodie/types";
-import { Badge, cn } from "@hoodie/ui";
+import type { AdminNotificationsDTO, Role } from "@store/types";
+import { Badge, cn } from "@store/ui";
 import Link from "@/admin/lib/link";
 import { usePathname } from "@/admin/lib/navigation";
 import { activeItem, BUILT_PHASE, navForRole, type NavItem } from "@/admin/lib/nav";

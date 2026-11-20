@@ -202,6 +202,8 @@ export interface CouponDTO {
   startsAt: string | null;
   endsAt: string | null;
   isActive: boolean;
+  /** Shown to shoppers as a voucher. */
+  isPublic: boolean;
   /** active | scheduled | expired | used_up | disabled */
   state: "active" | "scheduled" | "expired" | "used_up" | "disabled";
   createdAt: string;

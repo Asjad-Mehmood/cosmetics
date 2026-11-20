@@ -6,9 +6,9 @@ import type {
   ApiResponse,
   PaginatedResponse,
   ReturnStatus,
-} from "@hoodie/types";
-import { RETURN_REASON_LABEL, RETURN_STATUS_LABEL } from "@hoodie/types";
-import { Badge, type BadgeProps, Button, Dialog, Field, Input, Skeleton } from "@hoodie/ui";
+} from "@store/types";
+import { RETURN_REASON_LABEL, RETURN_STATUS_LABEL } from "@store/types";
+import { Badge, type BadgeProps, Button, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useRouter } from "@/admin/lib/navigation";

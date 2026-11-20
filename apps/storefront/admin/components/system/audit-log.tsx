@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, AuditLogEntryDTO, PaginatedResponse } from "@hoodie/types";
-import { Input } from "@hoodie/ui";
+import type { ApiResponse, AuditLogEntryDTO, PaginatedResponse } from "@store/types";
+import { Input } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { Fragment, useState } from "react";

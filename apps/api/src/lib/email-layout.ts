@@ -1,4 +1,4 @@
-const STORE = "Urban Store";
+const STORE = "Amazon Group";
 
 const esc = (s: string) =>
   s.replace(

@@ -1,9 +1,9 @@
 "use client";
 
-import type { ApiResponse, OrderDTO, ReturnDTO } from "@hoodie/types";
-import { formatMoney, RETURN_REASON_LABEL, RETURN_STATUS_LABEL } from "@hoodie/types";
-import { RETURN_REASONS } from "@hoodie/validation";
-import { Badge, type BadgeProps, Button, Dialog, Field } from "@hoodie/ui";
+import type { ApiResponse, OrderDTO, ReturnDTO } from "@store/types";
+import { formatMoney, RETURN_REASON_LABEL, RETURN_STATUS_LABEL } from "@store/types";
+import { RETURN_REASONS } from "@store/validation";
+import { Badge, type BadgeProps, Button, Dialog, Field } from "@store/ui";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -185,7 +185,9 @@ function ReturnForm({
           label={reason === "other" ? "Tell us more" : "Anything else? (optional)"}
           htmlFor="return-details"
           hint={
-            reason === "wrong_size" ? "Want a different size instead? Say which one." : undefined
+            reason === "wrong_shade"
+              ? "Want a different shade or size instead? Say which one."
+              : undefined
           }
         >
           <textarea

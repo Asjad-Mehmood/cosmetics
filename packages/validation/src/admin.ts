@@ -4,7 +4,7 @@ import {
   MESSAGE_STATUSES,
   ORDER_STATUSES,
   PAYMENT_METHODS,
-} from "@hoodie/types";
+} from "@store/types";
 import { z } from "zod";
 import { emailSchema, moneySchema, paginationSchema, slugSchema } from "./common";
 
@@ -134,6 +134,7 @@ const couponFields = {
   startsAt: z.iso.datetime({ offset: true }).nullable(),
   endsAt: z.iso.datetime({ offset: true }).nullable(),
   isActive: z.boolean(),
+  isPublic: z.boolean(),
 };
 
 type CouponShape = {
@@ -162,6 +163,7 @@ export const createCouponSchema = z
     startsAt: couponFields.startsAt.optional(),
     endsAt: couponFields.endsAt.optional(),
     isActive: couponFields.isActive.default(true),
+    isPublic: couponFields.isPublic.default(false),
   })
   .refine(couponValueRule, {
     message: "Percentage must be 1-100; a fixed amount must be above zero",
@@ -223,7 +225,7 @@ export type UpdateShippingZoneInput = z.infer<typeof updateShippingZoneSchema>;
 
 // ───────────── Content (CMS) ─────────────
 
-/** A site path ("/shop/hoodies") or a full https URL. */
+/** A site path ("/categories/skincare") or a full https URL. */
 const linkSchema = z
   .string()
   .trim()
@@ -354,14 +356,14 @@ export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>;
 
 // ───────────── Email settings ─────────────
 
-/** "Urban Store <orders@urbanstore.pk>" or just "orders@urbanstore.pk". */
+/** "Amazon Group <orders@amazongroup.pk>" or just "orders@amazongroup.pk". */
 const emailFromSchema = z
   .string()
   .trim()
   .max(200)
   .regex(
     /^(?:[^<>@]+<\s*[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+\s*>|[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)$/,
-    'Use an address like orders@yourdomain.com or "Urban Store <orders@yourdomain.com>"',
+    'Use an address like orders@yourdomain.com or "Amazon Group <orders@yourdomain.com>"',
   );
 
 /** Secrets are optional on update: leave them out to keep the saved value. */

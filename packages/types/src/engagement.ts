@@ -57,9 +57,10 @@ export interface AdminReviewDTO extends MyReviewDTO {
 // ───────────── Returns ─────────────
 
 export const RETURN_REASON_LABEL: Record<string, string> = {
-  wrong_size: "Wrong size",
+  wrong_shade: "Wrong shade or size",
   not_as_described: "Not as described",
-  damaged: "Arrived damaged or faulty",
+  damaged: "Arrived damaged, leaking or faulty",
+  expired: "Expired or close to expiry",
   wrong_item: "Received the wrong item",
   changed_mind: "Changed my mind",
   other: "Other",

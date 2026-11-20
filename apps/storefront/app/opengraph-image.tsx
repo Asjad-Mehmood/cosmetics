@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/config";
 
-export const alt = `${siteConfig.name}: streetwear hoodies made in Pakistan`;
+export const alt = `${siteConfig.name}: beauty and pharmacy store in Pakistan`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,7 +16,7 @@ export default function OpengraphImage() {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 80,
-        background: "#16181d",
+        background: "#0f5e63",
         color: "white",
         fontFamily: "sans-serif",
       }}
@@ -24,23 +24,25 @@ export default function OpengraphImage() {
       <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
         <svg width="120" height="120" viewBox="0 0 32 32">
           <rect width="32" height="32" rx="8" fill="#ffffff" />
-          <path d="M6.5 24C6.5 13.5 10.6 6 16 6s9.5 7.5 9.5 18Z" fill="#16181d" />
-          <path d="M11.4 24c0-7.4 2-11.6 4.6-11.6s4.6 4.2 4.6 11.6Z" fill="#ffffff" />
           <path
-            d="M12.6 22.5v5M19.4 22.5v5"
-            stroke="#e2622b"
-            strokeWidth="1.6"
+            d="M16 4.5S7.5 13.4 7.5 19.3a8.5 8.5 0 0 0 17 0C24.5 13.4 16 4.5 16 4.5Z"
+            fill="#0f5e63"
+          />
+          <path
+            d="M16 15.3v7.6M12.2 19.1h7.6"
+            stroke="#f3a3b0"
+            strokeWidth="2.4"
             strokeLinecap="round"
           />
         </svg>
-        <div style={{ fontSize: 72, fontWeight: 800, letterSpacing: -2 }}>URBAN STORE</div>
+        <div style={{ fontSize: 72, fontWeight: 800, letterSpacing: -2 }}>{siteConfig.name}</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <div style={{ fontSize: 60, fontWeight: 700, lineHeight: 1.1 }}>
-          Everyday streetwear hoodies, made in Pakistan.
+          Genuine beauty and health care, delivered across Pakistan.
         </div>
-        <div style={{ fontSize: 34, color: "#e2622b" }}>
-          Pullovers · Zip-ups · Custom embroidery · Cash on Delivery
+        <div style={{ fontSize: 34, color: "#f3a3b0" }}>
+          Skincare · Makeup · Fragrance · Vitamins · Cash on Delivery
         </div>
       </div>
     </div>,

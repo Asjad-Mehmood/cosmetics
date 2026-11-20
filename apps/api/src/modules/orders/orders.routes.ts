@@ -1,10 +1,11 @@
-import { paginationSchema, returnRequestSchema, trackOrderSchema } from "@hoodie/validation";
+import { paginationSchema, returnRequestSchema, trackOrderSchema } from "@store/validation";
 import { z } from "zod";
 import { ok } from "../../lib/http";
 import { storeInfo } from "../../lib/settings";
 import { defineRoutes, route } from "../../lib/route";
 import { currentUser } from "../../middleware/auth";
 import { renderInvoice } from "./invoice";
+import { purchasedProducts } from "../catalog/catalog.service";
 import * as orders from "./orders.service";
 
 const tokenQuery = z.object({ token: z.string().max(100).optional() });
@@ -92,5 +93,12 @@ export const myOrdersRouter = defineRoutes("/me/orders", "Orders", [
     access: "user",
     query: paginationSchema,
     handler: ({ req, query }) => orders.listMyOrders(currentUser(req).id, query),
+  }),
+  route({
+    method: "get",
+    path: "/products",
+    summary: "Products from the customer's earlier orders that are still for sale (Buy it again)",
+    access: "user",
+    handler: async ({ req }) => ok(await purchasedProducts(currentUser(req).id)),
   }),
 ]);

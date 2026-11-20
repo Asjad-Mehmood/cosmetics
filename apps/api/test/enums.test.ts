@@ -1,15 +1,14 @@
 import { $Enums } from "@prisma/client";
-import * as shared from "@hoodie/types";
+import * as shared from "@store/types";
 import { describe, expect, it } from "vitest";
 
 /**
- * The frontends use the enums in @hoodie/types; the database uses the Prisma
+ * The frontends use the enums in @store/types; the database uses the Prisma
  * enums. This test fails if someone changes one without the other.
  */
 const pairs = [
   ["Role", $Enums.Role, shared.Role],
   ["ProductStatus", $Enums.ProductStatus, shared.ProductStatus],
-  ["Fit", $Enums.Fit, shared.Fit],
   ["OrderStatus", $Enums.OrderStatus, shared.OrderStatus],
   ["PaymentMethod", $Enums.PaymentMethod, shared.PaymentMethod],
   ["PaymentStatus", $Enums.PaymentStatus, shared.PaymentStatus],

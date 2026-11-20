@@ -1,8 +1,8 @@
 "use client";
 
-import type { ApiResponse, OrderDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Button, Card, Container, Skeleton } from "@hoodie/ui";
+import type { ApiResponse, OrderDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Button, Card, Container, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";

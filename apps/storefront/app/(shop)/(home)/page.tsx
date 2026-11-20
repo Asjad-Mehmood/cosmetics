@@ -1,59 +1,48 @@
-import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@hoodie/types";
-import { Card, Container } from "@hoodie/ui";
+import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
+import { Container } from "@store/ui";
 import Image from "next/image";
-import { RecentlyViewed } from "@/components/product/recently-viewed";
 import Link from "next/link";
-import { RefreshIcon, ShieldIcon, TruckIcon } from "@/components/icons";
-import { ProductGrid } from "@/components/product/product-card";
+import { BuyAgain } from "@/components/home/buy-again";
+import { HeroCarousel } from "@/components/home/hero-carousel";
+import { JustForYou } from "@/components/home/just-for-you";
+import {
+  ChevronRightIcon,
+  ClockIcon,
+  HeartIcon,
+  LeafIcon,
+  PillIcon,
+  ShieldIcon,
+  SparkleIcon,
+} from "@/components/icons";
+import { NewsletterBand } from "@/components/layout/footer";
+import { ProductRail } from "@/components/product/product-rail";
+import { RecentlyViewed } from "@/components/product/recently-viewed";
+import { VoucherStrip } from "@/components/vouchers";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe, getList } from "@/lib/server-api";
 
-const perks = [
-  {
-    icon: TruckIcon,
-    title: "Fast nationwide delivery",
-    body: "1-2 days in Lahore, 2-5 days across Pakistan.",
-  },
-  { icon: RefreshIcon, title: "14-day free exchanges", body: "Wrong size? Swap it for free." },
-  { icon: ShieldIcon, title: "Cash on Delivery", body: "Pay in cash when your parcel arrives." },
+/** "Shop by concern": each tile runs a search for that concern. */
+const CONCERNS = [
+  { label: "Dark spots", q: "dark spots", icon: SparkleIcon, tone: "bg-accent-50 text-accent-700" },
+  { label: "Hydration", q: "hyaluronic", icon: LeafIcon, tone: "bg-mint text-brand-700" },
+  { label: "Sun protection", q: "SPF", icon: ShieldIcon, tone: "bg-[#fff4e0] text-[#8a5300]" },
+  { label: "Frizzy hair", q: "frizz", icon: SparkleIcon, tone: "bg-[#f1ecfb] text-[#5b3b9a]" },
+  { label: "Heart health", q: "heart", icon: HeartIcon, tone: "bg-accent-50 text-accent-700" },
+  { label: "Fever care", q: "thermometer", icon: ClockIcon, tone: "bg-mint text-brand-700" },
 ];
 
-const TILE_TONES = ["bg-[#1E3A5F]", "bg-[#36454F]", "bg-[#8B7355]", "bg-[#111111]"];
-
-function Section({
-  title,
-  href,
-  linkLabel,
-  children,
-}: {
-  title: string;
-  href: string;
-  linkLabel: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <Container className="py-14">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          <Link href={href} className="text-sm font-medium underline">
-            {linkLabel}
-          </Link>
-        </div>
-        {children}
-      </Container>
-    </section>
-  );
-}
-
 export default async function HomePage() {
-  const [home, categories, newArrivals, bestSellers] = await Promise.all([
+  const [home, categories, bestSellers, newArrivals, offers, forYou] = await Promise.all([
     getDataSafe<HomeContentDTO | null>("/cms/home", null, { revalidate: 300 }),
     getData<CategoryDTO[]>("/categories", { revalidate: 300 }),
-    getList<ProductCardDTO>("/products?collection=new-arrivals&sort=newest&limit=4"),
-    getList<ProductCardDTO>("/products?sort=best_selling&limit=4"),
+    getList<ProductCardDTO>("/products?sort=best_selling&limit=10"),
+    getList<ProductCardDTO>("/products?collection=new-arrivals&sort=newest&limit=10"),
+    getList<ProductCardDTO>("/products?onSale=true&sort=best_selling&limit=10"),
+    getList<ProductCardDTO>("/products?sort=top_rated&limit=10&page=1"),
   ]);
-  const hero = home?.banners[0];
+  const banners = home?.banners ?? [];
+  const makeup = categories?.find((c) => c.slug === "makeup");
+  const wellness = categories?.find((c) => c.slug === "health-wellness");
 
   // Lets search engines show the store name, logo and a search box.
   const structuredData = [
@@ -89,120 +78,229 @@ export default async function HomePage() {
           __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
-      <section className="bg-ink text-white">
-        <Container className="grid items-center gap-10 py-14 md:grid-cols-2 md:py-20">
-          <div>
-            <p className="text-brand-500 text-sm font-semibold uppercase tracking-widest">
-              New season
+      <h1 className="sr-only">{siteConfig.name}: beauty and pharmacy store in Pakistan</h1>
+
+      <Container className="pt-4 sm:pt-6">
+        {banners.length > 0 ? (
+          <HeroCarousel banners={banners} />
+        ) : (
+          <section className="bg-brand-700 rounded-3xl px-6 py-16 text-white sm:px-12">
+            <p className="text-3xl font-extrabold sm:text-5xl">
+              Genuine beauty and health care, delivered.
             </p>
-            <h1 className="mt-4 text-balance text-4xl font-black tracking-tight sm:text-6xl">
-              {hero?.title ?? "Heavyweight hoodies, built to last."}
-            </h1>
-            <p className="mt-6 max-w-md text-lg text-white/70">
-              {hero?.subtitle ??
-                "320–400 GSM cotton fleece in pullover, zip-up and oversized fits."}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={hero?.link ?? "/shop"}
-                className="text-ink inline-flex h-12 items-center rounded-lg bg-white px-6 font-semibold hover:bg-white/90"
-              >
-                {hero?.ctaLabel ?? "Shop all hoodies"}
-              </Link>
-              <Link
-                href="/shop"
-                className="inline-flex h-12 items-center rounded-lg border border-white/30 px-6 font-semibold hover:bg-white/10"
-              >
-                Browse everything
-              </Link>
-            </div>
-          </div>
-          {hero && (
-            <div className="relative hidden aspect-[16/9] overflow-hidden rounded-2xl md:block">
-              <Image
-                src={hero.imageUrl}
-                alt=""
-                fill
-                priority
-                sizes="50vw"
-                className="object-cover"
-              />
-            </div>
-          )}
-        </Container>
-      </section>
+            <Link
+              href="/shop"
+              className="text-ink mt-8 inline-flex h-12 items-center rounded-full bg-white px-7 font-semibold"
+            >
+              Shop now
+            </Link>
+          </section>
+        )}
+      </Container>
+
+      <Container className="pt-6">
+        <VoucherStrip title="Collect vouchers" />
+      </Container>
 
       {categories && categories.length > 0 && (
-        <section>
-          <Container className="pt-14">
-            <h2 className="text-2xl font-bold tracking-tight">Shop by style</h2>
-            <div
-              className={`mt-6 grid grid-cols-2 gap-4 ${categories.length === 5 ? "md:grid-cols-3 lg:grid-cols-5" : "lg:grid-cols-4"}`}
-            >
-              {categories.map((c, i) => (
-                <Link
-                  key={c.id}
-                  href={`/categories/${c.slug}`}
-                  className={`${TILE_TONES[i % TILE_TONES.length]} group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-xl p-5 text-white`}
-                >
-                  {c.imageUrl && (
-                    <>
-                      <Image
-                        src={c.imageUrl}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 20vw, 50vw"
-                        // On phones the first tiles are the largest thing on screen.
-                        priority={i < 2}
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                    </>
-                  )}
-                  <span className="relative text-lg font-bold group-hover:underline">{c.name}</span>
-                  <span className="relative text-sm text-white/80">
-                    {c.productCount} {c.productCount === 1 ? "style" : "styles"}
-                  </span>
-                </Link>
-              ))}
+        <section aria-labelledby="categories-heading">
+          <Container className="pt-12">
+            <div className="mb-6 flex items-end justify-between">
+              <h2 id="categories-heading" className="text-2xl font-bold tracking-tight">
+                Shop by category
+              </h2>
+              <Link href="/shop" className="text-brand-700 text-sm font-semibold hover:underline">
+                All products
+              </Link>
             </div>
+            <ul className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-6 sm:px-0">
+              {categories.map((c, i) => (
+                <li key={c.id} className="w-24 shrink-0 sm:w-auto">
+                  <Link href={`/categories/${c.slug}`} className="group block text-center">
+                    <span className="bg-blush ring-line group-hover:ring-brand-600 relative mx-auto block aspect-square w-full overflow-hidden rounded-full ring-1 transition group-hover:ring-2 sm:w-36">
+                      {c.imageUrl && (
+                        <Image
+                          src={c.imageUrl}
+                          alt=""
+                          fill
+                          sizes="(min-width: 640px) 144px, 96px"
+                          priority={i < 3}
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
+                    </span>
+                    <span className="mt-3 block text-sm font-semibold group-hover:underline">
+                      {c.name}
+                    </span>
+                    <span className="text-muted block text-xs">
+                      {c.productCount} {c.productCount === 1 ? "product" : "products"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Container>
         </section>
       )}
 
-      {newArrivals.data.length > 0 && (
-        <Section title="New arrivals" href="/collections/new-arrivals" linkLabel="See all new">
-          <ProductGrid products={newArrivals.data} />
-        </Section>
-      )}
+      <Container>
+        <BuyAgain />
+      </Container>
 
-      <section>
-        <Container className="grid gap-4 md:grid-cols-3">
-          {perks.map(({ icon: Icon, title, body }) => (
-            <Card key={title} className="flex gap-4">
-              <Icon className="text-brand-600 shrink-0" />
-              <div>
-                <h3 className="font-semibold">{title}</h3>
-                <p className="text-muted mt-1 text-sm">{body}</p>
-              </div>
-            </Card>
-          ))}
+      <Container className="pt-14">
+        <ProductRail
+          title="Best sellers"
+          subtitle="What our customers buy again and again"
+          products={bestSellers.data}
+          href="/collections/best-sellers"
+          linkLabel="See all best sellers"
+        />
+      </Container>
+
+      <section aria-labelledby="concerns-heading">
+        <Container className="pt-14">
+          <h2 id="concerns-heading" className="mb-6 text-2xl font-bold tracking-tight">
+            Shop by concern
+          </h2>
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {CONCERNS.map(({ label, q, icon: Icon, tone }) => (
+              <li key={label}>
+                <Link
+                  href={`/search?q=${encodeURIComponent(q)}`}
+                  className={`${tone} hover:shadow-(--shadow-card) group flex h-full items-center gap-3 rounded-2xl px-4 py-4 transition`}
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/80">
+                    <Icon width={20} height={20} />
+                  </span>
+                  <span className="text-ink text-sm font-semibold group-hover:underline">
+                    {label}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
-      {bestSellers.data.length > 0 && (
-        <Section
-          title="Best sellers"
-          href="/collections/best-sellers"
-          linkLabel="See all best sellers"
-        >
-          <ProductGrid products={bestSellers.data} />
-        </Section>
+      <Container className="pt-14">
+        <ProductRail
+          title="New arrivals"
+          subtitle="Fresh launches and restocks"
+          products={newArrivals.data}
+          href="/collections/new-arrivals"
+          linkLabel="See all new"
+        />
+      </Container>
+
+      {(makeup || wellness) && (
+        <Container className="pt-14">
+          <div className="grid gap-4 md:grid-cols-2">
+            {[
+              makeup && {
+                c: makeup,
+                bg: "bg-accent-50",
+                eyebrow: "Makeup",
+                title: "Colour that lasts all day",
+                cta: "Shop makeup",
+              },
+              wellness && {
+                c: wellness,
+                bg: "bg-mint",
+                eyebrow: "Health & wellness",
+                title: "Everyday essentials for the whole family",
+                cta: "Shop health",
+              },
+            ]
+              .filter((x) => !!x)
+              .map(({ c, bg, eyebrow, title, cta }) => (
+                <Link
+                  key={c.id}
+                  href={`/categories/${c.slug}`}
+                  className={`${bg} group relative flex min-h-56 overflow-hidden rounded-3xl`}
+                >
+                  <div className="relative z-10 flex w-3/5 flex-col justify-center p-6 sm:p-8">
+                    <p className="text-brand-700 text-xs font-semibold uppercase tracking-widest">
+                      {eyebrow}
+                    </p>
+                    <p className="mt-2 text-xl font-bold leading-tight sm:text-2xl">{title}</p>
+                    <span className="text-brand-700 mt-4 inline-flex items-center gap-1 text-sm font-semibold group-hover:underline">
+                      {cta} <ChevronRightIcon width={16} height={16} />
+                    </span>
+                  </div>
+                  {c.imageUrl && (
+                    <div className="absolute inset-y-0 right-0 w-2/5">
+                      <Image
+                        src={c.imageUrl}
+                        alt=""
+                        fill
+                        sizes="(min-width: 768px) 20vw, 40vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                </Link>
+              ))}
+          </div>
+        </Container>
       )}
 
-      <Container>
+      {offers.data.length > 0 && (
+        <Container className="pt-14">
+          <ProductRail
+            title="Offers"
+            subtitle="Genuine products at lower prices"
+            products={offers.data}
+            href="/offers"
+            linkLabel="See all offers"
+          />
+        </Container>
+      )}
+
+      <Container className="pt-14">
+        <section
+          aria-labelledby="pharmacy-heading"
+          className="bg-brand-700 grid gap-6 overflow-hidden rounded-3xl px-6 py-8 text-white sm:px-10 md:grid-cols-[auto_1fr_auto] md:items-center"
+        >
+          <span className="grid size-16 place-items-center rounded-2xl bg-white/10">
+            <PillIcon width={32} height={32} />
+          </span>
+          <div>
+            <h2 id="pharmacy-heading" className="text-2xl font-bold">
+              Prescription medicines are coming soon
+            </h2>
+            <p className="mt-2 max-w-2xl text-white/85">
+              Upload your prescription at checkout and our registered pharmacist will check it
+              before your order is sent. Until then, shop vitamins, supplements and health devices.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/categories/health-wellness"
+              className="text-ink inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold hover:bg-white/90"
+            >
+              Shop health
+            </Link>
+            <Link
+              href="/faq"
+              className="inline-flex h-11 items-center rounded-full border border-white/40 px-5 text-sm font-semibold hover:bg-white/10"
+            >
+              How it will work
+            </Link>
+          </div>
+        </section>
+      </Container>
+
+      <Container className="pt-14">
+        <JustForYou initial={forYou} />
+      </Container>
+
+      <Container className="pt-6">
         <RecentlyViewed />
       </Container>
+
+      <div className="-mb-24 pt-14">
+        <NewsletterBand />
+      </div>
     </>
   );
 }

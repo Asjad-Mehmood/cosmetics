@@ -4,8 +4,8 @@ import {
   type AppliedCouponDTO,
   type CartDTO,
   type CartItemDTO,
-} from "@hoodie/types";
-import { MAX_QTY_PER_ITEM } from "@hoodie/validation";
+} from "@store/types";
+import { MAX_QTY_PER_ITEM } from "@store/validation";
 import type { Prisma } from "@prisma/client";
 import { randomToken } from "../../lib/crypto";
 import { prisma } from "../../lib/prisma";

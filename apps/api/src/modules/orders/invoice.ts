@@ -1,4 +1,4 @@
-import { formatMoney, ORDER_STATUS_LABEL, type OrderAddressDTO } from "@hoodie/types";
+import { formatMoney, ORDER_STATUS_LABEL, type OrderAddressDTO } from "@store/types";
 import PDFDocument from "pdfkit";
 import type { StoreInfo } from "../../lib/settings";
 import { shippingLabel, type FullOrder } from "./order.mapper";
@@ -106,7 +106,9 @@ export function renderInvoice(order: FullOrder, STORE: StoreInfo): Promise<Buffe
         50,
         y + 20,
       )
-      .text("Thank you for shopping with us. Exchanges are free within 14 days of delivery.");
+      .text(
+        "Thank you for shopping with us. Unopened beauty and personal care items can be returned within 7 days of delivery.",
+      );
     doc.end();
   });
 }

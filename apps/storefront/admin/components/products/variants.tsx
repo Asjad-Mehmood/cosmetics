@@ -1,8 +1,8 @@
 "use client";
 
-import type { AdminVariantDTO, ApiResponse } from "@hoodie/types";
-import { compareSizes, SIZES } from "@hoodie/types";
-import { Badge, Button, cn, Field, Input } from "@hoodie/ui";
+import type { AdminVariantDTO, ApiResponse } from "@store/types";
+import { compareSizes } from "@store/types";
+import { Badge, Button, cn, Field, Input } from "@store/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -22,13 +22,23 @@ function Generator({ product, onDone }: { product: AdminProduct; onDone: () => v
   const existingColors = useMemo(() => {
     const map = new Map<string, string>();
     for (const v of product.variants)
-      if (!map.has(v.color)) map.set(v.color, v.colorHex ?? "#111111");
+      if (!map.has(v.color)) map.set(v.color, v.colorHex ?? "#e5e7eb");
     return [...map].map(([name, hex]) => ({ name, hex }));
   }, [product.variants]);
 
-  const [sizes, setSizes] = useState<string[]>(["S", "M", "L", "XL"]);
+  const [sizesText, setSizesText] = useState(() =>
+    [...new Set(product.variants.map((v) => v.size))].sort(compareSizes).join(", "),
+  );
+  const sizes = [
+    ...new Set(
+      sizesText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
+  ].sort(compareSizes);
   const [colors, setColors] = useState(
-    existingColors.length ? existingColors : [{ name: "Black", hex: "#111111" }],
+    existingColors.length ? existingColors : [{ name: "Standard", hex: "#e5e7eb" }],
   );
   const [prefix, setPrefix] = useState(skuPrefixFor(product.title, product.id));
   const [initialStock, setInitialStock] = useState("0");
@@ -73,10 +83,11 @@ function Generator({ product, onDone }: { product: AdminProduct; onDone: () => v
   return (
     <div className="bg-surface space-y-4 rounded-lg p-4">
       <div>
-        <h3 className="font-semibold">Size × colour generator</h3>
+        <h3 className="font-semibold">Size × shade generator</h3>
         <p className="text-muted text-sm">
-          Creates every missing combination. Safe to run again after adding a colour: existing
-          variants are left alone.
+          Creates every missing combination. Safe to run again after adding a size or shade:
+          existing variants are left alone. Products without shades use one shade called
+          &quot;Standard&quot;.
         </p>
       </div>
       {error && (
@@ -84,40 +95,26 @@ function Generator({ product, onDone }: { product: AdminProduct; onDone: () => v
           {error}
         </p>
       )}
+      <Field
+        label="Sizes"
+        htmlFor="generator-sizes"
+        hint="Separate with commas, as printed on the pack: 30 ml, 50 ml or 30 tablets, 60 tablets."
+      >
+        <Input
+          id="generator-sizes"
+          value={sizesText}
+          onChange={(e) => setSizesText(e.target.value)}
+          placeholder="e.g. 30 ml, 50 ml"
+        />
+      </Field>
       <fieldset>
-        <legend className="text-sm font-medium">Sizes</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {SIZES.map((s) => {
-            const on = sizes.includes(s);
-            return (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={on}
-                onClick={() =>
-                  setSizes((all) =>
-                    on ? all.filter((x) => x !== s) : [...all, s].sort(compareSizes),
-                  )
-                }
-                className={cn(
-                  "h-9 min-w-12 rounded-lg border px-3 text-sm font-medium",
-                  on ? "bg-ink border-ink text-white" : "border-line bg-canvas hover:border-ink",
-                )}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend className="text-sm font-medium">Colours</legend>
+        <legend className="text-sm font-medium">Shades</legend>
         <ul className="mt-2 space-y-2">
           {colors.map((c, i) => (
             <li key={i} className="flex items-center gap-2">
               <input
                 type="color"
-                aria-label={`Colour ${i + 1} swatch`}
+                aria-label={`Shade ${i + 1} swatch`}
                 value={c.hex}
                 onChange={(e) =>
                   setColors((all) =>
@@ -127,21 +124,21 @@ function Generator({ product, onDone }: { product: AdminProduct; onDone: () => v
                 className="border-line h-9 w-11 cursor-pointer rounded-lg border p-1"
               />
               <Input
-                aria-label={`Colour ${i + 1} name`}
+                aria-label={`Shade ${i + 1} name`}
                 value={c.name}
                 onChange={(e) =>
                   setColors((all) =>
                     all.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)),
                   )
                 }
-                placeholder="Colour name, e.g. Heather Grey"
+                placeholder="Shade name, e.g. Nude Rose or Standard"
                 className="h-9 max-w-64"
               />
               {colors.length > 1 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Remove ${c.name || "colour"}`}
+                  aria-label={`Remove ${c.name || "shade"}`}
                   onClick={() => setColors((all) => all.filter((_, j) => j !== i))}
                 >
                   Remove
@@ -156,7 +153,7 @@ function Generator({ product, onDone }: { product: AdminProduct; onDone: () => v
           className="mt-2"
           onClick={() => setColors((all) => [...all, { name: "", hex: "#888888" }])}
         >
-          + Add colour
+          + Add shade
         </Button>
       </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -346,12 +343,12 @@ export function VariantsSection({ product }: { product: AdminProduct }) {
       description={
         variants.length
           ? `${variants.length} variants · ${totalStock} in stock. Leave a variant's price empty to use the product price (${formatMoney(product.basePrice)}).`
-          : "Each size and colour combination is a variant with its own SKU and stock."
+          : "Each size and shade combination is a variant with its own SKU and stock."
       }
       actions={
         variants.length > 0 && (
           <Button variant="outline" size="sm" onClick={() => setShowGenerator((s) => !s)}>
-            {showGenerator ? "Hide generator" : "Add sizes or colours"}
+            {showGenerator ? "Hide generator" : "Add sizes or shades"}
           </Button>
         )
       }

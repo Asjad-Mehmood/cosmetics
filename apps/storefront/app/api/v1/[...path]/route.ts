@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 async function api(request: Request): Promise<Response> {
-  const { handle } = await import("@hoodie/api/embedded");
+  const { handle } = await import("@store/api/embedded");
   return handle(request);
 }
 

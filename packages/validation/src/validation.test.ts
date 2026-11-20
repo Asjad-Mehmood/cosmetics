@@ -13,12 +13,12 @@ import {
 } from "./index";
 
 const validProduct = {
-  title: "Classic Pullover Hoodie",
-  description: "Heavyweight 320 GSM brushed fleece hoodie.",
-  basePrice: 349900,
+  title: "Vitamin C Brightening Serum",
+  description: "A lightweight daily serum with 15% vitamin C.",
+  basePrice: 249900,
   variants: [
-    { sku: "CPH-BLK-M", size: "M", color: "Black" },
-    { sku: "CPH-BLK-L", size: "L", color: "Black" },
+    { sku: "VCS-STD-15", size: "15 ml", color: "Standard" },
+    { sku: "VCS-STD-30", size: "30 ml", color: "Standard" },
   ],
 };
 
@@ -27,7 +27,7 @@ describe("registerSchema", () => {
     const r = registerSchema.parse({
       name: "Ali",
       email: " Ali@Example.COM ",
-      password: "Hoodie123",
+      password: "Glow12345",
     });
     expect(r.email).toBe("ali@example.com");
   });
@@ -64,7 +64,6 @@ describe("createProductSchema", () => {
   it("accepts a valid product and applies defaults", () => {
     const r = createProductSchema.parse(validProduct);
     expect(r.status).toBe("DRAFT");
-    expect(r.fit).toBe("REGULAR");
     expect(r.variants[0]?.stock).toBe(0);
   });
 
@@ -109,8 +108,12 @@ describe("productListQuerySchema", () => {
     expect(r.sort).toBe("newest");
   });
 
-  it("rejects unknown sizes", () => {
-    expect(productListQuerySchema.safeParse({ size: "M,HUGE" }).success).toBe(false);
+  it("accepts pack sizes as written on the product, but not overlong ones", () => {
+    expect(productListQuerySchema.parse({ size: "30 ml,60 softgels" }).size).toEqual([
+      "30 ml",
+      "60 softgels",
+    ]);
+    expect(productListQuerySchema.safeParse({ size: "x".repeat(41) }).success).toBe(false);
   });
 });
 
@@ -136,7 +139,7 @@ describe("stockAdjustmentSchema", () => {
 
 describe("update schemas never inject defaults", () => {
   it.each([
-    ["product", updateProductSchema, { title: "Renamed hoodie" }],
+    ["product", updateProductSchema, { title: "Renamed serum" }],
     ["variant", updateVariantSchema, { colorHex: "#000000" }],
     ["category", updateCategorySchema, { name: "Renamed" }],
     ["collection", updateCollectionSchema, { name: "Renamed" }],
@@ -149,12 +152,12 @@ describe("engagement schemas", async () => {
   const { reviewSchema, returnRequestSchema, unsubscribeSchema } = await import("./engagement");
 
   it("validates reviews", () => {
-    expect(reviewSchema.safeParse({ rating: 5, body: "Lovely and warm hoodie." }).success).toBe(
-      true,
-    );
-    expect(reviewSchema.safeParse({ rating: 6, body: "Lovely and warm hoodie." }).success).toBe(
-      false,
-    );
+    expect(
+      reviewSchema.safeParse({ rating: 5, body: "Lovely serum, my skin feels great." }).success,
+    ).toBe(true);
+    expect(
+      reviewSchema.safeParse({ rating: 6, body: "Lovely serum, my skin feels great." }).success,
+    ).toBe(false);
     expect(reviewSchema.safeParse({ rating: 4, body: "short" }).success).toBe(false);
     expect(
       reviewSchema.parse({ rating: 3, title: "  ", body: "Fine, a bit thin." }).title,
@@ -163,10 +166,10 @@ describe("engagement schemas", async () => {
 
   it("validates return requests", () => {
     const item = { orderItemId: "a", quantity: 1 };
-    expect(returnRequestSchema.safeParse({ items: [item], reason: "wrong_size" }).success).toBe(
+    expect(returnRequestSchema.safeParse({ items: [item], reason: "wrong_shade" }).success).toBe(
       true,
     );
-    expect(returnRequestSchema.safeParse({ items: [], reason: "wrong_size" }).success).toBe(false);
+    expect(returnRequestSchema.safeParse({ items: [], reason: "wrong_shade" }).success).toBe(false);
     expect(returnRequestSchema.safeParse({ items: [item], reason: "other" }).success).toBe(false);
     expect(returnRequestSchema.safeParse({ items: [item, item], reason: "damaged" }).success).toBe(
       false,

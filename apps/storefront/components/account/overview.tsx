@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card } from "@hoodie/ui";
+import { Button, Card } from "@store/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";

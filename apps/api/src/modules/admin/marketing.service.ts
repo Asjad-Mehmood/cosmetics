@@ -1,10 +1,10 @@
-import { ErrorCode, type CouponDTO, type ShippingZoneDTO } from "@hoodie/types";
+import { ErrorCode, type CouponDTO, type ShippingZoneDTO } from "@store/types";
 import type {
   CreateCouponInput,
   CreateShippingZoneInput,
   UpdateCouponInput,
   UpdateShippingZoneInput,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Coupon, ShippingZone } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/app-error";
@@ -32,6 +32,7 @@ export const toCouponDTO = (c: Coupon): CouponDTO => ({
   startsAt: c.startsAt?.toISOString() ?? null,
   endsAt: c.endsAt?.toISOString() ?? null,
   isActive: c.isActive,
+  isPublic: c.isPublic,
   state: couponState(c),
   createdAt: c.createdAt.toISOString(),
 });

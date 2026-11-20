@@ -49,7 +49,7 @@ export async function sendDueReviewRequests(now = new Date()): Promise<number> {
 }
 
 /**
- * "How's your hoodie?" email, a week after delivery. Only for orders that are
+ * "How are you finding it?" email, a week after delivery. Only for orders that are
  * still delivered (not returned or refunded), and only lists products the
  * customer hasn't reviewed yet. Returns 1 if an email was sent.
  */
@@ -92,10 +92,10 @@ export async function sendReviewRequest(orderId: string): Promise<number> {
   await sendMail({
     to: order.email,
     subject: `How's your ${items.length === 1 ? items[0]!.productTitle : "order"}?`,
-    text: `${name ? `Hi ${name},\n\n` : ""}How are you finding your order ${order.orderNumber}? A quick review helps other shoppers pick the right hoodie and size.\n${items.map((i) => `- ${i.productTitle}: ${link(live.find((p) => p.id === i.productId)!.slug)}`).join("\n")}\n${reviewer ? "" : "\nReviews need an account with this email address.\n"}`,
+    text: `${name ? `Hi ${name},\n\n` : ""}How are you finding your order ${order.orderNumber}? A quick review helps other shoppers choose the right product.\n${items.map((i) => `- ${i.productTitle}: ${link(live.find((p) => p.id === i.productId)!.slug)}`).join("\n")}\n${reviewer ? "" : "\nReviews need an account with this email address.\n"}`,
     html: emailLayout(
-      "How's your hoodie?",
-      `<p>${name ? `Hi ${esc(name)}, h` : "H"}ow are you finding your order ${esc(order.orderNumber)}? A quick review helps other shoppers pick the right hoodie and size.</p><ul style="padding-left:20px">${list}</ul>${reviewer ? "" : `<p style="color:#555">Reviews need an account with this email address. <a href="${esc(env.STOREFRONT_URL)}/register" style="color:#111">Create one in a minute.</a></p>`}`,
+      "How are you finding it?",
+      `<p>${name ? `Hi ${esc(name)}, h` : "H"}ow are you finding your order ${esc(order.orderNumber)}? A quick review helps other shoppers choose the right product.</p><ul style="padding-left:20px">${list}</ul>${reviewer ? "" : `<p style="color:#555">Reviews need an account with this email address. <a href="${esc(env.STOREFRONT_URL)}/register" style="color:#111">Create one in a minute.</a></p>`}`,
       { label: "Write a review", url: link(first.slug) },
     ),
   });

@@ -8,10 +8,10 @@ export function newsletterWelcomeEmail(email: string): Mail {
   return {
     to: email,
     subject: "You're on the list",
-    text: `Thanks for subscribing! You'll be the first to hear about new drops and sales.\n${env.STOREFRONT_URL}\n\nUnsubscribe: ${stop}\n`,
+    text: `Thanks for subscribing! You'll be the first to hear about new arrivals and offers.\n${env.STOREFRONT_URL}\n\nUnsubscribe: ${stop}\n`,
     html: emailLayout(
       "You're on the list",
-      "<p>Thanks for subscribing! You'll be the first to hear about new drops and sales.</p>",
+      "<p>Thanks for subscribing! You'll be the first to hear about new arrivals and offers.</p>",
       { label: "Browse new arrivals", url: `${env.STOREFRONT_URL}/shop` },
       `<a href="${esc(stop)}" style="color:#888">Unsubscribe</a>`,
     ),

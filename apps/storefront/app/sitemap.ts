@@ -1,4 +1,4 @@
-import type { CategoryDTO, CollectionDTO, ProductCardDTO } from "@hoodie/types";
+import type { CategoryDTO, CollectionDTO, ProductCardDTO } from "@store/types";
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/config";
 import { getDataSafe, getList } from "@/lib/server-api";
@@ -46,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
     ...[
-      "/size-guide",
+      "/offers",
       "/faq",
       "/about",
       "/contact",

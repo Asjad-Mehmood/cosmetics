@@ -1,7 +1,7 @@
 "use client";
 
-import type { ShippingZoneDTO } from "@hoodie/types";
-import { Badge, Button, Dialog, Field, Input } from "@hoodie/ui";
+import type { ShippingZoneDTO } from "@store/types";
+import { Badge, Button, Dialog, Field, Input } from "@store/ui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

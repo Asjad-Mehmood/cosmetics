@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   // Workspace packages ship TypeScript source, so bundle them into the output.
-  noExternal: [/^@hoodie\//],
+  noExternal: [/^@store\//],
 });

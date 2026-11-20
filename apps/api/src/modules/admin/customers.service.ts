@@ -1,5 +1,5 @@
-import type { AdminCustomerDTO, AdminCustomerListItemDTO } from "@hoodie/types";
-import type { CustomerListQuery } from "@hoodie/validation";
+import type { AdminCustomerDTO, AdminCustomerListItemDTO } from "@store/types";
+import type { CustomerListQuery } from "@store/validation";
 import { Prisma } from "@prisma/client";
 import { paginated } from "../../lib/http";
 import { prisma } from "../../lib/prisma";

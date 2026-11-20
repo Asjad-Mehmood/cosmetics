@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApiResponse, UploadConfigDTO } from "@hoodie/types";
+import type { ApiResponse, UploadConfigDTO } from "@store/types";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { api } from "@/admin/lib/api";

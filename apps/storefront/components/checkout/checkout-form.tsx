@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AddressDTO, ApiResponse, CheckoutResultDTO, QuoteDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { checkoutSchema } from "@hoodie/validation";
-import { Badge, Button, Card, cn, Container, Field, Input, Skeleton } from "@hoodie/ui";
+import type { AddressDTO, ApiResponse, CheckoutResultDTO, QuoteDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { checkoutSchema } from "@store/validation";
+import { Badge, Button, Card, cn, Container, Field, Input, Skeleton } from "@store/ui";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ import { cartKey, useCart } from "@/hooks/use-cart";
 import { api, ApiError } from "@/lib/api";
 import { applyApiError } from "@/lib/forms";
 import { FormMessage } from "../auth/auth-card";
+import { BadgeCheckIcon, CashIcon, LockIcon } from "../icons";
 import { OrderSummary } from "./order-summary";
 
 const formSchema = checkoutSchema.omit({ idempotencyKey: true });
@@ -52,9 +53,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section aria-labelledby={`step-${step}`} className="border-line border-b pb-8">
-      <h2 id={`step-${step}`} className="mb-5 flex items-center gap-3 text-lg font-semibold">
-        <span className="bg-ink grid size-7 place-items-center rounded-full text-sm text-white">
+    <section
+      aria-labelledby={`step-${step}`}
+      className="border-line bg-canvas rounded-3xl border p-5 sm:p-7"
+    >
+      <h2 id={`step-${step}`} className="mb-5 flex items-center gap-3 text-lg font-bold">
+        <span className="bg-brand-600 grid size-8 place-items-center rounded-full text-sm text-white">
           {step}
         </span>
         {title}
@@ -210,10 +214,15 @@ export function CheckoutForm() {
   const q = quote.data;
 
   return (
-    <Container className="py-10 sm:py-14">
-      <h1 className="text-3xl font-bold tracking-tight">Checkout</h1>
+    <Container className="py-8 sm:py-12">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <h1 className="text-3xl font-extrabold tracking-tight">Checkout</h1>
+        <p className="text-muted flex items-center gap-1.5 text-sm">
+          <LockIcon /> Secure checkout · Cash on Delivery
+        </p>
+      </div>
       {!me.data && (
-        <p className="text-muted mt-2 text-sm">
+        <p className="bg-blush mt-4 rounded-2xl px-4 py-3 text-sm">
           Have an account?{" "}
           <Link href="/login?next=/checkout" className="text-ink underline">
             Sign in
@@ -225,9 +234,9 @@ export function CheckoutForm() {
       <form
         onSubmit={onSubmit}
         noValidate
-        className="mt-8 grid items-start gap-10 lg:grid-cols-[1fr_400px]"
+        className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_400px] lg:gap-10"
       >
-        <div className="space-y-8">
+        <div className="space-y-6">
           {formError && <FormMessage>{formError}</FormMessage>}
 
           <Section step={1} title="Contact">
@@ -494,8 +503,8 @@ export function CheckoutForm() {
           </Section>
         </div>
 
-        <Card className="space-y-5 lg:sticky lg:top-24">
-          <h2 className="font-semibold">Order summary</h2>
+        <Card className="space-y-5 rounded-3xl lg:sticky lg:top-36">
+          <h2 className="text-lg font-bold">Order summary</h2>
           <OrderSummary
             cart={cart}
             quote={q}
@@ -505,6 +514,8 @@ export function CheckoutForm() {
           <Button
             type="submit"
             size="lg"
+            pill
+            variant="brand"
             className="w-full"
             loading={isSubmitting}
             disabled={!q || cart.warnings.length > 0}
@@ -520,6 +531,16 @@ export function CheckoutForm() {
               .
             </p>
           )}
+          <ul className="text-muted space-y-1.5 text-xs">
+            <li className="flex items-center gap-2">
+              <BadgeCheckIcon width={16} height={16} className="text-brand-700" /> 100% genuine
+              products, checked for expiry
+            </li>
+            <li className="flex items-center gap-2">
+              <CashIcon width={16} height={16} className="text-brand-700" /> Pay in cash when your
+              parcel arrives
+            </li>
+          </ul>
           <p className="text-muted text-center text-xs">
             By placing your order you agree to our{" "}
             <Link href="/policies/terms" className="underline">

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, StoreSettingsDTO, StoreSettingsResponseDTO } from "@hoodie/types";
-import { Badge, Button, Field, Input, Skeleton } from "@hoodie/ui";
+import type { ApiResponse, StoreSettingsDTO, StoreSettingsResponseDTO } from "@store/types";
+import { Badge, Button, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useEffect, useState } from "react";

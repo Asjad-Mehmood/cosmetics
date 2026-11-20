@@ -5,8 +5,8 @@ import type {
   AdminCustomerListItemDTO,
   ApiResponse,
   PaginatedResponse,
-} from "@hoodie/types";
-import { Badge, Button, Skeleton } from "@hoodie/ui";
+} from "@store/types";
+import { Badge, Button, Skeleton } from "@store/ui";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useRouter } from "@/admin/lib/navigation";

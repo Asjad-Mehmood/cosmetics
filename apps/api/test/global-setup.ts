@@ -45,7 +45,7 @@ export default function setup() {
     // a test database created before the prefix changed.
     input: `INSERT INTO "Setting" (key, value, "updatedAt") VALUES
         ('payments.card.enabled', 'true'::jsonb, now()),
-        ('orders.numberPrefix', '"US-"'::jsonb, now())
+        ('orders.numberPrefix', '"AG-"'::jsonb, now())
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, "updatedAt" = now();`,
   });
 }

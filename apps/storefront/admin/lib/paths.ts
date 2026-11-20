@@ -2,8 +2,8 @@
 export const ADMIN_BASE = "/admin";
 
 /**
- * Admin code uses paths relative to the panel ("/orders/US-10001"); this turns
- * them into site paths ("/admin/orders/US-10001"). Anything else (full URLs,
+ * Admin code uses paths relative to the panel ("/orders/AG-10001"); this turns
+ * them into site paths ("/admin/orders/AG-10001"). Anything else (full URLs,
  * shop paths built with `shopUrl`) is left alone.
  */
 export function adminHref(path: string): string {

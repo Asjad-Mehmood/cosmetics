@@ -1,4 +1,4 @@
-import type { Role } from "@hoodie/types";
+import type { Role } from "@store/types";
 import { Router, type Request, type RequestHandler, type Response } from "express";
 import type { z } from "zod";
 import { authenticate, authorize, optionalAuth } from "../middleware/auth";

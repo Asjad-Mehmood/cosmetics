@@ -3,7 +3,7 @@ import type {
   CreateCollectionInput,
   UpdateCategoryInput,
   UpdateCollectionInput,
-} from "@hoodie/validation";
+} from "@store/validation";
 import { prisma } from "../../lib/prisma";
 import { uniqueSlug } from "../../lib/slug";
 import { AppError } from "../../utils/app-error";

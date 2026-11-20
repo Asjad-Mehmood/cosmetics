@@ -7,7 +7,7 @@ import {
   type ProductDetailDTO,
   type StockStatus,
   type VariantDTO,
-} from "@hoodie/types";
+} from "@store/types";
 import type { Prisma } from "@prisma/client";
 
 /** Units that can still be sold (stock minus units held by unpaid checkouts). */
@@ -91,13 +91,13 @@ function common(p: CardProduct | DetailProduct) {
     id: p.id,
     slug: p.slug,
     title: p.title,
-    fit: p.fit,
     ...pricing(p),
     colors: colorsOf(p.variants),
     sizesInStock: [...new Set(inStockVariants.map((v) => v.size))].sort(compareSizes),
     inStock: inStockVariants.length > 0,
     isFeatured: p.isFeatured,
     avgRating: p.avgRating,
+    soldCount: p.soldCount,
     reviewCount: p.reviewCount,
   };
 }
@@ -135,8 +135,9 @@ export function toProductDetail(p: DetailProduct): ProductDetailDTO {
   return {
     ...common(p),
     description: p.description,
-    fabric: p.fabric,
-    careInfo: p.careInfo,
+    ingredients: p.ingredients,
+    howToUse: p.howToUse,
+    warnings: p.warnings,
     seoTitle: p.seoTitle,
     seoDescription: p.seoDescription,
     images: p.images.map(toImage),

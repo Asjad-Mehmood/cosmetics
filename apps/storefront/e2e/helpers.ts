@@ -17,8 +17,10 @@ interface Variant {
 export async function findVariant(
   request: APIRequestContext,
   status: Variant["stockStatus"] | "available",
+  /** Only products priced at least this much (minor units), e.g. to meet a coupon minimum. */
+  minPrice = 0,
 ) {
-  const list = await (await request.get(`${API}/products?limit=50`)).json();
+  const list = await (await request.get(`${API}/products?limit=50&minPrice=${minPrice}`)).json();
   // Skip throwaway products that other tests create and archive in parallel.
   for (const card of (list.data as { slug: string; title: string }[]).filter(
     (c) => !c.title.startsWith("E2E "),
@@ -32,16 +34,18 @@ export async function findVariant(
   throw new Error(`no variant with status ${status}`);
 }
 
-/** Opens a product page and picks a colour + size. */
+/** Opens a product page and picks a shade (when there is a choice) + size. */
 export async function selectVariant(page: Page, slug: string, v: { color: string; size: string }) {
   await page.goto(`/products/${slug}`);
-  await page.getByRole("button", { name: new RegExp(`^${v.color}`) }).click();
-  await page.getByRole("button", { name: new RegExp(`^Size ${v.size}(,|$)`) }).click();
+  const shade = page.getByRole("button", { name: new RegExp(`^${v.color}`) });
+  if (await shade.count()) await shade.click();
+  const size = v.size.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  await page.getByRole("button", { name: new RegExp(`^Size ${size}( |$)`) }).click();
 }
 
 export async function addToCart(page: Page, slug: string, v: { color: string; size: string }) {
   await selectVariant(page, slug, v);
-  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
   const drawer = page.getByRole("dialog", { name: /Your cart/ });
   await expect(drawer).toBeVisible();
   return drawer;

@@ -1,5 +1,5 @@
-import type { OrderDTO, PaymentSessionDTO } from "@hoodie/types";
-import type { ReturnRequestInput } from "@hoodie/validation";
+import type { OrderDTO, PaymentSessionDTO } from "@store/types";
+import type { ReturnRequestInput } from "@store/validation";
 import { paginated, skipTake } from "../../lib/http";
 import { requestReturn, returnWindowDays } from "../returns/returns.service";
 import { prisma } from "../../lib/prisma";

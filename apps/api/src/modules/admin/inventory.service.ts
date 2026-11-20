@@ -1,5 +1,5 @@
-import type { InventoryRowDTO, StockAdjustmentDTO } from "@hoodie/types";
-import type { InventoryQuery } from "@hoodie/validation";
+import type { InventoryRowDTO, StockAdjustmentDTO } from "@store/types";
+import type { InventoryQuery } from "@store/validation";
 import { Prisma } from "@prisma/client";
 import { paginated } from "../../lib/http";
 import { prisma } from "../../lib/prisma";

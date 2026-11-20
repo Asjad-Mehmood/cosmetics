@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminNotificationsDTO, AuthUser } from "@hoodie/types";
-import { Button } from "@hoodie/ui";
+import type { AdminNotificationsDTO, AuthUser } from "@store/types";
+import { Button } from "@store/ui";
 import Link from "@/admin/lib/link";
 import { useRouter } from "@/admin/lib/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";

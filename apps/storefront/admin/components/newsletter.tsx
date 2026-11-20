@@ -1,7 +1,7 @@
 "use client";
 
-import type { NewsletterSubscriberDTO, PaginatedResponse } from "@hoodie/types";
-import { Button } from "@hoodie/ui";
+import type { NewsletterSubscriberDTO, PaginatedResponse } from "@store/types";
+import { Button } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";

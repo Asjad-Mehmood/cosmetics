@@ -1,4 +1,4 @@
-import { demoPaymentSchema } from "@hoodie/validation";
+import { demoPaymentSchema } from "@store/validation";
 import { ok } from "../../lib/http";
 import { prisma } from "../../lib/prisma";
 import { defineRoutes, route } from "../../lib/route";

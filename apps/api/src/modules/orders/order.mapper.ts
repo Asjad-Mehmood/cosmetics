@@ -1,4 +1,4 @@
-import type { OrderAddressDTO, OrderDTO, OrderListItemDTO, OrderTrackingDTO } from "@hoodie/types";
+import type { OrderAddressDTO, OrderDTO, OrderListItemDTO, OrderTrackingDTO } from "@store/types";
 import type { Prisma } from "@prisma/client";
 import { SHIPPING_LABEL } from "../checkout/pricing";
 import { returnWindow, toReturnDTO } from "../returns/returns.shared";

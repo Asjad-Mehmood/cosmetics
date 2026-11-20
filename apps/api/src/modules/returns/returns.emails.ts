@@ -1,4 +1,4 @@
-import { RETURN_REASON_LABEL, type ReturnDTO } from "@hoodie/types";
+import { RETURN_REASON_LABEL, type ReturnDTO } from "@store/types";
 import { emailLayout, esc } from "../../lib/email-layout";
 import type { Mail } from "../../lib/mailer";
 import type { StoreInfo } from "../../lib/settings";

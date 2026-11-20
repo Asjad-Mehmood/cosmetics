@@ -1,4 +1,4 @@
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import Link from "next/link";
 import type { SearchParams } from "@/lib/listing";
 
@@ -27,7 +27,7 @@ export function Pagination({
     .filter((p) => p >= 1 && p <= totalPages)
     .sort((a, b) => a - b);
 
-  const item = "grid h-10 min-w-10 place-items-center rounded-lg px-3 text-sm font-medium";
+  const item = "grid h-10 min-w-10 place-items-center rounded-full px-3 text-sm font-medium";
   return (
     <nav aria-label="Pagination" className="mt-12 flex items-center justify-center gap-1">
       {page > 1 && (
@@ -45,7 +45,7 @@ export function Pagination({
           <Link
             href={href(pathname, searchParams, p)}
             aria-current={p === page ? "page" : undefined}
-            className={cn(item, p === page ? "bg-ink text-white" : "hover:bg-surface")}
+            className={cn(item, p === page ? "bg-brand-600 text-white" : "hover:bg-surface")}
           >
             {p}
           </Link>

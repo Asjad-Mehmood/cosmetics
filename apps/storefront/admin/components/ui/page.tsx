@@ -1,4 +1,4 @@
-import { Card, cn } from "@hoodie/ui";
+import { Card, cn } from "@store/ui";
 import Link from "@/admin/lib/link";
 import type { ReactNode } from "react";
 

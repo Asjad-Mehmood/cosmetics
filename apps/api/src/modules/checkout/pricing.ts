@@ -2,8 +2,8 @@
  * Pure pricing rules (no database access), so they are easy to test.
  * All amounts are integers in minor units (paisa).
  */
-import type { ShippingMethodId, ShippingOptionDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
+import type { ShippingMethodId, ShippingOptionDTO } from "@store/types";
+import { formatMoney } from "@store/types";
 import type { Coupon, ShippingZone } from "@prisma/client";
 
 // ───────────── Coupons ─────────────

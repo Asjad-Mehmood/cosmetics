@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@hoodie/validation";
-import { Button, Field, Input } from "@hoodie/ui";
+import { loginSchema } from "@store/validation";
+import { Button, Field, Input } from "@store/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";

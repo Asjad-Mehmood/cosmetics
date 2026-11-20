@@ -66,7 +66,7 @@ describe("admin categories", () => {
       (
         await admin
           .post("/api/v1/admin/categories")
-          .send({ name: "Pullover again", slug: "pullover" })
+          .send({ name: "Skincare again", slug: "skincare" })
       ).status,
     ).toBe(409);
   });
@@ -126,7 +126,7 @@ describe("upload signing", () => {
       const d = res.body.data;
       expect(d).toMatchObject({
         apiKey: "key123",
-        folder: "hoodie/products",
+        folder: "amazon-group/products",
         uploadUrl: "https://api.cloudinary.com/v1_1/demo/image/upload",
       });
       expect(d.signature).toBe(

@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { API, findVariant, uniqueEmail } from "../helpers";
 
 export const ADMIN = {
-  email: process.env.E2E_ADMIN_EMAIL ?? "admin@hoodie.local",
+  email: process.env.E2E_ADMIN_EMAIL ?? "admin@amazongroup.local",
   password: process.env.E2E_ADMIN_PASSWORD ?? process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123",
 };
 
@@ -81,7 +81,7 @@ export async function customerWithDeliveredOrder(playwright: {
   expect(reg.status()).toBe(201);
 
   // A seeded product: other tests create and archive their own products in parallel.
-  const slug = "urban-essential-pullover-hoodie";
+  const slug = "argan-oil-repair-shampoo";
   const detail = (await (await customer.get(`${API}/products/${slug}`)).json()).data;
   const title = detail.title as string;
   const variant = (detail.variants as { id: string; stockStatus: string }[]).find(

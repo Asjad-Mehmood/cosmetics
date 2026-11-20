@@ -1,4 +1,4 @@
-import { formatMoney } from "@hoodie/types";
+import { formatMoney } from "@store/types";
 
 export { formatMoney };
 

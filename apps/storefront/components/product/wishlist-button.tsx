@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMe } from "@/hooks/use-auth";
@@ -31,7 +31,7 @@ export function WishlistButton({
 
   const onClick = () => {
     if (!me.data) {
-      toast("Sign in to save hoodies to your wishlist");
+      toast("Sign in to save products to your wishlist");
       router.push(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }

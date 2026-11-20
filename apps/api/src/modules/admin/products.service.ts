@@ -1,5 +1,5 @@
-import type { AdminProductListItemDTO, AdminVariantDTO } from "@hoodie/types";
-import { ErrorCode } from "@hoodie/types";
+import type { AdminProductListItemDTO, AdminVariantDTO } from "@store/types";
+import { ErrorCode } from "@store/types";
 import type {
   AdminProductListQuery,
   BulkProductActionInput,
@@ -9,7 +9,7 @@ import type {
   UpdateVariantInput,
   VariantInput,
   generateVariantsSchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Prisma, ProductStatus } from "@prisma/client";
 import type { z } from "zod";
 import { paginated, skipTake } from "../../lib/http";
@@ -258,6 +258,8 @@ export async function bulkAction({ ids, action }: BulkProductActionInput) {
 
 // ───────────── Variants ─────────────
 
+/** "30 ml" → "30ML", "3.5 g" → "3.5G" (SKUs have no spaces). */
+const sizeCode = (size: string) => size.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase();
 const colorCode = (name: string) =>
   name
     .replace(/[^a-zA-Z0-9]/g, "")
@@ -287,7 +289,7 @@ export async function generateVariants(
         size,
         color: color.name,
         colorHex: color.hex,
-        sku: `${input.skuPrefix}-${colorCode(color.name)}-${size}`,
+        sku: `${input.skuPrefix}-${colorCode(color.name)}-${sizeCode(size)}`,
         stock: input.initialStock,
       })),
   );

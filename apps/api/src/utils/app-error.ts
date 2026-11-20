@@ -1,4 +1,4 @@
-import { ErrorCode } from "@hoodie/types";
+import { ErrorCode } from "@store/types";
 
 const STATUS_BY_CODE: Record<ErrorCode, number> = {
   BAD_REQUEST: 400,

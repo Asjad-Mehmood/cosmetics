@@ -1,4 +1,4 @@
-import { Container, Skeleton } from "@hoodie/ui";
+import { Container, Skeleton } from "@store/ui";
 
 export function ListingSkeleton() {
   return (

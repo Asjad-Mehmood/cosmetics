@@ -1,1 +1,1 @@
-export { default } from "@hoodie/config/eslint/base";
+export { default } from "@store/config/eslint/base";

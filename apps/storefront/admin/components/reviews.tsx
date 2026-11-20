@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminReviewDTO, ApiResponse, PaginatedResponse } from "@hoodie/types";
-import { Badge, Button, cn } from "@hoodie/ui";
+import type { AdminReviewDTO, ApiResponse, PaginatedResponse } from "@store/types";
+import { Badge, Button, cn } from "@store/ui";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -1,4 +1,4 @@
-import type { Role } from "@hoodie/types";
+import type { Role } from "@store/types";
 import type { Prisma } from "@prisma/client";
 import { hash } from "argon2";
 import { randomUUID } from "node:crypto";
@@ -8,7 +8,7 @@ import { prisma } from "../src/lib/prisma";
 
 export const app = createApp();
 
-export const PASSWORD = "Hoodie123";
+export const PASSWORD = "Glow12345";
 let passwordHash: Promise<string> | undefined;
 
 export const uniqueEmail = (prefix = "user") => `${prefix}-${randomUUID().slice(0, 8)}@test.local`;
@@ -56,17 +56,17 @@ export async function createTestProduct(
   const id = randomUUID().slice(0, 8);
   return prisma.product.create({
     data: {
-      title: `Test Hoodie ${id}`,
-      slug: `test-hoodie-${id}`,
-      description: "A hoodie created by the test suite.",
+      title: `Test Product ${id}`,
+      slug: `test-product-${id}`,
+      description: "A product created by the test suite.",
       basePrice: opts.price ?? 300000,
       status: opts.status ?? "ACTIVE",
       variants: {
-        create: ["S", "M", "L"].map((size) => ({
-          sku: `T${id}-${size}`.toUpperCase(),
+        create: ["15 ml", "30 ml", "50 ml"].map((size) => ({
+          sku: `T${id}-${size.replace(" ", "")}`.toUpperCase(),
           size,
-          color: "Black",
-          colorHex: "#111111",
+          color: "Standard",
+          colorHex: "#E5E7EB",
           stock: opts.stock ?? 5,
         })),
       },

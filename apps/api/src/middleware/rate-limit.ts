@@ -1,4 +1,4 @@
-import { ErrorCode } from "@hoodie/types";
+import { ErrorCode } from "@store/types";
 import type { RequestHandler } from "express";
 import { rateLimit, type Options } from "express-rate-limit";
 import { RedisStore, type RedisReply } from "rate-limit-redis";

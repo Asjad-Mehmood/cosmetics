@@ -1,4 +1,4 @@
-import type { CollectionDTO } from "@hoodie/types";
+import type { CollectionDTO } from "@store/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";
@@ -29,6 +29,8 @@ export default async function CollectionPage({ params, searchParams }: Props) {
     <ProductListing
       title={collection.name}
       description={collection.description}
+      image={collection.bannerUrl}
+      eyebrow="Collection"
       pathname={`/collections/${slug}`}
       searchParams={await searchParams}
       scope={{ collection: slug }}

@@ -1,7 +1,7 @@
 "use client";
 
-import type { CouponDTO, DiscountType } from "@hoodie/types";
-import { Button, Dialog, Field, Input } from "@hoodie/ui";
+import type { CouponDTO, DiscountType } from "@store/types";
+import { Badge, Button, Dialog, Field, Input } from "@store/ui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ interface Values {
   startsAt: string;
   endsAt: string;
   isActive: boolean;
+  isPublic: boolean;
 }
 
 const toValues = (c: CouponDTO | null): Values => ({
@@ -45,6 +46,7 @@ const toValues = (c: CouponDTO | null): Values => ({
   startsAt: toLocalInput(c?.startsAt),
   endsAt: toLocalInput(c?.endsAt),
   isActive: c?.isActive ?? true,
+  isPublic: c?.isPublic ?? false,
 });
 
 const intOrNull = (v: string) => (v.trim() ? Number.parseInt(v, 10) : null);
@@ -88,6 +90,7 @@ function CouponDialog({
       startsAt: fromLocalInput(v.startsAt),
       endsAt: fromLocalInput(v.endsAt),
       isActive: v.isActive,
+      isPublic: v.isPublic,
     };
     save.mutate(
       { id: coupon?.id, body },
@@ -203,6 +206,11 @@ function CouponDialog({
           hint="Turn off to pause the code without deleting it."
           {...register("isActive")}
         />
+        <Switch
+          label="Show in the shop"
+          hint="Advertise this code as a voucher on the home page, product pages and the cart, so anyone can use it."
+          {...register("isPublic")}
+        />
       </form>
     </Dialog>
   );
@@ -282,7 +290,10 @@ export function Coupons() {
                     )}
                   </Td>
                   <Td>
-                    <CouponStateBadge state={c.state} />
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <CouponStateBadge state={c.state} />
+                      {c.isPublic && <Badge tone="brand">In shop</Badge>}
+                    </span>
                   </Td>
                   <Td className="whitespace-nowrap text-right">
                     <Button

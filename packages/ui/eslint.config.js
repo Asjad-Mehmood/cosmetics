@@ -1,1 +1,1 @@
-export { default } from "@hoodie/config/eslint/react";
+export { default } from "@store/config/eslint/react";

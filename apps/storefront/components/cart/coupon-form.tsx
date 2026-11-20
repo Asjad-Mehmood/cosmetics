@@ -1,8 +1,8 @@
 "use client";
 
-import type { AppliedCouponDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Button, Input } from "@hoodie/ui";
+import type { AppliedCouponDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Button, Input } from "@store/ui";
 import { useState } from "react";
 import { useApplyCoupon, useRemoveCoupon } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";

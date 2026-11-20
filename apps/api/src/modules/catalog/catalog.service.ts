@@ -1,6 +1,6 @@
-import type { CategoryDTO, CollectionDTO, FiltersDTO, ProductSort } from "@hoodie/types";
-import { compareSizes, FITS } from "@hoodie/types";
-import type { ProductListQuery } from "@hoodie/validation";
+import type { CategoryDTO, CollectionDTO, FiltersDTO, ProductSort } from "@store/types";
+import { compareSizes } from "@store/types";
+import type { ProductListQuery } from "@store/validation";
 import type { Prisma } from "@prisma/client";
 import { paginated, skipTake } from "../../lib/http";
 import { prisma } from "../../lib/prisma";
@@ -26,13 +26,14 @@ function listWhere(q: ProductListQuery, searchIds?: string[]): Prisma.ProductWhe
   if (q.slugs?.length) and.push({ slug: { in: q.slugs } });
   if (q.category) and.push(inCategory(q.category));
   if (q.collection) and.push(inCollection(q.collection));
-  if (q.fit?.length) and.push({ fit: { in: q.fit } });
+  // A compare-at price is always above the price (validated), so "has one" = on sale.
+  if (q.onSale) and.push({ compareAtPrice: { not: null } });
   // Price filters use the product's base price (variant overrides are rare).
   if (q.minPrice !== undefined || q.maxPrice !== undefined) {
     and.push({ basePrice: { gte: q.minPrice, lte: q.maxPrice } });
   }
 
-  // Size / colour / stock must all hold for the SAME variant: "M in Black, in stock".
+  // Size / colour / stock must all hold for the SAME variant: "30 ml in Standard, in stock".
   if (q.size?.length || q.color?.length || q.inStock) {
     and.push({
       variants: {
@@ -64,6 +65,29 @@ async function cardsInOrder(ids: string[]) {
   const rows = await prisma.product.findMany({ where: { id: { in: ids } }, include: cardInclude });
   const byId = new Map(rows.map((p) => [p.id, p]));
   return ids.flatMap((id) => (byId.has(id) ? [toProductCard(byId.get(id)!)] : []));
+}
+
+/**
+ * Products this customer has ordered before (newest order first), still on
+ * sale: the "Buy it again" row.
+ */
+export async function purchasedProducts(userId: string, limit = 12) {
+  const items = await prisma.orderItem.findMany({
+    where: { order: { userId, status: { notIn: ["CANCELLED", "PENDING_PAYMENT"] } } },
+    select: { productId: true },
+    orderBy: { order: { placedAt: "desc" } },
+    take: 200,
+  });
+  const ids = [...new Set(items.map((i) => i.productId))];
+  const live = new Set(
+    (
+      await prisma.product.findMany({
+        where: { id: { in: ids }, status: ACTIVE },
+        select: { id: true },
+      })
+    ).map((p) => p.id),
+  );
+  return cardsInOrder(ids.filter((id) => live.has(id)).slice(0, limit));
 }
 
 export async function listProducts(q: ProductListQuery) {
@@ -239,13 +263,12 @@ export async function getFilters(scope: {
     ...(scope.collection ? inCollection(scope.collection) : {}),
   };
 
-  const [variants, fits, price] = await Promise.all([
+  const [variants, price] = await Promise.all([
     prisma.productVariant.findMany({
       where: { isActive: true, product: productWhere },
       select: { size: true, color: true, colorHex: true },
       distinct: ["size", "color"],
     }),
-    prisma.product.findMany({ where: productWhere, select: { fit: true }, distinct: ["fit"] }),
     prisma.product.aggregate({
       where: productWhere,
       _min: { basePrice: true },
@@ -261,7 +284,6 @@ export async function getFilters(scope: {
     colors: [...colors]
       .map(([name, hex]) => ({ name, hex }))
       .sort((a, b) => a.name.localeCompare(b.name)),
-    fits: FITS.filter((f) => fits.some((p) => p.fit === f)),
     price: { min: price._min.basePrice ?? 0, max: price._max.basePrice ?? 0 },
   };
 }

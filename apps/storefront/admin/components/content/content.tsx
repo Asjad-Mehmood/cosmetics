@@ -6,8 +6,8 @@ import type {
   AdminPageDTO,
   AnnouncementDTO,
   ApiResponse,
-} from "@hoodie/types";
-import { Badge, Button, Dialog, Field, Input, Skeleton } from "@hoodie/ui";
+} from "@store/types";
+import { Badge, Button, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -293,7 +293,7 @@ function Banners() {
               label="Link (optional)"
               htmlFor="b-link"
               error={errors.link?.message}
-              hint="e.g. /collections/winter-drop"
+              hint="e.g. /collections/summer-skincare"
             >
               <Input id="b-link" {...register("link")} />
             </Field>

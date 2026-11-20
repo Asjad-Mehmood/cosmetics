@@ -1,11 +1,11 @@
-# Deploying Urban Store on Vercel
+# Deploying Amazon Group on Vercel
 
-Urban Store is **one Vercel project** with a free Neon Postgres database. The
+Amazon Group is **one Vercel project** with a free Neon Postgres database. The
 same site serves:
 
 | Address                      | What it is                          |
 | ---------------------------- | ----------------------------------- |
-| `urbanstore-one.vercel.app/` | The shop customers use              |
+| `amazon-group.vercel.app/  ` | The shop customers use              |
 | `.../admin`                  | The admin panel for staff           |
 | `.../api/v1`                 | The backend (orders, stock, emails) |
 
@@ -15,7 +15,7 @@ taking real orders.
 
 ## 1. Project settings
 
-In your Vercel project (`urbanstore`): **Settings → Build and Deployment**.
+In your Vercel project (for example `amazon-group`): **Settings → Build and Deployment**.
 
 - **Root Directory: `apps/storefront`**.
 - Framework Preset: **Next.js**.
@@ -26,7 +26,7 @@ In your Vercel project (`urbanstore`): **Settings → Build and Deployment**.
 
 **Storage → Create Database → Neon (Postgres)**. Choose the **Singapore** region
 (closest to Pakistan, and where the functions run) and the free plan, then
-**Connect** it to the `urbanstore` project. This adds `DATABASE_URL` and
+**Connect** it to the project. This adds `DATABASE_URL` and
 `DATABASE_URL_UNPOOLED` automatically.
 
 ## 3. Environment variables
@@ -55,7 +55,7 @@ function instances. Without it each instance keeps its own.
 
 1. creates or updates the database tables;
 2. creates your admin account and the store settings, shipping zones and pages;
-3. the first time only, adds the Urban Store catalogue. Later deploys never
+3. the first time only, adds the starter catalogue. Later deploys never
    overwrite what you change in the admin;
 4. builds the site.
 
@@ -69,7 +69,7 @@ Check `https://<your-site>/api/v1/health` shows `"status":"ok"`.
 
 1. Open `https://<your-site>/admin` and sign in with `SEED_ADMIN_EMAIL` /
    `SEED_ADMIN_PASSWORD`.
-2. **Inventory:** every size starts with 20 in stock. Set your real stock.
+2. **Inventory:** every pack size starts with 20 in stock. Set your real stock.
 3. **Store settings:** check the store name, phone, address and return window.
 4. **Store settings → Email:** until this is set up the shop sends no email at
    all. Orders still work, and customers see their order on screen. When you're
@@ -107,6 +107,6 @@ Check `https://<your-site>/api/v1/health` shows `"status":"ok"`.
 
 ## Custom domain
 
-Add the domain under **Settings → Domains** (e.g. `urbanstore.pk`), set
-`STOREFRONT_URL` = `https://urbanstore.pk`, and redeploy. The admin is then at
-`urbanstore.pk/admin`.
+Add the domain under **Settings → Domains** (e.g. `amazongroup.pk`), set
+`STOREFRONT_URL` = `https://amazongroup.pk`, and redeploy. The admin is then at
+`amazongroup.pk/admin`.

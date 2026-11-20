@@ -1,4 +1,4 @@
-import type { CategoryDTO } from "@hoodie/types";
+import type { CategoryDTO } from "@store/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";
@@ -29,6 +29,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     <ProductListing
       title={category.name}
       description={category.description}
+      image={category.imageUrl}
+      eyebrow="Category"
       pathname={`/categories/${slug}`}
       searchParams={await searchParams}
       scope={{ category: slug }}

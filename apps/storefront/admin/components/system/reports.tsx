@@ -6,8 +6,8 @@ import type {
   InventoryValuationRowDTO,
   ProductReportRowDTO,
   SalesReportDTO,
-} from "@hoodie/types";
-import { Button, Input } from "@hoodie/ui";
+} from "@store/types";
+import { Button, Input } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";

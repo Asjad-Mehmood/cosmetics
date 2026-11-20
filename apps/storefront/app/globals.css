@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@hoodie/ui/theme.css";
+@import "@store/ui/theme.css";
 
 /* Let Tailwind see the class names used inside the shared UI package. */
 @source "../../../packages/ui/src";
@@ -10,5 +10,35 @@
   }
   body {
     @apply bg-canvas text-ink font-sans;
+  }
+}
+
+@layer base {
+  html {
+    /* Anchors (#reviews) land below the sticky header. */
+    scroll-padding-top: 8rem;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+/* Horizontal rails: scrollable, without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

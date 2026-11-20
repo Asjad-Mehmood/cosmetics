@@ -19,16 +19,16 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: hoodie
-          POSTGRES_PASSWORD: hoodie
-          POSTGRES_DB: hoodie_store
+          POSTGRES_USER: store
+          POSTGRES_PASSWORD: store
+          POSTGRES_DB: amazon_group
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U hoodie -d hoodie_store"
+          --health-cmd "pg_isready -U store -d amazon_group"
           --health-interval 5s --health-timeout 5s --health-retries 10
 
     env:
-      DATABASE_URL: postgresql://hoodie:hoodie@localhost:5432/hoodie_store?schema=public
+      DATABASE_URL: postgresql://store:store@localhost:5432/amazon_group?schema=public
       SEED_ADMIN_PASSWORD: CiAdmin123
       TURBO_TELEMETRY_DISABLED: 1
       NEXT_TELEMETRY_DISABLED: 1
@@ -76,16 +76,16 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: hoodie
-          POSTGRES_PASSWORD: hoodie
-          POSTGRES_DB: hoodie_store
+          POSTGRES_USER: store
+          POSTGRES_PASSWORD: store
+          POSTGRES_DB: amazon_group
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U hoodie -d hoodie_store"
+          --health-cmd "pg_isready -U store -d amazon_group"
           --health-interval 5s --health-timeout 5s --health-retries 10
 
     env:
-      DATABASE_URL: postgresql://hoodie:hoodie@localhost:5432/hoodie_store?schema=public
+      DATABASE_URL: postgresql://store:store@localhost:5432/amazon_group?schema=public
       SEED_ADMIN_PASSWORD: CiAdmin123
       JWT_ACCESS_SECRET: ci-only-secret-at-least-32-characters-long
       TURBO_TELEMETRY_DISABLED: 1
@@ -105,13 +105,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browser
-        run: pnpm --filter @hoodie/storefront exec playwright install --with-deps chromium
+        run: pnpm --filter @store/storefront exec playwright install --with-deps chromium
 
       - name: Migrate and seed
         run: |
           # Generate the Prisma client first: the seed imports it, and nothing
           # else in this job has generated it yet (lint/typecheck do in "check").
-          pnpm --filter @hoodie/api db:generate
+          pnpm --filter @store/api db:generate
           pnpm db:deploy
           pnpm db:seed
 

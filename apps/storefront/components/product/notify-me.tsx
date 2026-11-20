@@ -1,7 +1,7 @@
 "use client";
 
-import { stockAlertSchema } from "@hoodie/validation";
-import { Button, Input } from "@hoodie/ui";
+import { stockAlertSchema } from "@store/validation";
+import { Button, Input } from "@store/ui";
 import { useState } from "react";
 import { useMe } from "@/hooks/use-auth";
 import { api } from "@/lib/api";

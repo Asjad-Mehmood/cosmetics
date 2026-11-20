@@ -34,7 +34,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm --filter @hoodie/storefront start",
+    command: "pnpm --filter @store/storefront start",
     url: `${BASE_URL}/api/v1/health`,
     reuseExistingServer: !process.env.CI,
     // A production build: it needs a non-default secret and demo card payments

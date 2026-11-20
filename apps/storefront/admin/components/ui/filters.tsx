@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@hoodie/ui";
+import { Input } from "@store/ui";
 import { useEffect, useRef, useState } from "react";
 import { useDebounced } from "@/admin/hooks/use-url-state";
 

@@ -1,4 +1,4 @@
-import { ErrorCode, hasRole, type Role } from "@hoodie/types";
+import { ErrorCode, hasRole, type Role } from "@store/types";
 import type { Request, RequestHandler } from "express";
 import { COOKIE } from "../lib/cookies";
 import { verifyAccessToken } from "../lib/jwt";

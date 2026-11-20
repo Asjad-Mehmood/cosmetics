@@ -1,4 +1,4 @@
-import { FITS, PRODUCT_SORTS, PRODUCT_STATUSES, SIZES } from "@hoodie/types";
+import { PRODUCT_SORTS, PRODUCT_STATUSES } from "@store/types";
 import { z } from "zod";
 import { hexColorSchema, moneySchema, paginationSchema, slugSchema } from "./common";
 
@@ -13,9 +13,12 @@ const csv = <T extends z.ZodType>(item: T) =>
  * images and categories.
  */
 
+/** A pack size as printed on the product: "30 ml", "50 g", "60 tablets", "One size". */
+const sizeSchema = z.string().trim().min(1).max(40);
+
 const variantFields = {
   sku: z.string().trim().min(1).max(64),
-  size: z.enum(SIZES),
+  size: sizeSchema,
   color: z.string().trim().min(1).max(40),
   colorHex: hexColorSchema.optional(),
   price: moneySchema.optional(),
@@ -44,9 +47,9 @@ const productFields = {
   title: z.string().trim().min(3).max(120),
   slug: slugSchema.optional(),
   description: z.string().trim().min(10),
-  fit: z.enum(FITS),
-  fabric: z.string().max(200).optional(),
-  careInfo: z.string().max(500).optional(),
+  ingredients: z.string().max(5000).optional(),
+  howToUse: z.string().max(2000).optional(),
+  warnings: z.string().max(2000).optional(),
   basePrice: moneySchema.positive(),
   compareAtPrice: moneySchema.nullable().optional(),
   status: z.enum(PRODUCT_STATUSES),
@@ -69,7 +72,6 @@ const uniqueVariantsRule = (d: { variants?: { size: string; color: string }[] })
 export const createProductSchema = z
   .object({
     ...productFields,
-    fit: productFields.fit.default("REGULAR"),
     status: productFields.status.default("DRAFT"),
     isFeatured: productFields.isFeatured.default(false),
     categoryIds: productFields.categoryIds.default([]),
@@ -103,7 +105,7 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 
 /** Admin helper: generate the size × colour variant matrix. */
 export const generateVariantsSchema = z.object({
-  sizes: z.array(z.enum(SIZES)).min(1),
+  sizes: z.array(sizeSchema).min(1),
   colors: z
     .array(z.object({ name: z.string().trim().min(1).max(40), hex: hexColorSchema.optional() }))
     .min(1),
@@ -120,12 +122,16 @@ export const productListQuerySchema = paginationSchema.extend({
   q: z.string().trim().max(100).optional(),
   category: z.string().optional(),
   collection: z.string().optional(),
-  size: csv(z.enum(SIZES)).optional(),
+  size: csv(sizeSchema).optional(),
   color: csv(z.string()).optional(),
-  fit: csv(z.enum(FITS)).optional(),
   minPrice: z.coerce.number().int().nonnegative().optional(),
   maxPrice: z.coerce.number().int().nonnegative().optional(),
   inStock: z
+    .enum(["true", "false"])
+    .transform((v) => v === "true")
+    .optional(),
+  /** Only products with a compare-at ("was") price. */
+  onSale: z
     .enum(["true", "false"])
     .transform((v) => v === "true")
     .optional(),

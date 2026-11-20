@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminRole, ApiResponse, StaffMemberDTO } from "@hoodie/types";
-import { Badge, Button, Dialog, Field, Input } from "@hoodie/ui";
+import type { AdminRole, ApiResponse, StaffMemberDTO } from "@store/types";
+import { Badge, Button, Dialog, Field, Input } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

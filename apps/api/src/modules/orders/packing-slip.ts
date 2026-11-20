@@ -1,4 +1,4 @@
-import type { OrderAddressDTO } from "@hoodie/types";
+import type { OrderAddressDTO } from "@store/types";
 import PDFDocument from "pdfkit";
 import type { StoreInfo } from "../../lib/settings";
 import { shippingLabel, type FullOrder } from "./order.mapper";
@@ -127,7 +127,7 @@ export function renderPackingSlip(order: FullOrder, store: StoreInfo): Promise<B
       .fontSize(9)
       .fillColor("#666")
       .text(
-        `Questions? ${[store.email, store.phone].filter(Boolean).join(" · ")}. Exchanges are free within 14 days of delivery.`,
+        `Questions? ${[store.email, store.phone].filter(Boolean).join(" · ")}. Unopened items can be returned within 7 days of delivery.`,
         50,
         760,
         { width: 495, align: "center" },

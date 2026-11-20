@@ -1,4 +1,4 @@
-import { registerSchema } from "@hoodie/validation";
+import { registerSchema } from "@store/validation";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app";
@@ -25,7 +25,7 @@ const app = createApp({
           summary: "test",
           access: "public",
           handler: () => {
-            throw AppError.notFound("Hoodie");
+            throw AppError.notFound("Product");
           },
         }),
         route({
@@ -56,7 +56,7 @@ describe("error handling", () => {
     const res = await request(app).get("/api/v1/__test/missing");
 
     expect(res.status).toBe(404);
-    expect(res.body.error).toMatchObject({ code: "NOT_FOUND", message: "Hoodie not found" });
+    expect(res.body.error).toMatchObject({ code: "NOT_FOUND", message: "Product not found" });
   });
 
   it("returns 422 with field errors when validation fails", async () => {
@@ -74,7 +74,7 @@ describe("error handling", () => {
   it("passes parsed (normalised) bodies to the handler", async () => {
     const res = await request(app)
       .post("/api/v1/__test/register")
-      .send({ name: "Ali Khan", email: "ALI@Example.com", password: "Hoodie123" });
+      .send({ name: "Ali Khan", email: "ALI@Example.com", password: "Glow12345" });
 
     expect(res.status).toBe(201);
     expect(res.body.data.email).toBe("ali@example.com");

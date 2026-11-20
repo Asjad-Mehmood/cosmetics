@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { addToCart, findVariant, uniqueEmail } from "./helpers";
 
-const PASSWORD = "Hoodie123";
+const PASSWORD = "Glow12345";
 
 test("the account area sends guests to sign in", async ({ page }) => {
   await page.goto("/account/addresses");
@@ -11,7 +11,7 @@ test("the account area sends guests to sign in", async ({ page }) => {
 test("a wrong password shows an error", async ({ page }) => {
   await page.goto("/login");
   const main = page.locator("#main");
-  await main.getByLabel("Email").fill("customer@hoodie.local");
+  await main.getByLabel("Email").fill("customer@amazongroup.local");
   await main.getByLabel("Password").fill("WrongPass123");
   await main.getByRole("button", { name: "Sign in" }).click();
   await expect(main.getByRole("alert")).toHaveText("Incorrect email or password");

@@ -1,4 +1,4 @@
-import type { ReturnDTO } from "@hoodie/types";
+import type { ReturnDTO } from "@store/types";
 import type { OrderItem, OrderStatus, ReturnRequest } from "@prisma/client";
 import { getSetting } from "../../lib/settings";
 

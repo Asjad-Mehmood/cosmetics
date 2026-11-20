@@ -1,22 +1,22 @@
 # Local development services.
 #   pnpm db:up     start Postgres + Redis
 #   pnpm db:down   stop them (data is kept in named volumes)
-name: hoodie-store
+name: amazon-group-store
 
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: hoodie
-      POSTGRES_PASSWORD: hoodie
-      POSTGRES_DB: hoodie_store
+      POSTGRES_USER: store
+      POSTGRES_PASSWORD: store
+      POSTGRES_DB: amazon_group
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hoodie -d hoodie_store"]
+      test: ["CMD-SHELL", "pg_isready -U store -d amazon_group"]
       interval: 5s
       timeout: 5s
       retries: 10

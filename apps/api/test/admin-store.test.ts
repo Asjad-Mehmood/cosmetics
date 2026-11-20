@@ -168,10 +168,10 @@ describe("content", () => {
 
   it("manages pages but protects the ones the storefront links to", async () => {
     const { agent } = await signedInAgent("MANAGER");
-    const slug = `size-help-${randomUUID().slice(0, 6)}`;
+    const slug = `skin-help-${randomUUID().slice(0, 6)}`;
     const page = await agent
       .post("/api/v1/admin/pages")
-      .send({ slug, title: "Size help", content: "Measure a hoodie you love." });
+      .send({ slug, title: "Skin help", content: "Find the right routine for your skin." });
     expect(page.status).toBe(201);
     expect((await request(app).get(`/api/v1/cms/pages/${slug}`)).status).toBe(200);
 
@@ -388,11 +388,11 @@ describe("email settings", () => {
     const { agent } = await signedInAgent("SUPER_ADMIN");
     const smtp = {
       provider: "smtp",
-      from: "Urban Store <orders@urbanstore.pk>",
+      from: "Amazon Group <orders@amazongroup.pk>",
       host: "127.0.0.1",
       port: 1, // nothing listens here, so the test email fails quickly
       secure: false,
-      user: "orders@urbanstore.pk",
+      user: "orders@amazongroup.pk",
     };
 
     const missing = await agent.put("/api/v1/admin/settings/email").send(smtp);
@@ -422,7 +422,7 @@ describe("email settings", () => {
 
     const test = await agent
       .post("/api/v1/admin/settings/email/test")
-      .send({ to: "owner@urbanstore.pk" });
+      .send({ to: "owner@amazongroup.pk" });
     expect(test.status).toBe(502);
     expect(test.body.error.message).toMatch(/could not be sent/);
 

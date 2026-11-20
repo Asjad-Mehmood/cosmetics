@@ -1,9 +1,10 @@
 "use client";
 
-import type { CartDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { cn } from "@hoodie/ui";
+import type { CartDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { cn } from "@store/ui";
 import Link from "next/link";
+import { LockIcon } from "../icons";
 import { CouponForm } from "./coupon-form";
 
 /** Subtotal, discount and the checkout button. */
@@ -34,16 +35,17 @@ export function CartSummary({ cart, showCoupon = false }: { cart: CartDTO; showC
           </dd>
         </div>
       </dl>
-      <p className="text-muted text-xs">Delivery is calculated at checkout.</p>
+      <p className="text-muted text-xs">Delivery charges are shown at checkout.</p>
       <Link
         href="/checkout"
         aria-disabled={blocked}
         onClick={(e) => blocked && e.preventDefault()}
         className={cn(
-          "flex h-12 w-full items-center justify-center rounded-lg text-base font-medium text-white",
-          blocked ? "bg-muted pointer-events-none" : "bg-ink hover:bg-ink/85",
+          "flex h-12 w-full items-center justify-center gap-2 rounded-full text-base font-semibold text-white",
+          blocked ? "bg-muted pointer-events-none" : "bg-brand-600 hover:bg-brand-700",
         )}
       >
+        {!blocked && <LockIcon />}
         {blocked ? "Fix the items above to continue" : "Checkout"}
       </Link>
     </div>
