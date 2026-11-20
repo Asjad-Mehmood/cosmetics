@@ -3,7 +3,7 @@
 import type { ProductCardDTO } from "@store/types";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
 import { ProductCard } from "./product-card";
 
 /** A titled, horizontally scrolling row of product cards with arrow buttons. */
@@ -13,12 +13,15 @@ export function ProductRail({
   href,
   linkLabel = "See all",
   subtitle,
+  eyebrow,
 }: {
   title: string;
   products: ProductCardDTO[];
   href?: string;
   linkLabel?: string;
   subtitle?: string;
+  /** Small gold label above the title, e.g. "Most loved". */
+  eyebrow?: string;
 }) {
   const list = useRef<HTMLUListElement>(null);
   const headingId = useId();
@@ -46,20 +49,34 @@ export function ProductRail({
 
   if (!products.length) return null;
   const arrow =
-    "border-line bg-canvas hover:border-ink grid size-10 place-items-center rounded-full border transition disabled:opacity-30";
+    "border-line bg-canvas hover:bg-brand-600 hover:border-brand-600 grid size-10 place-items-center rounded-full border transition-colors hover:text-white disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <section aria-labelledby={headingId}>
-      <div className="mb-5 flex items-end justify-between gap-4">
+      <div className="mb-7 flex items-end justify-between gap-4">
         <div>
-          <h2 id={headingId} className="text-2xl font-bold tracking-tight">
+          {eyebrow && <p className="eyebrow text-accent-700 mb-3">{eyebrow}</p>}
+          <h2 id={headingId} className="display text-3xl sm:text-4xl">
             {title}
           </h2>
-          {subtitle && <p className="text-muted mt-1 text-sm">{subtitle}</p>}
+          {subtitle && <p className="text-muted mt-3 text-sm sm:text-base">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2">
           {href && (
-            <Link href={href} className="text-brand-700 mr-2 text-sm font-semibold hover:underline">
+            <Link
+              href={href}
+              className="border-line hover:border-brand-600 group mr-1 hidden items-center gap-2 rounded-full border bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors sm:inline-flex"
+            >
+              {linkLabel}
+              <ArrowRightIcon
+                width={14}
+                height={14}
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
+              />
+            </Link>
+          )}
+          {href && (
+            <Link href={href} className="text-brand-700 text-sm font-semibold sm:hidden">
               {linkLabel}
             </Link>
           )}

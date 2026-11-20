@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { themeColor: "#0f5e63" };
+export const viewport: Viewport = { themeColor: "#0a1128" };
 
 /**
  * One site, two areas: the shop (app/(shop), with its header and footer) and

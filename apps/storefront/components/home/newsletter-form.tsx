@@ -1,12 +1,12 @@
 "use client";
 
 import { newsletterSchema } from "@store/validation";
-import { Button, Input } from "@store/ui";
+import { Button, cn, Input } from "@store/ui";
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
-export function NewsletterForm() {
+export function NewsletterForm({ onDark = false }: { onDark?: boolean }) {
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -38,8 +38,19 @@ export function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="email"
+        className={cn(
+          "h-12 rounded-full px-5",
+          onDark && "border-white/15 bg-white/5 text-white placeholder:text-white/50",
+        )}
       />
-      <Button type="submit" loading={pending}>
+      <Button
+        type="submit"
+        size="lg"
+        pill
+        variant={onDark ? "gold" : "brand"}
+        loading={pending}
+        className="shrink-0"
+      >
         Subscribe
       </Button>
     </form>

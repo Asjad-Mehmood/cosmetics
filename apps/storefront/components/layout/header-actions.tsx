@@ -11,7 +11,7 @@ import { BagIcon, HeartIcon, UserIcon } from "../icons";
 const Count = ({ n, testId }: { n: number; testId?: string }) => (
   <span
     data-testid={testId}
-    className="bg-accent-700 absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10px] font-bold text-white ring-2 ring-white"
+    className="bg-accent-500 text-brand-700 absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10px] font-extrabold ring-2 ring-white"
   >
     {n > 99 ? "99+" : n}
   </span>
@@ -51,7 +51,7 @@ export function HeaderActions() {
       <button
         type="button"
         onClick={openCart}
-        className="hover:bg-surface flex items-center gap-2.5 rounded-full p-2 lg:pr-3"
+        className="hover:bg-surface lg:bg-brand-600 lg:hover:bg-brand-700 flex items-center gap-2.5 rounded-full p-2 transition-colors lg:py-1.5 lg:pl-3 lg:pr-5 lg:text-white"
       >
         <span className="relative">
           <BagIcon />
@@ -59,7 +59,7 @@ export function HeaderActions() {
         </span>
         <span className="sr-only lg:hidden">Cart</span>
         <span className="hidden text-left leading-tight lg:block">
-          <span className="text-muted block text-[11px]">Cart </span>
+          <span className="block text-[11px] text-white/70">Cart </span>
           <span className="block text-sm font-semibold">{formatMoney(cart.data?.total ?? 0)}</span>
         </span>
         <span className="sr-only">

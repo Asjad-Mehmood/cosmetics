@@ -19,6 +19,7 @@ export function BuyAgain() {
   return (
     <div className="pt-14">
       <ProductRail
+        eyebrow="Your favourites"
         title="Buy it again"
         subtitle="Restock your favourites from earlier orders"
         products={products.data}

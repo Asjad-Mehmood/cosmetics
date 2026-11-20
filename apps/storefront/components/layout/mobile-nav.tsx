@@ -18,7 +18,7 @@ export function MobileNavButton() {
       type="button"
       aria-label="Open menu"
       onClick={() => setMenuOpen(true)}
-      className="hover:bg-surface -ml-2 rounded-full p-2 lg:hidden"
+      className="hover:bg-surface rounded-full p-2 lg:hidden"
     >
       <MenuIcon />
     </button>
