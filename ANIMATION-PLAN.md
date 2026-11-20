@@ -1,6 +1,6 @@
 # Animation Plan: Amazon Group storefront
 
-> **Status: phases 1 and 2 are built** (see the notes under each). Phases 3–8 are not started.
+> **Status: phases 1–3 are built** (see the notes under each). Phases 4–8 are not started.
 
 ## Goal
 
@@ -126,6 +126,20 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - **Toasts (`sonner`):** match its timing and easing to our tokens, so they slide up on mobile and in from the bottom-right on desktop.
 
 **Done when:** every overlay animates both opening and closing, and Escape, the backdrop click and the back button still close it instantly.
+
+> **Built (phase 3).** Overlay styles are in `packages/ui/src/styles/theme.css`
+> (`.ui-dialog`, `.ui-popover`):
+>
+> - **`Dialog`:** the centre dialog scales and fades in, drawers slide in from their side, and the bottom sheet rises. All of them animate closed as well, and the backdrop fades in and blurs slightly.
+> - **Bottom sheets:** drag the top bar down more than 80 px (or flick it) to close; a short drag springs back.
+> - **Dropdowns:** the mega menu and search suggestions fade and drop in and out.
+> - **Reduce motion:** overlays open and close instantly, with no transition at all.
+> - **Toasts (`sonner`):** left on their own animation for now.
+> - **Tests:** `e2e/motion.spec.ts` covers the drawer exit and the sheet drag.
+>
+> A finding from testing: a closed overlay stays on screen until its closing
+> animation ends. Tests and other code must not expect it to vanish instantly
+> unless Reduce motion is on.
 
 ## Phase 4: Shopping feedback (the "it worked" moments)
 

@@ -70,3 +70,48 @@ test("links to the current page and new tabs start no page switch", async ({ pag
   await expect(page.getByTestId("nav-progress")).toHaveCount(0);
   await expect(page.getByTestId("route-skeleton")).toHaveCount(0);
 });
+
+test("the cart drawer slides out before it disappears", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: /cart/i }).first().click();
+  const drawer = page.locator('dialog[data-variant="right"]');
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toHaveCSS("translate", "none");
+
+  await page.keyboard.press("Escape");
+  // Still on screen while it slides away, then gone.
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toBeHidden();
+});
+
+test.describe("on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test("a bottom sheet closes when dragged down, and springs back after a short drag", async ({
+    page,
+  }) => {
+    await page.goto("/shop");
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: /^Filters/ }).click();
+    const sheet = page.getByRole("dialog", { name: "Filters" });
+    // Measure the handle once the sheet has finished sliding up.
+    await expect(sheet).toHaveCSS("translate", "none");
+    const handle = (await sheet.getByRole("heading", { name: "Filters" }).boundingBox())!;
+    const x = handle.x + handle.width / 2;
+
+    const dragBy = async (dy: number) => {
+      await page.mouse.move(x, handle.y);
+      await page.mouse.down();
+      await page.mouse.move(x, handle.y + dy, { steps: 8 });
+      await page.mouse.up();
+    };
+
+    await dragBy(40);
+    await expect(sheet).toHaveCSS("translate", "none");
+    await expect(sheet).toBeVisible();
+
+    await dragBy(240);
+    await expect(sheet).toBeHidden();
+  });
+});

@@ -150,3 +150,99 @@
 @utility stagger {
   animation-delay: calc(min(var(--i, 0), 6) * 40ms);
 }
+
+/*
+ * Overlays: dialogs, drawers and bottom sheets (<Dialog>), and dropdown panels
+ * (.ui-popover). They animate both in and out: `@starting-style` gives the
+ * opening state, and `transition-behavior: allow-discrete` keeps the element
+ * on screen (display, top layer) until its closing transition has finished.
+ * Browsers without these features simply open and close instantly.
+ */
+@layer components {
+  .ui-dialog {
+    transition-property: opacity, translate, scale, display, overlay;
+    transition-behavior: allow-discrete;
+    transition-duration: calc(var(--duration-slow) * 0.7);
+    transition-timing-function: var(--ease-in);
+  }
+  .ui-dialog[open] {
+    transition-duration: var(--duration-slow);
+    transition-timing-function: var(--ease-out);
+  }
+  .ui-dialog[data-variant="center"]:not([open]) {
+    opacity: 0;
+    scale: 0.96;
+  }
+  .ui-dialog[data-variant="right"]:not([open]) {
+    translate: 100% 0;
+  }
+  .ui-dialog[data-variant="left"]:not([open]) {
+    translate: -100% 0;
+  }
+  .ui-dialog[data-variant="bottom"]:not([open]) {
+    translate: 0 100%;
+  }
+  @starting-style {
+    .ui-dialog[data-variant="center"][open] {
+      opacity: 0;
+      scale: 0.96;
+    }
+    .ui-dialog[data-variant="right"][open] {
+      translate: 100% 0;
+    }
+    .ui-dialog[data-variant="left"][open] {
+      translate: -100% 0;
+    }
+    .ui-dialog[data-variant="bottom"][open] {
+      translate: 0 100%;
+    }
+  }
+
+  .ui-dialog::backdrop {
+    background-color: oklch(0.2 0.02 230 / 0);
+    backdrop-filter: blur(0);
+    transition-property: background-color, backdrop-filter, display, overlay;
+    transition-behavior: allow-discrete;
+    transition-duration: inherit;
+    transition-timing-function: inherit;
+  }
+  .ui-dialog[open]::backdrop {
+    background-color: oklch(0.2 0.02 230 / 0.5);
+    backdrop-filter: blur(2px);
+  }
+  @starting-style {
+    .ui-dialog[open]::backdrop {
+      background-color: oklch(0.2 0.02 230 / 0);
+      backdrop-filter: blur(0);
+    }
+  }
+
+  /* Dropdown panels shown and hidden with the `hidden` attribute. */
+  .ui-popover {
+    transition-property: opacity, translate, display;
+    transition-behavior: allow-discrete;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-out);
+  }
+  .ui-popover[hidden] {
+    opacity: 0;
+    translate: 0 -4px;
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--ease-in);
+  }
+  @starting-style {
+    .ui-popover:not([hidden]) {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+}
+
+/* Reduce motion: overlays open and close instantly, with nothing left on screen. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-dialog,
+  .ui-dialog::backdrop,
+  .ui-popover {
+    transition: none !important;
+  }
+}

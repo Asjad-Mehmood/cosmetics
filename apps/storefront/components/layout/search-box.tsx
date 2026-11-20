@@ -227,7 +227,7 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
 
       <div
         hidden={!showList}
-        className="border-line bg-canvas shadow-(--shadow-pop) absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border p-2"
+        className="ui-popover border-line bg-canvas shadow-(--shadow-pop) absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border p-2"
       >
         {!q.trim() && (
           <p className="text-muted px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider">
@@ -257,7 +257,7 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
                       i === active && "border-brand-600 bg-brand-50",
                     )
                   : cn(
-                      "flex items-center gap-3 rounded-xl px-2 py-2",
+                      "flex items-center gap-3 rounded-xl px-2 py-2 transition-colors duration-100",
                       i === active && "bg-surface",
                     ),
               )}
