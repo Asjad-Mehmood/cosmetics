@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import express from "express";
 import supertest from "supertest";
 import { describe, expect, it } from "vitest";
@@ -18,6 +20,31 @@ describe("Vercel api service entry", () => {
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe("ok");
     expect((await supertest(vercelApp).get("/api/v1/products/does-not-exist")).status).toBe(404);
+  });
+
+  // Vercel checks the entrypoint exists before running the build, so it must be
+  // a committed file. After the build it serves the server file it finds in
+  // outputDirectory, so that must be a folder holding only the Vercel bundle
+  // (in plain dist/ it would pick dist/server.js, the long-running server).
+  it("points vercel.json at committed source and a Vercel-only output folder", async () => {
+    const root = new URL("../../../", import.meta.url);
+    const config = JSON.parse(readFileSync(new URL("vercel.json", root), "utf8"));
+    const service = config.services.api;
+    const entry = `${service.root}/${service.entrypoint}`;
+    const tracked = execFileSync("git", ["ls-files", "--error-unmatch", entry], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    expect(tracked.trim()).toBe(entry);
+    expect(entry).toBe("apps/api/src/vercel.ts");
+
+    const { default: tsup } = await import("../tsup.vercel.config");
+    const options = tsup as { entry: Record<string, string>; outDir: string };
+    expect(options.entry).toEqual({ index: service.entrypoint });
+    expect(options.outDir).toBe(service.outputDirectory);
+    expect(readFileSync(new URL("../scripts/vercel-build.mjs", import.meta.url), "utf8")).toContain(
+      "--config tsup.vercel.config.ts",
+    );
   });
 });
 

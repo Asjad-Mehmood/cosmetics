@@ -5,7 +5,8 @@
     "api": {
       "root": "apps/api",
       "framework": "express",
-      "entrypoint": "dist/vercel.js",
+      "entrypoint": "src/vercel.ts",
+      "outputDirectory": "dist/vercel",
       "buildCommand": "node scripts/vercel-build.mjs"
     },
     "storefront": {
