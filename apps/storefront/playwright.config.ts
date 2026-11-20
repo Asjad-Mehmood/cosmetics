@@ -21,6 +21,9 @@ export default defineConfig({
   use: {
     baseURL: BASE_URL,
     trace: "retain-on-failure",
+    // Animations off, so tests never wait on (or race) a transition.
+    // e2e/motion.spec.ts turns them back on to test them.
+    reducedMotion: "reduce",
   },
   projects: [
     {

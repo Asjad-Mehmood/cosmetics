@@ -33,11 +33,26 @@
   }
 }
 
+/* Page-switch progress bar: grows quickly, then slows down while it waits. */
+@theme {
+  --animate-nav-progress: nav-progress 8s var(--ease-out) forwards;
+  @keyframes nav-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(0.9);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Run looping animations (skeleton shimmer, spinners) once, not as a flicker. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
