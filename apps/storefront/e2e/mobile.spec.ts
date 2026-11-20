@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test("menu drawer opens and navigates", async ({ page }) => {
   await page.goto("/");
+  // The menu button works once the page's scripts have loaded (see browse.spec.ts).
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Open menu" }).click();
   const menu = page.getByRole("dialog", { name: "Menu" });
   await menu.getByRole("link", { name: "Hair Care" }).click();

@@ -10,6 +10,9 @@ test("home page shows the hero, categories and products", async ({ page }) => {
 
 test("mega menu leads to a category page that only lists that category", async ({ page }) => {
   await page.goto("/");
+  // The menu button works once the page's scripts have loaded; a busy test
+  // machine can otherwise click it a moment too early.
+  await page.waitForLoadState("networkidle");
   await page
     .getByRole("navigation", { name: "Main" })
     .getByRole("button", { name: "All categories" })

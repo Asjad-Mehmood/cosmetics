@@ -56,7 +56,11 @@ export function MegaMenu({ categories, collections }: NavData) {
         All categories
         <ChevronDownIcon className={cn("transition-transform", open && "rotate-180")} />
       </button>
-      <div id="mega-menu" hidden={!open} className="absolute inset-x-0 top-full z-50 pt-px">
+      <div
+        id="mega-menu"
+        hidden={!open}
+        className="ui-popover absolute inset-x-0 top-full z-50 pt-px"
+      >
         <div className="border-line bg-canvas shadow-(--shadow-pop) border-b">
           <div className="mx-auto grid max-w-7xl grid-cols-[1fr_220px] gap-10 px-8 py-8">
             <div>
