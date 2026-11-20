@@ -16,7 +16,7 @@ export default function OpengraphImage() {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 80,
-        background: "#0f5e63",
+        background: "#0a1128",
         color: "white",
         fontFamily: "sans-serif",
       }}
@@ -26,11 +26,11 @@ export default function OpengraphImage() {
           <rect width="32" height="32" rx="8" fill="#ffffff" />
           <path
             d="M16 4.5S7.5 13.4 7.5 19.3a8.5 8.5 0 0 0 17 0C24.5 13.4 16 4.5 16 4.5Z"
-            fill="#0f5e63"
+            fill="#0a1128"
           />
           <path
             d="M16 15.3v7.6M12.2 19.1h7.6"
-            stroke="#f3a3b0"
+            stroke="#d4af37"
             strokeWidth="2.4"
             strokeLinecap="round"
           />
@@ -41,7 +41,7 @@ export default function OpengraphImage() {
         <div style={{ fontSize: 60, fontWeight: 700, lineHeight: 1.1 }}>
           Genuine beauty and health care, delivered across Pakistan.
         </div>
-        <div style={{ fontSize: 34, color: "#f3a3b0" }}>
+        <div style={{ fontSize: 34, color: "#d4af37" }}>
           Skincare · Makeup · Fragrance · Vitamins · Cash on Delivery
         </div>
       </div>

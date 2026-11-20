@@ -50,7 +50,7 @@ export function MegaMenu({ categories, collections }: NavData) {
           }
           setOpen((o) => !o);
         }}
-        className="bg-brand-600 hover:bg-brand-700 mr-2 flex h-9 items-center gap-2 rounded-full pl-3 pr-3.5 text-sm font-semibold text-white"
+        className="bg-brand-600 hover:bg-brand-700 flex h-10 items-center gap-2 rounded-full pl-4 pr-4 text-[13px] font-semibold text-white shadow-sm"
       >
         <GridIcon width={16} height={16} />
         All categories
@@ -59,20 +59,18 @@ export function MegaMenu({ categories, collections }: NavData) {
       <div
         id="mega-menu"
         hidden={!open}
-        className="ui-popover absolute inset-x-0 top-full z-50 pt-px"
+        className="ui-popover absolute inset-x-4 top-full z-50 pt-2 sm:inset-x-6 lg:inset-x-8"
       >
-        <div className="border-line bg-canvas shadow-(--shadow-pop) border-b">
-          <div className="mx-auto grid max-w-7xl grid-cols-[1fr_220px] gap-10 px-8 py-8">
+        <div className="border-line shadow-(--shadow-pop) rounded-3xl border bg-white/95 backdrop-blur-xl">
+          <div className="grid grid-cols-[1fr_220px] gap-10 px-8 py-8">
             <div>
-              <p className="text-muted text-xs font-semibold uppercase tracking-wider">
-                Shop by category
-              </p>
+              <p className="eyebrow text-accent-700">Shop by category</p>
               <ul className="mt-4 grid grid-cols-3 gap-3 xl:grid-cols-5">
                 {categories.map((c) => (
                   <li key={c.id}>
                     <Link
                       href={`/categories/${c.slug}`}
-                      className="hover:border-brand-600 border-line group flex items-center gap-3 rounded-2xl border p-2.5 transition"
+                      className="hover:border-brand-600 border-line hover:shadow-(--shadow-card) group flex items-center gap-3 rounded-2xl border p-2.5 transition duration-300 hover:-translate-y-0.5"
                     >
                       <span className="bg-surface relative size-12 shrink-0 overflow-hidden rounded-xl">
                         {c.imageUrl && (
@@ -105,9 +103,7 @@ export function MegaMenu({ categories, collections }: NavData) {
               </Link>
             </div>
             <div>
-              <p className="text-muted text-xs font-semibold uppercase tracking-wider">
-                Collections
-              </p>
+              <p className="eyebrow text-accent-700">Collections</p>
               <ul className="mt-4 space-y-1">
                 <li>
                   <Link

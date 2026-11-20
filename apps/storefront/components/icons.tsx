@@ -109,6 +109,12 @@ export const ChevronRightIcon = (p: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+export const ArrowRightIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base} width={18} height={18} {...p}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+
 export const XIcon = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base} width={18} height={18} {...p}>
     <path d="M6 6l12 12M18 6 6 18" />

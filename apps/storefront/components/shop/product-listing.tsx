@@ -68,12 +68,8 @@ export async function ProductListing({
           {breadcrumbs}
           <div className="bg-blush relative mb-6 overflow-hidden rounded-3xl">
             <div className="relative z-10 max-w-xl px-6 py-8 sm:px-10 sm:py-10 md:w-3/5">
-              {eyebrow && (
-                <p className="text-accent-700 text-xs font-semibold uppercase tracking-widest">
-                  {eyebrow}
-                </p>
-              )}
-              <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
+              {eyebrow && <p className="eyebrow text-accent-700">{eyebrow}</p>}
+              <h1 className="display mt-4 text-4xl sm:text-5xl">{title}</h1>
               {description && <p className="text-muted mt-3 max-w-lg">{description}</p>}
               <p className="mt-4 text-sm font-medium" aria-live="polite">
                 {total} {total === 1 ? "product" : "products"}

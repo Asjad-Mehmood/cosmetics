@@ -30,7 +30,7 @@ export function RecentlyViewed({ current }: { current?: string }) {
 
   return (
     <div className="mt-16">
-      <ProductRail title="Recently viewed" products={items} />
+      <ProductRail eyebrow="Pick up where you left off" title="Recently viewed" products={items} />
     </div>
   );
 }

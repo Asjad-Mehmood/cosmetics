@@ -9,37 +9,40 @@
     var(--font-brand), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  /* Brand: deep teal (care, trust) with a rose accent (beauty) */
-  --color-brand-50: oklch(0.97 0.015 190);
-  --color-brand-100: oklch(0.93 0.035 190);
-  --color-brand-500: oklch(0.55 0.09 192);
-  --color-brand-600: oklch(0.49 0.085 194);
-  --color-brand-700: oklch(0.42 0.075 196);
-  --color-accent-50: oklch(0.975 0.015 5);
-  --color-accent-100: oklch(0.94 0.03 5);
-  --color-accent-500: oklch(0.66 0.14 8);
-  --color-accent-700: oklch(0.5 0.15 10);
+  /* Brand: deep navy (trust, premium) with a gold accent (luxury beauty).
+     accent-500 is the bright gold for fills and for text on navy; on white,
+     gold text uses accent-700 (4.9:1). Text on accent-500 fills is navy. */
+  --color-brand-50: #f1f3f8;
+  --color-brand-100: #e1e6f0;
+  --color-brand-500: #2a3a63;
+  --color-brand-600: #0f172a;
+  --color-brand-700: #0a1128;
+  --color-brand-900: #050a18;
+  --color-accent-50: #fbf6e6;
+  --color-accent-100: #f3e6bf;
+  --color-accent-500: #d4af37;
+  --color-accent-700: #8c6d10;
 
   /* Neutrals / surfaces */
-  --color-ink: oklch(0.21 0.02 230);
-  --color-muted: oklch(0.49 0.015 230);
-  --color-line: oklch(0.91 0.008 210);
-  --color-surface: oklch(0.985 0.004 190);
-  --color-canvas: oklch(1 0 0);
+  --color-ink: #090d1f;
+  --color-muted: #475569;
+  --color-line: #e6e8ee;
+  --color-surface: #f6f7f9;
+  --color-canvas: #ffffff;
 
   /* Status (dark enough for small text on white and on their 10% tints: WCAG AA) */
   --color-success: oklch(0.5 0.13 150);
   --color-warning: oklch(0.75 0.15 80);
   --color-danger: oklch(0.52 0.2 27);
 
-  /* Soft section backgrounds */
-  --color-blush: oklch(0.965 0.02 10);
-  --color-mint: oklch(0.965 0.02 180);
+  /* Soft section backgrounds: a warm gold tint and a cool navy tint */
+  --color-blush: #fbf6e6;
+  --color-mint: #f1f3f8;
 
-  --radius-card: 1rem;
+  --radius-card: 1.5rem;
 
-  --shadow-card: 0 1px 2px oklch(0.2 0.02 230 / 0.06), 0 8px 24px -12px oklch(0.2 0.02 230 / 0.18);
-  --shadow-pop: 0 12px 40px -12px oklch(0.2 0.02 230 / 0.3);
+  --shadow-card: 0 1px 2px rgb(10 17 40 / 0.05), 0 20px 40px -12px rgb(10 17 40 / 0.12);
+  --shadow-pop: 0 25px 50px -12px rgb(10 17 40 / 0.25);
 
   /*
    * Motion (see ANIMATION-PLAN.md). Animate transform and opacity only; exits
@@ -50,7 +53,7 @@
   --duration-base: 200ms;
   --duration-slow: 320ms;
   --duration-hero: 600ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   /* A light overshoot for "pop" feedback (badges, hearts). */
   --ease-spring: linear(
@@ -244,5 +247,37 @@
   .ui-dialog::backdrop,
   .ui-popover {
     transition: none !important;
+  }
+}
+
+/*
+ * Display type: huge, uppercase, extra-bold and tightly set, for hero and
+ * section headings. Pair with a size (e.g. text-4xl md:text-5xl).
+ */
+@utility display {
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+/*
+ * A small section label with a dot: "• OUR BESTSELLERS". Colour it with a
+ * text colour (text-accent-700 on light backgrounds, text-accent-500 on navy).
+ */
+@utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  &::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: currentColor;
   }
 }

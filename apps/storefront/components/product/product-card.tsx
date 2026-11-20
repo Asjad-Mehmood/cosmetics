@@ -33,13 +33,13 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "border-line bg-canvas hover:shadow-(--shadow-card) group relative flex h-full flex-col rounded-2xl border p-2.5 transition hover:-translate-y-0.5 sm:p-3",
+        "border-line/80 bg-canvas hover:shadow-(--shadow-card) hover:border-line group relative flex h-full flex-col rounded-3xl border p-2.5 shadow-sm transition duration-500 ease-[var(--ease-out)] hover:-translate-y-1.5 sm:p-3",
         className,
       )}
     >
       <WishlistButton productId={product.id} title={product.title} className="right-4 top-4" />
       <Link href={`/products/${product.slug}`} className="block flex-1">
-        <div className="bg-surface relative aspect-square overflow-hidden rounded-xl">
+        <div className="bg-surface relative aspect-square overflow-hidden rounded-2xl">
           {image && (
             <Image
               src={image.url}
@@ -47,7 +47,7 @@ export function ProductCard({
               fill
               priority={priority}
               sizes={SIZES}
-              className="object-cover transition duration-500 group-hover:scale-105"
+              className="object-cover transition duration-[1.6s] ease-[var(--ease-out)] group-hover:scale-110"
             />
           )}
           {hoverImage && (
@@ -66,7 +66,7 @@ export function ProductCard({
               </span>
             )}
             {product.inStock && product.discountPercent > 0 && (
-              <span className="bg-accent-700 rounded-full px-2.5 py-1 text-[11px] font-bold text-white">
+              <span className="bg-accent-500 text-brand-700 rounded-full px-2.5 py-1 text-[11px] font-extrabold">
                 -{product.discountPercent}%
               </span>
             )}

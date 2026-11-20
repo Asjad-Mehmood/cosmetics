@@ -46,6 +46,52 @@
   }
 }
 
+/*
+ * Scroll reveals (Blume style): sections fade up and cards rise as they come
+ * into view. Driven by the scroll position itself (no JavaScript), so content
+ * is always rendered, and fully visible where scroll-driven animations aren't
+ * supported or motion is reduced.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+}
+@keyframes reveal-card {
+  from {
+    opacity: 0;
+    translate: 0 60px;
+    scale: 0.96;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    /* Give each card style={{ "--i": index }} for a short stagger. */
+    .reveal-card {
+      animation: reveal-card linear both;
+      animation-timeline: view();
+      animation-range: entry calc(min(var(--i, 0), 5) * 4%) entry
+        calc(45% + min(var(--i, 0), 5) * 4%);
+    }
+  }
+}
+
+/* An endless ticker: put the items in twice inside .marquee-track. */
+@theme {
+  --animate-marquee: marquee 32s linear infinite;
+  @keyframes marquee {
+    to {
+      translate: -50% 0;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -27,7 +27,8 @@ export function JustForYou({ initial }: { initial: PaginatedResponse<ProductCard
 
   return (
     <section aria-labelledby="for-you-heading">
-      <h2 id="for-you-heading" className="mb-5 text-2xl font-bold tracking-tight">
+      <p className="eyebrow text-accent-700">Picked for you</p>
+      <h2 id="for-you-heading" className="display mb-7 mt-3 text-3xl sm:text-4xl">
         Just for you
       </h2>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
