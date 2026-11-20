@@ -2,9 +2,8 @@
  * Vercel build for the `api` service (vercel.json → services.api.buildCommand),
  * run from apps/api:
  *   1. generate the Prisma client and bundle src/vercel.ts to
- *      dist/vercel/index.js (tsup.vercel.config.ts; the service's
- *      outputDirectory, so Vercel serves that file); workspace packages are
- *      bundled in;
+ *      vercel-bundle/index.js (tsup.vercel.config.ts), which the service's
+ *      entrypoint, vercel-entry.js, loads; workspace packages are bundled in;
  *   2. production only: apply database migrations over the direct (unpooled)
  *      connection, then seed the essentials (admin account, settings,
  *      shipping, pages and, on the very first deploy, the catalogue).

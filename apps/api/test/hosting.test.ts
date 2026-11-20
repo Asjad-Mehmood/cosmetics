@@ -23,25 +23,29 @@ describe("Vercel api service entry", () => {
   });
 
   // Vercel checks the entrypoint exists before running the build, so it must be
-  // a committed file. After the build it serves the server file it finds in
-  // outputDirectory, so that must be a folder holding only the Vercel bundle
-  // (in plain dist/ it would pick dist/server.js, the long-running server).
-  it("points vercel.json at committed source and a Vercel-only output folder", async () => {
+  // a committed file; it loads the tsup bundle. The bundle must stay out of
+  // dist/, build/ and output/ (Vercel would serve dist/server.js from there),
+  // and the service must not set outputDirectory (the function then loses its
+  // node_modules and crashes with FUNCTION_INVOCATION_FAILED).
+  it("points vercel.json at a committed entry that loads the Vercel bundle", async () => {
     const root = new URL("../../../", import.meta.url);
     const config = JSON.parse(readFileSync(new URL("vercel.json", root), "utf8"));
     const service = config.services.api;
+    expect(service.outputDirectory).toBeUndefined();
     const entry = `${service.root}/${service.entrypoint}`;
     const tracked = execFileSync("git", ["ls-files", "--error-unmatch", entry], {
       cwd: root,
       encoding: "utf8",
     });
     expect(tracked.trim()).toBe(entry);
-    expect(entry).toBe("apps/api/src/vercel.ts");
 
     const { default: tsup } = await import("../tsup.vercel.config");
     const options = tsup as { entry: Record<string, string>; outDir: string };
-    expect(options.entry).toEqual({ index: service.entrypoint });
-    expect(options.outDir).toBe(service.outputDirectory);
+    expect(options.entry).toEqual({ index: "src/vercel.ts" });
+    expect(["dist", "build", "output"]).not.toContain(options.outDir.split("/")[0]);
+    expect(readFileSync(new URL(entry, root), "utf8")).toContain(
+      `from "./${options.outDir}/index.js"`,
+    );
     expect(readFileSync(new URL("../scripts/vercel-build.mjs", import.meta.url), "utf8")).toContain(
       "--config tsup.vercel.config.ts",
     );
