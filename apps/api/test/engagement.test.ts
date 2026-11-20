@@ -487,3 +487,22 @@ describe("returns", () => {
     expect(late.body.error.message).toMatch(/window/);
   });
 });
+
+describe("buy it again", () => {
+  it("lists products from the customer's own orders, newest first", async () => {
+    const older = await createTestProduct();
+    const newer = await createTestProduct();
+    const { agent, user } = await signedInAgent();
+    await placeOrderAs(agent, user.email, [[older.variants[0]!.id, 1]]);
+    await placeOrderAs(agent, user.email, [[newer.variants[0]!.id, 1]]);
+
+    const res = await agent.get("/api/v1/me/orders/products");
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((p: { slug: string }) => p.slug)).toEqual([newer.slug, older.slug]);
+
+    // Someone else sees only their own (none), and guests must sign in.
+    const other = await signedInAgent();
+    expect((await other.agent.get("/api/v1/me/orders/products")).body.data).toEqual([]);
+    expect((await request(app).get("/api/v1/me/orders/products")).status).toBe(401);
+  });
+});

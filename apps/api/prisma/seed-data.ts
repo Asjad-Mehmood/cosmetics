@@ -367,6 +367,7 @@ export const coupons = [
     value: 10,
     minOrderAmount: 200000,
     maxUsesPerUser: 1,
+    isPublic: true,
   },
   {
     code: "FREESHIP",
@@ -374,6 +375,7 @@ export const coupons = [
     type: "FREE_SHIPPING" as const,
     value: 0,
     minOrderAmount: 200000,
+    isPublic: true,
   },
   {
     code: "GLOW500",
@@ -382,6 +384,7 @@ export const coupons = [
     value: 50000,
     minOrderAmount: 500000,
     maxUses: 200,
+    isPublic: true,
   },
 ];
 

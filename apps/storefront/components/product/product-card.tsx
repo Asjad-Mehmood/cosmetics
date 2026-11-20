@@ -3,10 +3,15 @@ import { formatMoney } from "@store/types";
 import { cn } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
+import { FreeDeliveryTag } from "./free-delivery-tag";
 import { Price } from "./price";
 import { QuickAdd } from "./quick-add";
 import { Stars } from "./stars";
 import { WishlistButton } from "./wishlist-button";
+
+/** 1234 → "1.2k" */
+const compact = (n: number) =>
+  n >= 1000 ? `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1).replace(/\.0$/, "")}k` : String(n);
 
 const SIZES = "(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
 
@@ -83,6 +88,12 @@ export function ProductCard({
             ) : (
               <span>New</span>
             )}
+            {product.soldCount >= 10 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{compact(product.soldCount)} sold</span>
+              </>
+            )}
           </p>
           <Price
             price={product.price}
@@ -90,8 +101,11 @@ export function ProductCard({
             from={product.hasPriceRange}
             className="text-[15px]"
           />
-          <p className="text-success h-4 text-xs font-semibold">
-            {saving > 0 && `Save ${formatMoney(saving)}`}
+          <p className="flex h-5 items-center gap-2 text-xs">
+            {saving > 0 && (
+              <span className="text-success font-semibold">Save {formatMoney(saving)}</span>
+            )}
+            <FreeDeliveryTag price={product.price} />
           </p>
         </div>
       </Link>

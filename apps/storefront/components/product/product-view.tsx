@@ -11,9 +11,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";
+import { arrivalWindow, formatWindow } from "@/lib/delivery-dates";
 import { useUi } from "@/store/ui";
 import { BadgeCheckIcon, CashIcon, ClockIcon, RefreshIcon, TruckIcon } from "../icons";
 import { freeDeliveryFrom, useSite } from "../site-context";
+import { VoucherStrip } from "../vouchers";
 import { NotifyMe } from "./notify-me";
 import { QuantityStepper } from "./quantity-stepper";
 import { Stars } from "./stars";
@@ -134,9 +136,12 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
 const firstAvailable = (variants: VariantDTO[]) =>
   variants.find((v) => v.stockStatus !== "out_of_stock");
 
-/** Delivery times and charges by zone, from the store's shipping settings. */
+/** Delivery dates and charges by zone, from the store's shipping settings. */
 function DeliveryInfo() {
   const { delivery } = useSite();
+  // Dates depend on the current time, so they are worked out after hydration.
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => setNow(new Date()), []);
   if (!delivery.length) return null;
   const free = freeDeliveryFrom(delivery);
   return (
@@ -144,15 +149,23 @@ function DeliveryInfo() {
       <p className="flex items-center gap-2 text-sm font-semibold">
         <TruckIcon width={18} height={18} className="text-brand-700" /> Delivery
       </p>
-      <ul className="mt-3 space-y-1.5 text-sm">
-        {delivery.map((z) => (
-          <li key={z.name} className="flex justify-between gap-4">
-            <span className="text-muted">{z.name}</span>
-            <span className="text-right font-medium">
-              {z.estimatedDays} working days · {formatMoney(z.standardRate)}
-            </span>
-          </li>
-        ))}
+      <ul className="mt-3 space-y-2 text-sm">
+        {delivery.map((z) => {
+          const eta = now ? arrivalWindow(z.estimatedDays, now) : null;
+          return (
+            <li key={z.name} className="flex justify-between gap-4">
+              <span className="text-muted">{z.name}</span>
+              <span className="text-right">
+                <span className="block font-semibold">
+                  {eta ? `Arrives ${formatWindow(eta)}` : `${z.estimatedDays} working days`}
+                </span>
+                <span className="text-muted block text-xs">
+                  {formatMoney(z.standardRate)} delivery
+                </span>
+              </span>
+            </li>
+          );
+        })}
       </ul>
       {free !== null && (
         <p className="text-success mt-3 text-sm font-semibold">
@@ -162,6 +175,7 @@ function DeliveryInfo() {
       <p className="text-muted mt-1 flex items-center gap-1.5 text-sm">
         <CashIcon width={16} height={16} /> Cash on Delivery available everywhere
       </p>
+      <p className="text-muted mt-1 text-xs">Order before 2 PM for same-day packing.</p>
     </div>
   );
 }
@@ -303,6 +317,7 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
           </p>
           <p className="text-muted mt-1 text-xs">Inclusive of all taxes</p>
         </div>
+        <VoucherStrip title="Save more with vouchers" className="mt-5" />
 
         {/* Shade (hidden when the product comes in one shade only) */}
         <fieldset className={cn("mt-6", product.colors.length < 2 && "hidden")}>

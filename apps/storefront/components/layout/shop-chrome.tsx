@@ -20,7 +20,14 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0">
       <Providers>
-        <SiteProvider value={{ contact, delivery: home?.delivery ?? [], categories }}>
+        <SiteProvider
+          value={{
+            contact,
+            delivery: home?.delivery ?? [],
+            categories,
+            vouchers: home?.vouchers ?? [],
+          }}
+        >
           <a
             href="#main"
             className="focus:bg-ink sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:px-3 focus:py-2 focus:text-white"
@@ -29,7 +36,7 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           </a>
           <TopBar text={home?.announcement ?? null} phone={contact.phone} />
           <Header categories={categories} collections={collections} />
-          <main id="main" className="flex-1">
+          <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
             {children}
           </main>
           <Footer categories={categories} contact={contact} />

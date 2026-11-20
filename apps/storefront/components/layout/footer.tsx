@@ -4,6 +4,7 @@ import Link from "next/link";
 import { footerNav, siteConfig } from "@/lib/config";
 import { NewsletterForm } from "../home/newsletter-form";
 import { CashIcon, MailIcon, PhoneIcon } from "../icons";
+import { BackToTop } from "./back-to-top";
 import { TrustStrip } from "./trust-strip";
 
 export function Footer({
@@ -23,6 +24,7 @@ export function Footer({
 
   return (
     <footer className="mt-24">
+      <BackToTop />
       <div className="border-line border-y">
         <Container className="py-8">
           <TrustStrip />

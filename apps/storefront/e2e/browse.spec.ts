@@ -31,8 +31,11 @@ test("filters update the URL and results, and can be cleared", async ({ page }) 
   const count = page.locator("#main").getByText(/^\d+ products?$/);
   const before = await count.textContent();
 
-  await page.getByRole("checkbox", { name: "Nude Rose" }).check();
-  await expect(page).toHaveURL(/color=Nude/);
+  // Retry until the filter panel is interactive.
+  await expect(async () => {
+    await page.getByRole("checkbox", { name: "Nude Rose" }).check();
+    await expect(page).toHaveURL(/color=Nude/, { timeout: 2000 });
+  }).toPass();
   await expect(count).toHaveText("1 product");
   await expect(page.getByRole("heading", { name: "Velvet Matte Lipstick" })).toBeVisible();
 
@@ -45,7 +48,8 @@ test("sorting by price orders the grid", async ({ page }) => {
   await page.goto("/shop");
   await page.getByLabel("Sort products").selectOption("price_asc");
   await expect(page).toHaveURL(/sort=price_asc/);
-  const prices = await page.locator("article p span.font-semibold").allTextContents();
+  await page.waitForLoadState("networkidle");
+  const prices = await page.locator("article [data-price]").allTextContents();
   const values = prices.map((p) => Number(p.replace(/[^\d]/g, "")));
   expect(values).toEqual([...values].sort((a, b) => a - b));
 });

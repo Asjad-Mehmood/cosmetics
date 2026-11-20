@@ -97,6 +97,7 @@ function common(p: CardProduct | DetailProduct) {
     inStock: inStockVariants.length > 0,
     isFeatured: p.isFeatured,
     avgRating: p.avgRating,
+    soldCount: p.soldCount,
     reviewCount: p.reviewCount,
   };
 }

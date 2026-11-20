@@ -1,18 +1,20 @@
 "use client";
 
-import type { CategoryDTO, DeliveryZoneDTO, HomeContentDTO } from "@store/types";
+import type { CategoryDTO, DeliveryZoneDTO, HomeContentDTO, VoucherDTO } from "@store/types";
 import { createContext, useContext, type ReactNode } from "react";
 
 export interface SiteData {
   contact: HomeContentDTO["contact"];
   delivery: DeliveryZoneDTO[];
   categories: CategoryDTO[];
+  vouchers: VoucherDTO[];
 }
 
 const SiteContext = createContext<SiteData>({
   contact: { phone: null, email: null },
   delivery: [],
   categories: [],
+  vouchers: [],
 });
 
 /** Store-wide data loaded once on the server (contact, delivery zones, categories). */

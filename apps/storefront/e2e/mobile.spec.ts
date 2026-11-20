@@ -32,6 +32,8 @@ test("no horizontal scrolling on key pages", async ({ page }) => {
 
 test("the bottom tab bar opens categories and the cart", async ({ page }) => {
   await page.goto("/");
+  // The tab bar works once the page's scripts have loaded.
+  await page.waitForLoadState("networkidle");
   const tabs = page.getByRole("navigation", { name: "Quick links" });
   await tabs.getByRole("button", { name: "Categories" }).click();
   const menu = page.getByRole("dialog", { name: "Menu" });

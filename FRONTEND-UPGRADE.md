@@ -98,3 +98,21 @@ All upgrades keep what already works: server rendering, the in-process API, acce
 7. Cart drawer, cart page and checkout.
 8. Auth, account and content pages.
 9. Tests, accessibility, screenshots and docs.
+
+## 11. Round 2: big-store features (inspired by Amazon and Daraz)
+
+The features shoppers know from the big marketplaces, in Amazon Group's own look. No marketplace branding, colours or layouts are copied.
+
+| Feature                                                                                                                   | Inspired by    | Where                                |
+| ------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------ |
+| **Collect vouchers**: public discount codes as tickets with Copy (home, product page) or Apply (cart)                     | Daraz          | Admin → Coupons → "Show in the shop" |
+| **"1.2k sold"** on product cards, from the real sales counter                                                             | Daraz          | Product cards                        |
+| **Free delivery** tag on items that qualify by themselves                                                                 | Daraz / Amazon | Product cards                        |
+| **Search in a category**: dropdown and Search button in the header search                                                 | Amazon         | Header                               |
+| **Frequently bought together**: this item plus up to two others (bought together first), with ticks and "Add all to cart" | Amazon         | Product page                         |
+| **Arrival dates**: "Arrives Sat 21 – Mon 23 Nov" per zone (skips Sundays; orders after 2 PM ship the next working day)    | Amazon         | Product page                         |
+| **Buy it again**: products from the customer's earlier orders                                                             | Amazon         | Home (signed in)                     |
+| **Just for you**: an endless grid with Load more                                                                          | Daraz          | Home                                 |
+| **Back to top** bar above the footer                                                                                      | Amazon         | Every page                           |
+
+Deliberately not added: fake countdown timers or "X% claimed" bars. They would invent urgency the store doesn't have. A real "deal ends" time can come later, once deals have end dates in the admin.

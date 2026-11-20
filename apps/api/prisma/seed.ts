@@ -249,7 +249,11 @@ async function seedBanners() {
 
 async function seedCoupons() {
   for (const coupon of coupons) {
-    await prisma.coupon.upsert({ where: { code: coupon.code }, update: {}, create: coupon });
+    await prisma.coupon.upsert({
+      where: { code: coupon.code },
+      update: { isPublic: coupon.isPublic },
+      create: coupon,
+    });
   }
   console.log(`  ✔ ${coupons.length} coupons`);
 }

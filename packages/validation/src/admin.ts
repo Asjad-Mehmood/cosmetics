@@ -134,6 +134,7 @@ const couponFields = {
   startsAt: z.iso.datetime({ offset: true }).nullable(),
   endsAt: z.iso.datetime({ offset: true }).nullable(),
   isActive: z.boolean(),
+  isPublic: z.boolean(),
 };
 
 type CouponShape = {
@@ -162,6 +163,7 @@ export const createCouponSchema = z
     startsAt: couponFields.startsAt.optional(),
     endsAt: couponFields.endsAt.optional(),
     isActive: couponFields.isActive.default(true),
+    isPublic: couponFields.isPublic.default(false),
   })
   .refine(couponValueRule, {
     message: "Percentage must be 1-100; a fixed amount must be above zero",

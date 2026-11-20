@@ -10,6 +10,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { POPULAR_SEARCHES } from "@/lib/config";
 import { SearchIcon, XIcon } from "../icons";
+import { useSite } from "../site-context";
 
 function useDebounced<T>(value: T, ms: number) {
   const [v, setV] = useState(value);
@@ -49,6 +50,8 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [active, setActive] = useState(-1);
+  const { categories } = useSite();
+  const [category, setCategory] = useState("");
   const term = useDebounced(q.trim(), 200);
 
   const suggestions = useQuery({
@@ -64,7 +67,8 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
     staleTime: 60_000,
   });
   const data = term.length >= 2 ? suggestions.data : undefined;
-  const searchHref = (text: string) => `/search?q=${encodeURIComponent(text)}`;
+  const searchHref = (text: string) =>
+    `/search?q=${encodeURIComponent(text)}${category ? `&category=${encodeURIComponent(category)}` : ""}`;
 
   const options: Option[] = q.trim()
     ? [
@@ -132,52 +136,89 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
           e.preventDefault();
           if (q.trim()) go(searchHref(q.trim()));
         }}
-        className="relative"
+        className={cn(
+          "relative",
+          !compact &&
+            "border-line bg-surface focus-within:border-brand-600 focus-within:bg-canvas focus-within:ring-brand-600/15 flex items-center rounded-full border transition focus-within:ring-4",
+        )}
       >
-        <SearchIcon
-          className="text-muted pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
-          width={18}
-          height={18}
-        />
-        <input
-          ref={input}
-          data-site-search
-          type="search"
-          role="combobox"
-          aria-label="Search products"
-          aria-expanded={showList}
-          aria-controls={listId}
-          aria-autocomplete="list"
-          aria-activedescendant={showList && active >= 0 ? optionId(active) : undefined}
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={onKeyDown}
-          placeholder={
-            compact ? "Search products" : "Search skincare, makeup, vitamins, medicines…"
-          }
-          className={cn(
-            "bg-surface border-line text-ink placeholder:text-muted w-full rounded-full border pl-11 pr-11 text-sm transition",
-            "focus:border-brand-600 focus:bg-canvas focus:ring-brand-600/15 focus:outline-none focus:ring-4",
-            "[&::-webkit-search-cancel-button]:hidden",
-            compact ? "h-11" : "h-12",
-          )}
-          autoComplete="off"
-        />
-        {q && (
-          <button
-            type="button"
-            aria-label="Clear search"
-            onClick={() => {
-              setQ("");
-              input.current?.focus();
+        {!compact && categories.length > 0 && (
+          <>
+            <label htmlFor={`${listId}-category`} className="sr-only">
+              Search in
+            </label>
+            <select
+              id={`${listId}-category`}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="border-line h-8 max-w-44 shrink-0 cursor-pointer border-r bg-transparent pl-5 pr-2 text-sm font-medium focus:outline-none"
+            >
+              <option value="">All categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+        <div className="relative flex-1">
+          <SearchIcon
+            className="text-muted pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
+            width={18}
+            height={18}
+          />
+          <input
+            ref={input}
+            data-site-search
+            type="search"
+            role="combobox"
+            aria-label="Search products"
+            aria-expanded={showList}
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={showList && active >= 0 ? optionId(active) : undefined}
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setOpen(true);
             }}
-            className="text-muted hover:text-ink absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1"
+            onFocus={() => setOpen(true)}
+            onKeyDown={onKeyDown}
+            placeholder={
+              compact ? "Search products" : "Search skincare, makeup, vitamins, medicines…"
+            }
+            className={cn(
+              "text-ink placeholder:text-muted w-full pl-11 pr-10 text-sm",
+              "[&::-webkit-search-cancel-button]:hidden",
+              compact
+                ? "bg-surface border-line focus:border-brand-600 focus:bg-canvas focus:ring-brand-600/15 h-11 rounded-full border transition focus:outline-none focus:ring-4"
+                : "h-12 bg-transparent focus:outline-none",
+            )}
+            autoComplete="off"
+          />
+          {q && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => {
+                setQ("");
+                input.current?.focus();
+              }}
+              className="text-muted hover:text-ink absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1"
+            >
+              <XIcon width={16} height={16} />
+            </button>
+          )}
+        </div>
+        {!compact && (
+          <button
+            type="submit"
+            aria-label="Search products"
+            className="bg-brand-600 hover:bg-brand-700 mr-1 flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white"
           >
-            <XIcon width={16} height={16} />
+            <SearchIcon width={16} height={16} />
+            Search
           </button>
         )}
       </form>

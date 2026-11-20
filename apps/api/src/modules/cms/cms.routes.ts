@@ -23,7 +23,7 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
     access: "public",
     handler: async () => {
       const now = new Date();
-      const [banners, enabled, text, store, zones] = await Promise.all([
+      const [banners, enabled, text, store, zones, coupons] = await Promise.all([
         prisma.banner.findMany({
           where: {
             isActive: true,
@@ -38,9 +38,31 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
         getSetting<string>("announcement.text"),
         storeInfo(),
         prisma.shippingZone.findMany({ where: { isActive: true }, orderBy: { position: "asc" } }),
+        prisma.coupon.findMany({
+          where: {
+            isActive: true,
+            isPublic: true,
+            AND: [
+              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+              { OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
+            ],
+          },
+          orderBy: { createdAt: "asc" },
+          take: 12,
+        }),
       ]);
       return ok<HomeContentDTO>({
         announcement: enabled && text ? text : null,
+        vouchers: coupons
+          .filter((c) => c.maxUses === null || c.usedCount < c.maxUses)
+          .map((c) => ({
+            code: c.code,
+            description: c.description,
+            type: c.type,
+            value: c.type === "FREE_SHIPPING" ? 0 : c.value,
+            minOrderAmount: c.minOrderAmount,
+            endsAt: c.endsAt?.toISOString() ?? null,
+          })),
         banners: banners.map((b): BannerDTO => ({
           id: b.id,
           title: b.title,

@@ -1,7 +1,7 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { prisma } from "../src/lib/prisma";
-import { app, createTestProduct, uniqueEmail } from "./helpers";
+import { app, createCoupon, createTestProduct, uniqueEmail } from "./helpers";
 
 describe("content endpoints", () => {
   it("returns the announcement and only currently active banners", async () => {
@@ -30,6 +30,19 @@ describe("content endpoints", () => {
     const ids = res.body.data.banners.map((b: { id: string }) => b.id);
     expect(ids).toContain("banner_skincare");
     expect(ids).not.toContain(expired.id);
+  });
+
+  it("lists only public, usable discount codes as vouchers", async () => {
+    const shown = await createCoupon({ isPublic: true, description: "Shown" });
+    const hidden = await createCoupon({ isPublic: false });
+    const expired = await createCoupon({ isPublic: true, endsAt: new Date(Date.now() - 1000) });
+    const usedUp = await createCoupon({ isPublic: true, maxUses: 1, usedCount: 1 });
+
+    const codes = (await request(app).get("/api/v1/cms/home")).body.data.vouchers.map(
+      (v: { code: string }) => v.code,
+    );
+    expect(codes).toContain(shown.code);
+    for (const c of [hidden, expired, usedUp]) expect(codes).not.toContain(c.code);
   });
 
   it("serves published pages and the FAQ", async () => {

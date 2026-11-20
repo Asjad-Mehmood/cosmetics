@@ -362,6 +362,8 @@ model Coupon {
   startsAt       DateTime?
   endsAt         DateTime?
   isActive       Boolean      @default(true)
+  /// Shown to shoppers as a voucher they can copy or apply (home, product page, cart).
+  isPublic       Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

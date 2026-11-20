@@ -9,6 +9,7 @@ import { useUi } from "@/store/ui";
 import { useSite } from "../site-context";
 import { CartLine } from "./cart-line";
 import { FreeDeliveryProgress } from "./free-delivery";
+import { VoucherStrip } from "../vouchers";
 import { CartSummary } from "./cart-summary";
 
 export function CartDrawer() {
@@ -97,6 +98,7 @@ export function CartDrawer() {
               <CartLine key={item.id} item={item} compact />
             ))}
           </ul>
+          <VoucherStrip title="Apply a voucher" mode="apply" className="mt-4" />
         </>
       )}
     </Dialog>

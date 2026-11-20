@@ -67,6 +67,29 @@ async function cardsInOrder(ids: string[]) {
   return ids.flatMap((id) => (byId.has(id) ? [toProductCard(byId.get(id)!)] : []));
 }
 
+/**
+ * Products this customer has ordered before (newest order first), still on
+ * sale: the "Buy it again" row.
+ */
+export async function purchasedProducts(userId: string, limit = 12) {
+  const items = await prisma.orderItem.findMany({
+    where: { order: { userId, status: { notIn: ["CANCELLED", "PENDING_PAYMENT"] } } },
+    select: { productId: true },
+    orderBy: { order: { placedAt: "desc" } },
+    take: 200,
+  });
+  const ids = [...new Set(items.map((i) => i.productId))];
+  const live = new Set(
+    (
+      await prisma.product.findMany({
+        where: { id: { in: ids }, status: ACTIVE },
+        select: { id: true },
+      })
+    ).map((p) => p.id),
+  );
+  return cardsInOrder(ids.filter((id) => live.has(id)).slice(0, limit));
+}
+
 export async function listProducts(q: ProductListQuery) {
   const searchIds = q.q ? await searchProductIds(q.q) : undefined;
   const where = listWhere(q, searchIds);

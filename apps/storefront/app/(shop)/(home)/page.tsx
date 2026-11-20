@@ -2,7 +2,9 @@ import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
 import { Container } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
+import { BuyAgain } from "@/components/home/buy-again";
 import { HeroCarousel } from "@/components/home/hero-carousel";
+import { JustForYou } from "@/components/home/just-for-you";
 import {
   ChevronRightIcon,
   ClockIcon,
@@ -15,6 +17,7 @@ import {
 import { NewsletterBand } from "@/components/layout/footer";
 import { ProductRail } from "@/components/product/product-rail";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
+import { VoucherStrip } from "@/components/vouchers";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe, getList } from "@/lib/server-api";
 
@@ -29,12 +32,13 @@ const CONCERNS = [
 ];
 
 export default async function HomePage() {
-  const [home, categories, bestSellers, newArrivals, offers] = await Promise.all([
+  const [home, categories, bestSellers, newArrivals, offers, forYou] = await Promise.all([
     getDataSafe<HomeContentDTO | null>("/cms/home", null, { revalidate: 300 }),
     getData<CategoryDTO[]>("/categories", { revalidate: 300 }),
     getList<ProductCardDTO>("/products?sort=best_selling&limit=10"),
     getList<ProductCardDTO>("/products?collection=new-arrivals&sort=newest&limit=10"),
     getList<ProductCardDTO>("/products?onSale=true&sort=best_selling&limit=10"),
+    getList<ProductCardDTO>("/products?sort=top_rated&limit=10&page=1"),
   ]);
   const banners = home?.banners ?? [];
   const makeup = categories?.find((c) => c.slug === "makeup");
@@ -94,6 +98,10 @@ export default async function HomePage() {
         )}
       </Container>
 
+      <Container className="pt-6">
+        <VoucherStrip title="Collect vouchers" />
+      </Container>
+
       {categories && categories.length > 0 && (
         <section aria-labelledby="categories-heading">
           <Container className="pt-12">
@@ -134,6 +142,10 @@ export default async function HomePage() {
           </Container>
         </section>
       )}
+
+      <Container>
+        <BuyAgain />
+      </Container>
 
       <Container className="pt-14">
         <ProductRail
@@ -276,6 +288,10 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
+      </Container>
+
+      <Container className="pt-14">
+        <JustForYou initial={forYou} />
       </Container>
 
       <Container className="pt-6">

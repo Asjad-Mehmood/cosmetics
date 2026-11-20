@@ -6,6 +6,7 @@ import { useCart } from "@/hooks/use-cart";
 import { TrustStrip } from "../layout/trust-strip";
 import { CartLine } from "./cart-line";
 import { FreeDeliveryProgress } from "./free-delivery";
+import { VoucherStrip } from "../vouchers";
 import { CartSummary } from "./cart-summary";
 
 export function CartPageContent() {
@@ -60,6 +61,7 @@ export function CartPageContent() {
                 <CartLine key={item.id} item={item} />
               ))}
             </ul>
+            <VoucherStrip title="Apply a voucher" mode="apply" className="mt-6" />
             <Link href="/shop" className="mt-6 inline-block text-sm font-medium underline">
               ← Continue shopping
             </Link>

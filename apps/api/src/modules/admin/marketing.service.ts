@@ -32,6 +32,7 @@ export const toCouponDTO = (c: Coupon): CouponDTO => ({
   startsAt: c.startsAt?.toISOString() ?? null,
   endsAt: c.endsAt?.toISOString() ?? null,
   isActive: c.isActive,
+  isPublic: c.isPublic,
   state: couponState(c),
   createdAt: c.createdAt.toISOString(),
 });

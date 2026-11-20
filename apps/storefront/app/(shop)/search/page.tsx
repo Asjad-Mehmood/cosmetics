@@ -1,9 +1,11 @@
 import { Button, Input } from "@store/ui";
+import type { CategoryDTO } from "@store/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductListing } from "@/components/shop/product-listing";
 import { POPULAR_SEARCHES } from "@/lib/config";
 import type { SearchParams } from "@/lib/listing";
+import { getDataSafe } from "@/lib/server-api";
 
 export const metadata: Metadata = { title: "Search", robots: { index: false } };
 
@@ -14,10 +16,18 @@ export default async function SearchPage({
 }) {
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
+  const slug = typeof sp.category === "string" && sp.category ? sp.category : undefined;
+  const category = slug
+    ? (await getDataSafe<CategoryDTO[]>("/categories", [], { revalidate: 300 })).find(
+        (c) => c.slug === slug,
+      )
+    : undefined;
 
   return (
     <ProductListing
       title={q ? `Results for “${q}”` : "Search"}
+      description={category ? `In ${category.name}` : undefined}
+      scope={category ? { category: category.slug } : {}}
       eyebrow="Search"
       pathname="/search"
       searchParams={sp}
@@ -25,6 +35,7 @@ export default async function SearchPage({
       header={
         <div className="mb-8">
           <form action="/search" role="search" className="flex max-w-xl gap-2">
+            {category && <input type="hidden" name="category" value={category.slug} />}
             <label htmlFor="search-q" className="sr-only">
               Search products
             </label>

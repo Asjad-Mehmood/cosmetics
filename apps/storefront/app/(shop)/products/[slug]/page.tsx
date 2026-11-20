@@ -3,6 +3,7 @@ import { toMajor } from "@store/types";
 import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BoughtTogether } from "@/components/product/bought-together";
 import { ProductDetails, type DetailSection } from "@/components/product/product-details";
 import { ProductRail } from "@/components/product/product-rail";
 import { ProductView } from "@/components/product/product-view";
@@ -107,6 +108,7 @@ export default async function ProductPage({ params }: Props) {
         ]}
       />
       <ProductView product={product} />
+      <BoughtTogether product={product} related={related} />
       <ProductDetails sections={detailSections(product)} />
       <Reviews slug={product.slug} />
 

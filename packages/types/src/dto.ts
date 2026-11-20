@@ -73,6 +73,8 @@ export interface ProductCardDTO {
   isFeatured: boolean;
   avgRating: number;
   reviewCount: number;
+  /** Units sold so far (shown as "1.2k sold"). */
+  soldCount: number;
 }
 
 export interface VariantDTO {
@@ -233,8 +235,21 @@ export interface DeliveryZoneDTO {
   codFee: number;
 }
 
+/** A discount code the store advertises to shoppers. */
+export interface VoucherDTO {
+  code: string;
+  description: string | null;
+  type: DiscountType;
+  /** Percent for PERCENTAGE, minor units for FIXED, 0 for FREE_SHIPPING. */
+  value: number;
+  minOrderAmount: number | null;
+  endsAt: string | null;
+}
+
 export interface HomeContentDTO {
   announcement: string | null;
+  /** Public, currently usable discount codes. */
+  vouchers: VoucherDTO[];
   banners: BannerDTO[];
   /** Contact details shown in the header and footer. */
   contact: { phone: string | null; email: string | null };

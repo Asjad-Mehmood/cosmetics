@@ -16,7 +16,7 @@ export function Price({
   const onSale = compareAtPrice != null && compareAtPrice > price;
   return (
     <p className={cn("flex flex-wrap items-baseline gap-x-2", className)}>
-      <span className={cn("font-semibold", onSale && "text-danger")}>
+      <span data-price className={cn("font-semibold", onSale && "text-danger")}>
         {from && <span className="text-muted font-normal">From </span>}
         {formatMoney(price)}
       </span>
