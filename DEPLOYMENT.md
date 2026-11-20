@@ -23,8 +23,8 @@ In your Vercel project (for example `amazon-group`): **Settings → Build and De
 - Leave the build, output and install commands empty. Each service's build
   comes from `vercel.json`:
   - `api` (`apps/api`, Express): `node scripts/vercel-build.mjs` generates the
-    Prisma client, bundles `src/vercel.ts` to `dist/vercel/index.js` (the
-    service's output directory, which Vercel serves) and, on production
+    Prisma client, bundles `src/vercel.ts` to `vercel-bundle/` (loaded by the
+    service's entrypoint, `apps/api/vercel-entry.js`) and, on production
     deploys only, migrates and seeds the database;
   - `storefront` (`apps/storefront`, Next.js): `next build`.
 

@@ -1,16 +1,12 @@
 import { defineConfig } from "tsup";
 
 /**
- * The bundle for the `api` Vercel service (vercel.json → services.api).
- *
- * It goes to its own folder, dist/vercel, which is the service's
- * outputDirectory: after the build command, Vercel serves the index.js it finds
- * there. (Without that setting it would search dist/ and pick dist/server.js,
- * the long-running server for other hosts.)
+ * The bundle for the `api` Vercel service, loaded by vercel-entry.js (see
+ * there for why it lives in vercel-bundle/ and not dist/).
  */
 export default defineConfig({
   entry: { index: "src/vercel.ts" },
-  outDir: "dist/vercel",
+  outDir: "vercel-bundle",
   format: ["esm"],
   target: "node22",
   platform: "node",

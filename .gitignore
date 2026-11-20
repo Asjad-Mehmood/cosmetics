@@ -43,3 +43,6 @@ apps/api/uploads/
 
 # Vercel
 .vercel
+
+# Bundle of the api Vercel service (apps/api/tsup.vercel.config.ts)
+vercel-bundle/
