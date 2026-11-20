@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useEmailEnabled } from "@/hooks/use-auth";
 import { api, ApiError } from "@/lib/api";
 import { siteConfig } from "@/lib/config";
+import { Confetti, DrawnCheck } from "../motion";
 import { OrderProgress, OrderTimeline, StatusBadge } from "./order-progress";
 import { OrderReturns } from "./order-returns";
 
@@ -89,28 +90,48 @@ export function OrderView({ number }: { number: string }) {
   return (
     <Container className="max-w-5xl py-10 sm:py-14">
       {justPlaced && o.status !== "PENDING_PAYMENT" && o.status !== "CANCELLED" && (
-        <div role="status" className="bg-success/10 mb-8 rounded-2xl p-6">
-          <p className="text-success text-sm font-semibold">Thank you!</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">Your order is confirmed</h1>
-          <p className="text-muted mt-2 text-sm">
-            {emailEnabled ? (
-              <>
-                We’ve emailed a confirmation to <strong className="text-ink">{o.email}</strong>.
-              </>
-            ) : (
-              <>
-                Bookmark this page to follow your order, or track it any time with order number{" "}
-                <strong className="text-ink">{o.number}</strong>.
-              </>
-            )}
-            {o.paymentMethod === "COD" && (
-              <>
-                {" "}
-                Please keep <strong className="text-ink">{formatMoney(o.grandTotal)}</strong> ready
-                in cash.
-              </>
-            )}
-          </p>
+        <div
+          role="status"
+          className="bg-success/10 animate-scale-in relative mb-8 flex gap-4 rounded-2xl p-6 sm:gap-5"
+        >
+          <Confetti />
+          <DrawnCheck className="text-success size-12 shrink-0 sm:size-14" delay={150} />
+          <div>
+            <p
+              className="text-success animate-fade-up text-sm font-semibold"
+              style={{ animationDelay: "500ms" }}
+            >
+              Thank you!
+            </p>
+            <h1
+              className="animate-fade-up mt-1 text-2xl font-bold tracking-tight"
+              style={{ animationDelay: "600ms" }}
+            >
+              Your order is confirmed
+            </h1>
+            <p
+              className="text-muted animate-fade-up mt-2 text-sm"
+              style={{ animationDelay: "700ms" }}
+            >
+              {emailEnabled ? (
+                <>
+                  We’ve emailed a confirmation to <strong className="text-ink">{o.email}</strong>.
+                </>
+              ) : (
+                <>
+                  Bookmark this page to follow your order, or track it any time with order number{" "}
+                  <strong className="text-ink">{o.number}</strong>.
+                </>
+              )}
+              {o.paymentMethod === "COD" && (
+                <>
+                  {" "}
+                  Please keep <strong className="text-ink">{formatMoney(o.grandTotal)}</strong>{" "}
+                  ready in cash.
+                </>
+              )}
+            </p>
+          </div>
         </div>
       )}
 

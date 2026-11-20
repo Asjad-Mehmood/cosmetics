@@ -115,3 +115,58 @@ test.describe("on a phone", () => {
     await expect(sheet).toBeHidden();
   });
 });
+
+test("adding to cart shows ✓ Added, flies the photo to the cart, then opens the cart", async ({
+  page,
+}) => {
+  await page.goto("/products/digital-thermometer");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
+
+  await expect(page.getByRole("button", { name: "Added" })).toBeVisible();
+  await expect(page.locator("img[data-fly-ghost]")).toHaveCount(1);
+  // It lands, disappears and the cart drawer opens with the new count.
+  await expect(page.getByRole("dialog", { name: /Your cart/ })).toBeVisible();
+  await expect(page.locator("img[data-fly-ghost]")).toHaveCount(0);
+  await expect(page.getByTestId("cart-count")).toHaveText(/\d+/);
+  // The button goes back to normal after a moment.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Add to cart", exact: true })).toBeVisible();
+});
+
+test("the hero's active dot fills up as the slideshow timer runs", async ({ page }) => {
+  await page.goto("/");
+  const bar = page.getByTestId("hero-progress");
+  await expect(bar).toHaveCount(1);
+  await expect
+    .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+    .toBe("hero-progress");
+  // Hovering pauses it.
+  await page.getByRole("region", { name: "Featured" }).hover();
+  await expect
+    .poll(() => bar.evaluate((el) => getComputedStyle(el).animationPlayState))
+    .toBe("paused");
+});
+
+test("sections below the fold fade in when scrolled to, and only then", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  const concerns = page.locator("ul[data-reveal]").filter({ hasText: "Dark spots" });
+  await expect(concerns).toHaveAttribute("data-reveal", "hidden");
+  await concerns.scrollIntoViewIfNeeded();
+  await expect(concerns).toHaveAttribute("data-reveal", "in");
+  await expect(concerns.locator(".reveal-item").first()).toHaveCSS("opacity", "1");
+});
+
+test("a wrong discount code shakes the field and shows the error", async ({ page }) => {
+  await page.goto("/products/digital-thermometer");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
+  const drawer = page.getByRole("dialog", { name: /Your cart/ });
+  await drawer.getByRole("link", { name: "View full cart" }).click();
+  await page.getByLabel("Discount code").fill("NOPE123");
+  await page.getByRole("button", { name: "Apply", exact: true }).click();
+  await expect(page.locator("#coupon-error")).toBeVisible();
+  // The shake moves the row without re-creating it, so what was typed stays.
+  await expect(page.getByLabel("Discount code")).toHaveValue("NOPE123");
+});

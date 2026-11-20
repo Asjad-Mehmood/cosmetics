@@ -1,15 +1,16 @@
 "use client";
 
 import type { ApiResponse, ProductCardDTO, ProductDetailDTO } from "@store/types";
-import { Button } from "@store/ui";
+import { Button, cn } from "@store/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { api, ApiError } from "@/lib/api";
+import { flyToCart, useFlash } from "@/lib/motion";
 import { useUi } from "@/store/ui";
-import { BagIcon } from "../icons";
+import { BagIcon, CheckIcon } from "../icons";
 
 /** A product the card can add in one tap: one shade, one size in stock, one price. */
 export const isSingleOption = (p: ProductCardDTO) =>
@@ -24,6 +25,7 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
   const addToCart = useAddToCart();
   const openCart = useUi((s) => s.openCart);
   const [loading, setLoading] = useState(false);
+  const [added, flashAdded] = useFlash();
   const href = `/products/${product.slug}`;
   const base = "w-full";
 
@@ -50,13 +52,18 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
     );
   }
 
-  async function add() {
+  async function add(e: MouseEvent<HTMLButtonElement>) {
+    // The card's photo, to fly into the cart icon.
+    const photo = e.currentTarget.closest("article")?.querySelector("img");
     setLoading(true);
     try {
       const detail = (await api<ApiResponse<ProductDetailDTO>>(href)).data;
       const available = detail.variants.filter((v) => v.stockStatus !== "out_of_stock");
       if (available.length !== 1) return router.push(href);
       await addToCart.mutateAsync({ variantId: available[0]!.id, quantity: 1 });
+      setLoading(false);
+      flashAdded();
+      await flyToCart(photo, photo?.currentSrc);
       openCart();
     } catch (err) {
       toast.error(
@@ -71,13 +78,21 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
     <Button
       variant="brand"
       pill
-      className={base}
+      className={cn(base, added && "bg-success hover:bg-success")}
       onClick={add}
       loading={loading}
       aria-label={`Add to cart: ${product.title}`}
     >
-      {!loading && <BagIcon width={16} height={16} />}
-      Add to cart
+      {added ? (
+        <span className="animate-check-in inline-flex items-center gap-1.5">
+          <CheckIcon width={16} height={16} /> Added
+        </span>
+      ) : (
+        <>
+          {!loading && <BagIcon width={16} height={16} />}
+          Add to cart
+        </>
+      )}
     </Button>
   );
 }

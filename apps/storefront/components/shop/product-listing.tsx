@@ -8,7 +8,7 @@ import { getData, getDataSafe, getList } from "@/lib/server-api";
 import { ChevronRightIcon } from "../icons";
 import { ProductGrid } from "../product/product-card";
 import { FilterPanel, MobileFilters } from "./filter-panel";
-import { ListingNavProvider, ResultsArea } from "./listing-nav";
+import { ListingNavProvider, ResultCount, ResultsArea } from "./listing-nav";
 import { Pagination } from "./pagination";
 import { ActiveFilters, SortSelect } from "./toolbar";
 
@@ -76,7 +76,7 @@ export async function ProductListing({
               <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
               {description && <p className="text-muted mt-3 max-w-lg">{description}</p>}
               <p className="mt-4 text-sm font-medium" aria-live="polite">
-                {total} {total === 1 ? "product" : "products"}
+                <ResultCount total={total} />
               </p>
             </div>
             {image && (
@@ -99,7 +99,7 @@ export async function ProductListing({
                         href={href}
                         aria-current={on ? "page" : undefined}
                         className={cn(
-                          "block rounded-full border px-4 py-2 text-sm font-medium transition",
+                          "block rounded-full border px-4 py-2 text-sm font-medium transition active:scale-95",
                           on
                             ? "border-brand-600 bg-brand-600 text-white"
                             : "border-line hover:border-brand-600",

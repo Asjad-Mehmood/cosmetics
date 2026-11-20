@@ -1,11 +1,13 @@
 "use client";
 
 import { cn } from "@store/ui";
+import { useTweenedNumber } from "@/lib/motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   useTransition,
   type ReactNode,
@@ -55,15 +57,36 @@ export function useListingNav(): ListingNav {
   return ctx;
 }
 
-/** Dims the results while a filter change is loading. */
+/**
+ * Dims the results while a filter change is loading, then fades the new
+ * cards in one after another. The first load is not animated.
+ */
 export function ResultsArea({ children }: { children: ReactNode }) {
   const { isPending } = useListingNav();
+  const query = useSearchParams().toString();
+  const first = useRef(query);
+  const changed = query !== first.current;
   return (
     <div
       aria-busy={isPending}
-      className={cn("transition-opacity", isPending && "pointer-events-none opacity-50")}
+      className={cn(
+        "transition-[opacity,filter] duration-300",
+        isPending && "pointer-events-none opacity-60 blur-[1px]",
+      )}
     >
-      {children}
+      <div key={query} className={cn(changed && "results-in")}>
+        {children}
+      </div>
     </div>
+  );
+}
+
+/** A count that ticks to its new value when the results change (at once with Reduce motion). */
+export function ResultCount({ total }: { total: number }) {
+  const shown = useTweenedNumber(total);
+  return (
+    <>
+      {shown} {total === 1 ? "product" : "products"}
+    </>
   );
 }

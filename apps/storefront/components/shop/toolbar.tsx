@@ -62,7 +62,7 @@ export function ActiveFilters({ lockedOnSale = false }: { lockedOnSale?: boolean
           key={c.label}
           type="button"
           onClick={c.remove}
-          className="bg-brand-50 text-brand-700 hover:bg-brand-100 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+          className="bg-brand-50 text-brand-700 hover:bg-brand-100 animate-scale-in flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition active:scale-90"
           aria-label={`Remove filter: ${c.label}`}
         >
           {c.label} <span aria-hidden>×</span>

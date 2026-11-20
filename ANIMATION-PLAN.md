@@ -1,6 +1,6 @@
 # Animation Plan: Amazon Group storefront
 
-> **Status: phases 1–3 are built** (see the notes under each). Phases 4–8 are not started.
+> **Status: all eight phases are built** (see the notes under each).
 
 ## Goal
 
@@ -161,6 +161,17 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - These run off the existing React Query mutation states, with no fake delays.
 - Screen readers still hear the same text announcements; these already exist through `sonner` and live regions.
 
+> **Built (phase 4).** Shared pieces are in `apps/storefront/app/motion.css`,
+> `apps/storefront/lib/motion.ts` (`flyToCart`, `useFlash`, `shake`,
+> `useTweenedNumber`, `useSlidingHighlight`) and `apps/storefront/components/motion.tsx`
+> (`RollingNumber`, `TweenedMoney`, `DrawnCheck`, `Burst`, `Confetti`).
+>
+> - **Differences from the plan:**
+>   - The fly-to-cart takes 650 ms, not 450 ms. It is easier to follow.
+>   - The cart opens when the photo lands.
+>   - A removed cart line folds away while the request runs, and comes back if the request fails.
+>   - The coupon shake uses the Web Animations API, so the field keeps what was typed and keeps focus.
+
 ## Phase 5: Product page
 
 - **Gallery:**
@@ -171,6 +182,16 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - **Details tabs and accordion:** on mobile, sections open with an animated height using `interpolate-size: allow-keywords`; other browsers just open instantly. On desktop, the tab underline slides between tabs.
 - **Frequently bought together:** "Add all" adds the items one after another, 80 ms apart, with a ✓ on each.
 - **Reviews:** star bars fill when they scroll into view, once.
+
+> **Built (phase 5).**
+>
+> - **Gallery:** the photo cross-fades and the thumbnail ring slides.
+> - **Hover zoom:** eases in over 500 ms.
+> - **Sticky bar:** slides up instead of appearing.
+> - **Details:** the tab underline slides; on phones the accordion opens with an animated height (`.details-animated`).
+> - **Frequently bought together:** "Add all" puts a ✓ on each photo in turn.
+> - **Reviews:** the star bars fill as they scroll into view.
+> - **Low stock:** the dot pings.
 
 ## Phase 6: Home and listing pages
 
@@ -195,6 +216,16 @@ All of these come from the shared `Dialog` and the header components. Fix them o
   - The results count ticks to the new number.
 - **Shop by category / concern tiles:** the hover ring and icon lift already exist. Add a press effect on mobile.
 
+> **Built (phase 6).**
+>
+> - **Hero:** each slide's text comes in line by line, and the photo drifts closer.
+> - **Hero dot and timer:** the active dot fills as a progress bar, and the slide changes when it is full. Pausing on hover, on focus or in a hidden tab freezes both together.
+> - **`<Reveal>`** (`components/reveal.tsx`): sections and rails fade up the first time they scroll into view, and cards come in one after another. It uses an IntersectionObserver instead of scroll-driven CSS, because rails scroll sideways and the CSS version would not work inside them. Content on screen at load, content without JavaScript, and content under Reduce motion is never hidden.
+> - **Rails:** edge fades show there is more to scroll.
+> - **Cards and tiles:** cards lift on hover, cards and tiles press in on touch, and sale badges slide in.
+> - **Filters:** the results dim and blur slightly while loading, then the new cards fade up in turn. The first load is not animated, so LCP is not delayed.
+> - **Counts and chips:** the count ticks to its new value, and filter chips scale in.
+
 ## Phase 7: Checkout, orders and account
 
 - **Checkout:**
@@ -207,6 +238,13 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - **Order progress timeline:** the line fills up to the current step; the current step pulses gently twice.
 - **Account:** the address book, wishlist and returns lists use the same remove-collapse and add-fade as the cart.
 
+> **Built (phase 7).**
+>
+> - **Checkout:** sections fade up in turn, and the one being filled in is highlighted. A form error shakes so it is noticed after the scroll up. Checkout is one page, not separate steps, so the planned sliding between steps does not apply.
+> - **Order placed:** the check draws itself, confetti in the logo colours, and the text fades in.
+> - **Order progress:** the steps fill one after another, and the current step pulses twice.
+> - **Address book:** addresses fade in, and fade and shrink away while being deleted.
+
 ## Phase 8: Admin (keep it calm)
 
 Staff use the admin all day, so motion stays minimal:
@@ -215,6 +253,11 @@ Staff use the admin all day, so motion stays minimal:
 - Table rows fade when filtered.
 - Save buttons go spinner → ✓.
 - Nothing else.
+
+> **Built (phase 8).**
+>
+> - **Table rows:** new admin table rows fade in.
+> - **Save buttons:** a button that started a successful save shows a ✓ for 1.2 s. This is done once, in the admin's React Query `MutationCache`, so every save button gets it without changes to each form.
 
 ## Testing and quality checks (every phase)
 

@@ -2,6 +2,7 @@
 
 import { cn } from "@store/ui";
 import { MinusIcon, PlusIcon } from "../icons";
+import { RollingNumber } from "../motion";
 
 export function QuantityStepper({
   value,
@@ -21,7 +22,7 @@ export function QuantityStepper({
   size?: "sm" | "md";
 }) {
   const btn = cn(
-    "grid place-items-center disabled:opacity-30 hover:bg-surface",
+    "grid place-items-center rounded-full transition-[scale,background-color] duration-150 disabled:opacity-30 hover:bg-surface active:scale-90",
     size === "sm" ? "size-8" : "size-10",
   );
   return (
@@ -46,7 +47,7 @@ export function QuantityStepper({
           size === "sm" ? "w-7" : "w-10",
         )}
       >
-        {value}
+        <RollingNumber value={value} />
       </span>
       <button
         type="button"

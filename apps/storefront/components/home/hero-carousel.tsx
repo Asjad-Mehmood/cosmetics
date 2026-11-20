@@ -23,12 +23,21 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
 
   const go = useCallback((i: number) => setIndex(((i % count) + count) % count), [count]);
 
+  const [hidden, setHidden] = useState(false);
+  const [motion, setMotion] = useState(false);
+  const stopped = paused || userPaused || hidden || !motion;
+
+  // No autoplay with Reduce motion; pause while the tab is in the background.
   useEffect(() => {
-    if (count < 2 || paused || userPaused) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % count), INTERVAL);
-    return () => clearInterval(t);
-  }, [count, paused, userPaused]);
+    setMotion(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const onVis = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  // The active dot fills up as the timer runs; the slide changes when it is full.
+  // (Driven by the dot's animation, so pausing freezes both together.)
+  const next = useCallback(() => setIndex((i) => (i + 1) % count), [count]);
 
   if (!count) return null;
 
@@ -64,16 +73,23 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
             inert={i !== index}
             className="bg-brand-700 relative h-[340px] w-full shrink-0 sm:h-[400px] lg:h-[460px]"
           >
+            {/* The photo drifts slowly closer while its slide is showing. */}
             <Image
               src={b.imageUrl}
               alt=""
               fill
               priority={i === 0}
               sizes="(min-width: 1280px) 1250px, 100vw"
-              className="object-cover"
+              className={cn(
+                "object-cover transition-transform duration-[7s] ease-out",
+                i === index ? "motion-safe:scale-110" : "scale-100",
+              )}
             />
             <span className="from-brand-700/95 via-brand-700/70 absolute inset-0 bg-gradient-to-r to-transparent" />
-            <div className="relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12">
+            <div
+              key={i === index ? `in-${index}` : "out"}
+              className="hero-copy relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12"
+            >
               <p className="text-accent-100 text-xs font-semibold uppercase tracking-widest">
                 Beauty &amp; pharmacy
               </p>
@@ -127,10 +143,24 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
                 aria-label={`Show slide ${i + 1}: ${b.title}`}
                 aria-current={i === index}
                 className={cn(
-                  "h-2 rounded-full transition-all",
-                  i === index ? "w-7 bg-white" : "w-2 bg-white/50 hover:bg-white/80",
+                  "relative h-2 overflow-hidden rounded-full transition-all duration-500",
+                  i === index ? "w-10 bg-white/40" : "w-2 bg-white/50 hover:bg-white/80",
                 )}
-              />
+              >
+                {i === index && (
+                  <span
+                    key={index}
+                    aria-hidden
+                    data-testid="hero-progress"
+                    onAnimationEnd={next}
+                    className="absolute inset-0 origin-left rounded-full bg-white"
+                    style={{
+                      animation: motion ? `hero-progress ${INTERVAL}ms linear both` : "none",
+                      animationPlayState: stopped ? "paused" : "running",
+                    }}
+                  />
+                )}
+              </button>
             ))}
             <button
               type="button"

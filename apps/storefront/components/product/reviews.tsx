@@ -253,7 +253,7 @@ export function Reviews({ slug }: { slug: string }) {
                           aria-hidden
                         >
                           <span
-                            className="bg-ink block h-full rounded-full"
+                            className="bg-accent-500 fill-on-view block h-full rounded-full"
                             style={{ width: `${share}%` }}
                           />
                         </span>

@@ -11,9 +11,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";
+import { flyToCart, useFlash, useSlidingHighlight } from "@/lib/motion";
 import { arrivalWindow, formatWindow } from "@/lib/delivery-dates";
 import { useUi } from "@/store/ui";
-import { BadgeCheckIcon, CashIcon, ClockIcon, RefreshIcon, TruckIcon } from "../icons";
+import { BadgeCheckIcon, CashIcon, CheckIcon, ClockIcon, RefreshIcon, TruckIcon } from "../icons";
 import { freeDeliveryFrom, useSite } from "../site-context";
 import { VoucherStrip } from "../vouchers";
 import { NotifyMe } from "./notify-me";
@@ -26,6 +27,7 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
   const [zoom, setZoom] = useState<{ x: number; y: number } | null>(null);
   const strip = useRef<HTMLUListElement>(null);
   const current = images[Math.min(active, images.length - 1)];
+  const thumbs = useSlidingHighlight(active, '[aria-current="true"]');
 
   // Phones: a swipeable strip; keep the dots in sync with the visible photo.
   const onScroll = () => {
@@ -43,6 +45,7 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
       <div className="relative md:hidden">
         <ul
           ref={strip}
+          data-fly-source
           onScroll={onScroll}
           className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto"
           aria-label="Product images"
@@ -81,26 +84,38 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
       {/* Tablets and up: thumbnails + main photo with hover zoom */}
       <div className="hidden gap-4 md:flex">
         {images.length > 1 && (
-          <ul className="flex w-20 shrink-0 flex-col gap-3" aria-label="Product images">
-            {images.map((img, i) => (
-              <li key={img.url}>
-                <button
-                  type="button"
-                  onClick={() => setActive(i)}
-                  aria-label={`Show image ${i + 1} of ${images.length}`}
-                  aria-current={i === active}
-                  className={cn(
-                    "bg-surface relative block aspect-square w-full overflow-hidden rounded-xl border-2 transition",
-                    i === active ? "border-brand-600" : "hover:border-line border-transparent",
-                  )}
-                >
-                  <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div ref={thumbs.ref} className="relative w-20 shrink-0">
+            <span
+              aria-hidden
+              className="border-brand-600 pointer-events-none absolute left-0 top-0 z-10 rounded-xl border-2"
+              style={thumbs.style}
+            />
+            <ul className="flex flex-col gap-3" aria-label="Product images">
+              {images.map((img, i) => (
+                <li key={img.url}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    aria-label={`Show image ${i + 1} of ${images.length}`}
+                    aria-current={i === active}
+                    className={cn(
+                      "bg-surface relative block aspect-square w-full overflow-hidden rounded-xl border-2 transition",
+                      i === active
+                        ? thumbs.box
+                          ? "border-transparent"
+                          : "border-brand-600"
+                        : "hover:border-line border-transparent opacity-80 hover:opacity-100",
+                    )}
+                  >
+                    <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
         <div
+          data-fly-source
           className="bg-surface relative aspect-square flex-1 cursor-zoom-in overflow-hidden rounded-3xl"
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
@@ -112,20 +127,26 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
           onMouseLeave={() => setZoom(null)}
         >
           {current && (
-            <Image
+            // A new photo cross-fades in over the old one.
+            <div
               key={current.url}
-              src={current.url}
-              alt={current.alt ?? title}
-              fill
-              priority
-              sizes="(min-width: 1024px) 45vw, 90vw"
-              className="object-cover transition-transform duration-200"
-              style={
-                zoom
-                  ? { transform: "scale(1.8)", transformOrigin: `${zoom.x}% ${zoom.y}%` }
-                  : undefined
-              }
-            />
+              className="animate-fade-in absolute inset-0"
+              style={{ animationDuration: "450ms" }}
+            >
+              <Image
+                src={current.url}
+                alt={current.alt ?? title}
+                fill
+                priority
+                sizes="(min-width: 1024px) 45vw, 90vw"
+                className="object-cover transition-transform duration-500 ease-out"
+                style={
+                  zoom
+                    ? { transform: "scale(1.8)", transformOrigin: `${zoom.x}% ${zoom.y}%` }
+                    : undefined
+                }
+              />
+            </div>
           )}
         </div>
       </div>
@@ -203,6 +224,9 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
   const [quantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [added, flashAdded] = useFlash();
+  const shades = useSlidingHighlight(color);
+  const sizes = useSlidingHighlight(size);
 
   const colorVariants = useMemo(
     () => product.variants.filter((v) => v.color === color),
@@ -248,10 +272,21 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
     addToCart.mutate(
       { variantId: variant.id, quantity },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           setQuantity(1);
-          if (then === "checkout") router.push("/checkout");
-          else openCart();
+          if (then === "checkout") return router.push("/checkout");
+          flashAdded();
+          // The photo on screen flies into the cart icon, then the cart opens.
+          const photo = [
+            ...document.querySelectorAll<HTMLImageElement>("[data-fly-source] img"),
+          ].find((img) => {
+            const r = img.getBoundingClientRect();
+            return r.width > 0 && r.left > -2 && r.right < window.innerWidth + 2;
+          });
+          const r = photo?.getBoundingClientRect();
+          const onScreen = r && r.bottom > 80 && r.top < window.innerHeight;
+          await flyToCart(onScreen ? photo : buyBox.current, photo?.currentSrc);
+          openCart();
         },
         onError: (err) => {
           setBuying(false);
@@ -324,7 +359,12 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
           <legend className="text-sm font-semibold">
             Shade: <span className="text-muted font-normal">{color}</span>
           </legend>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div ref={shades.ref} className="relative mt-3 flex flex-wrap gap-2">
+            <span
+              aria-hidden
+              className="border-brand-600 pointer-events-none absolute left-0 top-0 rounded-full border-2"
+              style={shades.style}
+            />
             {product.colors.map((c) => {
               const allSoldOut = product.variants
                 .filter((v) => v.color === c.name)
@@ -339,7 +379,11 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
                   title={c.name}
                   className={cn(
                     "relative size-11 rounded-full border-2 p-0.5 transition",
-                    c.name === color ? "border-brand-600" : "hover:border-line border-transparent",
+                    c.name === color
+                      ? shades.box
+                        ? "border-transparent"
+                        : "border-brand-600"
+                      : "hover:border-line border-transparent hover:scale-105",
                   )}
                 >
                   <span
@@ -363,7 +407,12 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
           <legend className="text-sm font-semibold">
             Size{size && <span className="text-muted font-normal">: {size}</span>}
           </legend>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div ref={sizes.ref} className="relative mt-3 flex flex-wrap gap-2">
+            <span
+              aria-hidden
+              className="border-brand-600 bg-brand-50 pointer-events-none absolute left-0 top-0 rounded-2xl border-2"
+              style={sizes.style}
+            />
             {product.sizes.map((s) => {
               const v = colorVariants.find((x) => x.size === s);
               const unavailable = !v || v.stockStatus === "out_of_stock";
@@ -376,9 +425,11 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
                   onClick={() => selectSize(s)}
                   aria-pressed={selected}
                   className={cn(
-                    "min-w-24 rounded-2xl border-2 px-4 py-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-40",
+                    "relative min-w-24 rounded-2xl border-2 px-4 py-2.5 text-left transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-40",
                     selected
-                      ? "border-brand-600 bg-brand-50"
+                      ? sizes.box
+                        ? "border-transparent"
+                        : "border-brand-600 bg-brand-50"
                       : "border-line hover:border-brand-600",
                   )}
                 >
@@ -396,13 +447,16 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
             })}
           </div>
           {sizeError && (
-            <p id="size-error" role="alert" className="text-danger mt-2 text-sm">
+            <p id="size-error" role="alert" className="text-danger animate-fade-in mt-2 text-sm">
               Please choose a size.
             </p>
           )}
           {variant?.stockStatus === "low_stock" && (
             <p className="mt-3 flex items-center gap-2 text-sm font-medium" role="status">
-              <span aria-hidden className="bg-warning size-2 rounded-full" />
+              <span aria-hidden className="relative flex size-2">
+                <span className="bg-warning absolute inset-0 animate-ping rounded-full opacity-75" />
+                <span className="bg-warning relative size-2 rounded-full" />
+              </span>
               Hurry, only {variant.lowStockCount} left in {variant.size}.
             </p>
           )}
@@ -438,12 +492,20 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
                   size="lg"
                   pill
                   variant="brand"
-                  className="h-12 flex-1"
+                  className={cn("h-12 flex-1", added && "bg-success hover:bg-success")}
                   onClick={() => add("cart")}
                   loading={addToCart.isPending && !buying}
                   disabled={!product.inStock}
                 >
-                  {product.inStock ? "Add to cart" : "Sold out"}
+                  {added ? (
+                    <span className="animate-check-in inline-flex items-center gap-2">
+                      <CheckIcon width={18} height={18} /> Added
+                    </span>
+                  ) : product.inStock ? (
+                    "Add to cart"
+                  ) : (
+                    "Sold out"
+                  )}
                 </Button>
                 <WishlistButton
                   productId={product.id}
@@ -485,8 +547,14 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
       {/* Phones: sticky buy bar above the tab bar once the main buttons are off screen */}
       {product.inStock && (
         <div
-          hidden={!showBar}
-          className="border-line bg-canvas/95 fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t px-4 py-3 backdrop-blur md:hidden"
+          aria-hidden={!showBar}
+          inert={!showBar}
+          className={cn(
+            "border-line bg-canvas/95 fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t px-4 py-3 backdrop-blur transition-[translate,opacity] duration-300 ease-out md:hidden",
+            showBar
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-full opacity-0",
+          )}
         >
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">

@@ -21,19 +21,33 @@ export function OrderProgress({ status }: { status: OrderStatus }) {
   if (status === "CANCELLED" || status === "PENDING_PAYMENT" || status === "REFUNDED") return null;
   return (
     <ol className="grid grid-cols-4 gap-2" aria-label="Order progress">
-      {STEPS.map((step) => {
+      {STEPS.map((step, i) => {
         const done = step.reached.includes(status);
+        const current = done && STEPS.filter((s) => s.reached.includes(status)).at(-1) === step;
         return (
-          <li
-            key={step.label}
-            aria-current={
-              done && STEPS.filter((s) => s.reached.includes(status)).at(-1) === step
-                ? "step"
-                : undefined
-            }
-          >
-            <div className={cn("h-1.5 rounded-full", done ? "bg-ink" : "bg-line")} />
-            <p className={cn("mt-2 text-xs sm:text-sm", done ? "font-medium" : "text-muted")}>
+          <li key={step.label} aria-current={current ? "step" : undefined}>
+            {/* Each finished step fills in turn; the current one pulses twice. */}
+            <div className="bg-line relative h-1.5 overflow-hidden rounded-full">
+              {done && (
+                <span
+                  className="bg-brand-600 animate-fill-x absolute inset-0 origin-left rounded-full"
+                  style={{ animationDelay: `${150 + i * 250}ms` }}
+                />
+              )}
+            </div>
+            <p
+              className={cn(
+                "mt-2 flex items-center gap-1.5 text-xs sm:text-sm",
+                done ? "font-medium" : "text-muted",
+              )}
+            >
+              {current && (
+                <span
+                  aria-hidden
+                  className="text-brand-600 animate-pulse-twice size-2 shrink-0 rounded-full bg-current"
+                  style={{ animationDelay: `${400 + i * 250}ms` }}
+                />
+              )}
               {step.label}
             </p>
           </li>

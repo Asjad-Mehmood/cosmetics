@@ -2,10 +2,12 @@
 
 import { cn } from "@store/ui";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useMe } from "@/hooks/use-auth";
 import { useToggleWishlist, useWishlistIds } from "@/hooks/use-wishlist";
 import { HeartIcon } from "../icons";
+import { Burst } from "../motion";
 
 /** Heart toggle. Guests are sent to sign in first (and come back here). */
 export function WishlistButton({
@@ -28,6 +30,8 @@ export function WishlistButton({
   const router = useRouter();
   const pathname = usePathname();
   const saved = ids.data?.includes(productId) ?? false;
+  // Bumped each time the shopper saves, to replay the heart pop and burst.
+  const [pops, setPops] = useState(0);
 
   const onClick = () => {
     if (!me.data) {
@@ -35,6 +39,7 @@ export function WishlistButton({
       router.push(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
+    if (!saved) setPops((n) => n + 1);
     toggle.mutate(
       { productId, saved: !saved },
       {
@@ -59,7 +64,7 @@ export function WishlistButton({
           className,
         )}
       >
-        <HeartIcon className={cn("size-5", saved && "fill-danger stroke-danger")} />
+        <Heart saved={saved} pops={pops} className="size-5" />
         {withText && (saved ? "Saved to your wishlist" : "Save to wishlist")}
       </button>
     );
@@ -75,7 +80,24 @@ export function WishlistButton({
         className,
       )}
     >
-      <HeartIcon className={cn("size-[18px]", saved && "fill-danger stroke-danger")} />
+      <Heart saved={saved} pops={pops} className="size-[18px]" />
     </button>
+  );
+}
+
+/** The heart: fills with a springy pop and a burst of dots when saved; un-saving just fades. */
+function Heart({ saved, pops, className }: { saved: boolean; pops: number; className: string }) {
+  return (
+    <span key={pops} className="relative grid place-items-center">
+      <HeartIcon
+        className={cn(
+          className,
+          "transition-[fill,stroke] duration-300",
+          saved ? "fill-danger stroke-danger" : "fill-transparent",
+          saved && pops > 0 && "animate-pop",
+        )}
+      />
+      {saved && pops > 0 && <Burst />}
+    </span>
   );
 }

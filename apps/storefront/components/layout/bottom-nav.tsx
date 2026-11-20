@@ -5,7 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMe } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
+import { useCartLanded } from "@/lib/motion";
 import { useUi } from "@/store/ui";
+import { RollingNumber } from "../motion";
 import { BagIcon, GridIcon, HomeIcon, SearchIcon, UserIcon } from "../icons";
 import { focusSiteSearch } from "./search-box";
 
@@ -18,6 +20,7 @@ export function BottomNav() {
   const me = useMe();
   const count = useCart().data?.itemCount ?? 0;
   const { openCart, setMenuOpen } = useUi();
+  const landed = useCartLanded();
   const accountHref = me.data ? "/account" : "/login";
   const color = (on: boolean) => (on ? "text-brand-700" : "text-muted");
 
@@ -48,11 +51,18 @@ export function BottomNav() {
           Search
         </button>
         <button type="button" onClick={openCart} className={cn(item, "text-muted")}>
-          <span className="relative">
+          <span
+            data-cart-target
+            key={landed}
+            className={cn("relative block", landed > 0 && "animate-wiggle")}
+          >
             <BagIcon width={20} height={20} />
             {count > 0 && (
-              <span className="bg-accent-700 absolute -right-2 -top-1 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[9px] font-bold text-white">
-                {count}
+              <span
+                key={count}
+                className="bg-accent-700 animate-pop absolute -right-2 -top-1 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[9px] font-bold text-white"
+              >
+                <RollingNumber value={count} />
               </span>
             )}
           </span>
