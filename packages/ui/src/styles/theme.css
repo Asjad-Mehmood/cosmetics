@@ -9,22 +9,27 @@
     var(--font-brand), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  /* Brand: deep teal (care, trust) with a rose accent (beauty) */
-  --color-brand-50: oklch(0.97 0.015 190);
-  --color-brand-100: oklch(0.93 0.035 190);
-  --color-brand-500: oklch(0.55 0.09 192);
-  --color-brand-600: oklch(0.49 0.085 194);
-  --color-brand-700: oklch(0.42 0.075 196);
-  --color-accent-50: oklch(0.975 0.015 5);
-  --color-accent-100: oklch(0.94 0.03 5);
-  --color-accent-500: oklch(0.66 0.14 8);
-  --color-accent-700: oklch(0.5 0.15 10);
+  /*
+   * Brand colours from the Amazon Group Pakistan logo: navy (the "amazon"
+   * lettering) and orange (the "A" and "GROUP PAKISTAN").
+   * Orange text on white uses accent-700 (5.2:1); the brighter accent-500 is
+   * for fills and for use on navy.
+   */
+  --color-brand-50: #eef2f9;
+  --color-brand-100: #dce4f2;
+  --color-brand-500: #3b5a94;
+  --color-brand-600: #1b2d52;
+  --color-brand-700: #0f1d38;
+  --color-accent-50: #fff4eb;
+  --color-accent-100: #ffe3cc;
+  --color-accent-500: #f47b20;
+  --color-accent-700: #c2410c;
 
-  /* Neutrals / surfaces */
-  --color-ink: oklch(0.21 0.02 230);
-  --color-muted: oklch(0.49 0.015 230);
-  --color-line: oklch(0.91 0.008 210);
-  --color-surface: oklch(0.985 0.004 190);
+  /* Neutrals / surfaces (with a hint of the navy) */
+  --color-ink: oklch(0.21 0.03 262);
+  --color-muted: oklch(0.49 0.02 262);
+  --color-line: oklch(0.91 0.01 262);
+  --color-surface: oklch(0.985 0.005 262);
   --color-canvas: oklch(1 0 0);
 
   /* Status (dark enough for small text on white and on their 10% tints: WCAG AA) */
@@ -32,9 +37,9 @@
   --color-warning: oklch(0.75 0.15 80);
   --color-danger: oklch(0.52 0.2 27);
 
-  /* Soft section backgrounds */
-  --color-blush: oklch(0.965 0.02 10);
-  --color-mint: oklch(0.965 0.02 180);
+  /* Soft section backgrounds: a warm orange tint and a cool navy tint */
+  --color-blush: #fff6ee;
+  --color-mint: #f0f4fa;
 
   --radius-card: 1rem;
 

@@ -23,7 +23,7 @@ export default async function OpengraphImage() {
         padding: 80,
         background: "#ffffff",
         borderBottom: "18px solid #f47b20",
-        color: "#0d1a33",
+        color: "#0f1d38",
         fontFamily: "sans-serif",
       }}
     >
@@ -32,7 +32,7 @@ export default async function OpengraphImage() {
         <div style={{ fontSize: 60, fontWeight: 700, lineHeight: 1.1 }}>
           Genuine beauty and health care, delivered across Pakistan.
         </div>
-        <div style={{ fontSize: 34, color: "#d9600b" }}>
+        <div style={{ fontSize: 34, color: "#c2410c" }}>
           Skincare · Makeup · Fragrance · Vitamins · Cash on Delivery
         </div>
       </div>
