@@ -18,11 +18,13 @@ taking real orders.
 In your Vercel project (for example `amazon-group`): **Settings → Build and Deployment**.
 
 - **Root Directory: leave empty** (the repository root, where `vercel.json` is).
-- Framework Preset: leave as detected (each service sets its own framework).
+- Framework Preset: **Services** (or **Other** if Services is not listed). Not
+  Next.js: each service sets its own framework in `vercel.json`.
 - Leave the build, output and install commands empty. Each service's build
   comes from `vercel.json`:
   - `api` (`apps/api`, Express): `node scripts/vercel-build.mjs` generates the
-    Prisma client, bundles the API to `dist/vercel.js` and, on production
+    Prisma client, bundles `src/vercel.ts` to `dist/vercel/index.js` (the
+    service's output directory, which Vercel serves) and, on production
     deploys only, migrates and seeds the database;
   - `storefront` (`apps/storefront`, Next.js): `next build`.
 

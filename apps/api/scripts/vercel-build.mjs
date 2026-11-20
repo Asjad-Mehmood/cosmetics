@@ -1,8 +1,10 @@
 /**
  * Vercel build for the `api` service (vercel.json → services.api.buildCommand),
  * run from apps/api:
- *   1. generate the Prisma client and bundle the API (dist/vercel.js is the
- *      service's entrypoint; workspace packages are bundled in);
+ *   1. generate the Prisma client and bundle src/vercel.ts to
+ *      dist/vercel/index.js (tsup.vercel.config.ts; the service's
+ *      outputDirectory, so Vercel serves that file); workspace packages are
+ *      bundled in;
  *   2. production only: apply database migrations over the direct (unpooled)
  *      connection, then seed the essentials (admin account, settings,
  *      shipping, pages and, on the very first deploy, the catalogue).
@@ -18,7 +20,7 @@ const run = (cmd, opts = {}) =>
   execSync(cmd, { stdio: "inherit", ...opts, env: { ...process.env, ...opts.env } });
 
 run("pnpm exec prisma generate", { cwd: api });
-run("pnpm exec tsup", { cwd: api });
+run("pnpm exec tsup --config tsup.vercel.config.ts", { cwd: api });
 
 // Only production deploys change the database: a preview of an unmerged branch
 // must never migrate or seed the live store. (Set MIGRATE_ON_PREVIEW=true for
