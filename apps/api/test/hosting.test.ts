@@ -3,8 +3,7 @@ import supertest from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app";
 import { databaseUrl } from "../src/lib/prisma";
-import { handle, request } from "../src/embedded";
-import { createUser, PASSWORD, PNG_1PX } from "./helpers";
+import vercelApp from "../src/vercel";
 import {
   INTERNAL_HEADER,
   internalRequest,
@@ -13,99 +12,39 @@ import {
 
 const app = createApp();
 
-describe("in-process requests (the storefront's server-side rendering)", () => {
-  it("answers GETs without HTTP", async () => {
-    const res = await request("/health");
+describe("Vercel api service entry", () => {
+  it("exports an Express app that serves the API at its public path", async () => {
+    const res = await supertest(vercelApp).get("/api/v1/health");
     expect(res.status).toBe(200);
-    expect(JSON.parse(res.body).data.status).toBe("ok");
+    expect(res.body.data.status).toBe("ok");
+    expect((await supertest(vercelApp).get("/api/v1/products/does-not-exist")).status).toBe(404);
   });
+});
 
-  it("returns catalogue data and 404s like the HTTP API", async () => {
-    const list = await request("/products?limit=2");
-    expect(list.status).toBe(200);
-    expect(JSON.parse(list.body).data.length).toBeGreaterThan(0);
-    expect((await request("/products/does-not-exist")).status).toBe(404);
-  });
-
-  it("skips rate limits only with this process's token", async () => {
-    const probe = express();
-    probe.use(internalRequest);
-    probe.get("/", (req, res) => {
-      res.json({
-        trusted: res.locals.trustedServer ?? false,
-        leaked: req.headers[INTERNAL_HEADER] ?? null,
-      });
+describe("internal requests (the storefront's server-side rendering)", () => {
+  const probe = express();
+  probe.use(internalRequest);
+  probe.get("/", (req, res) => {
+    res.json({
+      trusted: res.locals.trustedServer ?? false,
+      leaked: req.headers[INTERNAL_HEADER] ?? null,
     });
+  });
+
+  it("skips rate limits only with the token derived from the shared secret", async () => {
     const ok = await supertest(probe).get("/").set(INTERNAL_HEADER, internalRequestToken());
     expect(ok.body).toEqual({ trusted: true, leaked: null });
     const forged = await supertest(probe).get("/").set(INTERNAL_HEADER, "guess");
     expect(forged.body).toEqual({ trusted: false, leaked: null });
-  });
-});
-
-describe("Web Request adapter (the /api/v1 route on Vercel)", () => {
-  const site = "http://localhost:3000/api/v1";
-  const json = async (res: Response) => (await res.json()) as { data: any; error: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  /** Signs in through the adapter and returns the Cookie header to send back. */
-  async function signIn(role: "CUSTOMER" | "MANAGER" = "CUSTOMER") {
-    const user = await createUser({ role });
-    const res = await handle(
-      new Request(`${site}/auth/login`, {
-        method: "POST",
-        headers: { "content-type": "application/json", origin: "http://localhost:3000" },
-        body: JSON.stringify({ email: user.email, password: PASSWORD }),
-      }),
+    const otherSecret = internalRequestToken("x".repeat(40));
+    expect((await supertest(probe).get("/").set(INTERNAL_HEADER, otherSecret)).body.trusted).toBe(
+      false,
     );
-    return {
-      res,
-      user,
-      cookie: res.headers
-        .getSetCookie()
-        .map((c) => c.split(";")[0])
-        .join("; "),
-    };
-  }
-
-  it("passes JSON bodies and returns every cookie", async () => {
-    const { res, user } = await signIn();
-    expect(res.status).toBe(200);
-    expect((await json(res)).data.user.email).toBe(user.email);
-    expect(res.headers.getSetCookie().length).toBeGreaterThanOrEqual(2);
   });
 
-  it("keeps the CSRF origin check and error format", async () => {
-    const res = await handle(
-      new Request(`${site}/auth/login`, {
-        method: "POST",
-        headers: { "content-type": "application/json", origin: "https://evil.example" },
-        body: "{}",
-      }),
-    );
-    expect(res.status).toBe(403);
-    expect((await json(res)).error.code).toBe("FORBIDDEN");
-  });
-
-  it("round-trips binary uploads and downloads", async () => {
-    const { cookie } = await signIn("MANAGER");
-    const upload = await handle(
-      new Request(`${site}/admin/uploads/media?folder=products`, {
-        method: "POST",
-        headers: { "content-type": "image/png", cookie, origin: "http://localhost:3000" },
-        body: PNG_1PX,
-      }),
-    );
-    expect(upload.status).toBe(201);
-    const path = new URL((await json(upload)).data.url).pathname;
-    const image = await handle(new Request(`http://localhost:3000${path}`));
-    expect(image.headers.get("content-type")).toBe("image/png");
-    expect(Buffer.from(await image.arrayBuffer()).equals(PNG_1PX)).toBe(true);
-    const cached = await handle(
-      new Request(`http://localhost:3000${path}`, {
-        headers: { "if-none-match": image.headers.get("etag")! },
-      }),
-    );
-    expect(cached.status).toBe(304);
+  it("is a stable HMAC the storefront can compute independently", () => {
+    expect(internalRequestToken("a".repeat(32))).toBe(internalRequestToken("a".repeat(32)));
+    expect(internalRequestToken()).toMatch(/^[0-9a-f]{64}$/);
   });
 });
 

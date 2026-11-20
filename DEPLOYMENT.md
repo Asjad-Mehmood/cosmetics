@@ -1,13 +1,13 @@
 # Deploying Amazon Group on Vercel
 
-Amazon Group is **one Vercel project** with a free Neon Postgres database. The
-same site serves:
+Amazon Group is **one Vercel project with two services** (configured in the
+root `vercel.json`) and a free Neon Postgres database. They share one domain:
 
-| Address                      | What it is                          |
-| ---------------------------- | ----------------------------------- |
-| `amazon-group.vercel.app/  ` | The shop customers use              |
-| `.../admin`                  | The admin panel for staff           |
-| `.../api/v1`                 | The backend (orders, stock, emails) |
+| Address                    | Service      | What it is                          |
+| -------------------------- | ------------ | ----------------------------------- |
+| `amazon-group.vercel.app/` | `storefront` | The shop customers use              |
+| `.../admin`                | `storefront` | The admin panel for staff           |
+| `.../api/v1`               | `api`        | The backend (orders, stock, emails) |
 
 Everything here works on Vercel's free (Hobby) plan and Neon's free plan. Vercel's
 Hobby plan is meant for non-commercial use, so move to Pro once the shop is
@@ -17,10 +17,14 @@ taking real orders.
 
 In your Vercel project (for example `amazon-group`): **Settings → Build and Deployment**.
 
-- **Root Directory: `apps/storefront`**.
-- Framework Preset: **Next.js**.
-- Leave the build, output and install commands empty. They come from
-  `apps/storefront/vercel.json`.
+- **Root Directory: leave empty** (the repository root, where `vercel.json` is).
+- Framework Preset: leave as detected (each service sets its own framework).
+- Leave the build, output and install commands empty. Each service's build
+  comes from `vercel.json`:
+  - `api` (`apps/api`, Express): `node scripts/vercel-build.mjs` generates the
+    Prisma client, bundles the API to `dist/vercel.js` and, on production
+    deploys only, migrates and seeds the database;
+  - `storefront` (`apps/storefront`, Next.js): `next build`.
 
 ## 2. The database (free)
 
@@ -83,11 +87,16 @@ Check `https://<your-site>/api/v1/health` shows `"status":"ok"`.
 
 ## How it fits together
 
-- **One Next.js app** (`apps/storefront`): the shop in `app/(shop)`, the admin
-  panel in `app/admin`, and the API at `app/api/v1/[...path]`. The API route
-  hands each request to the Express app from `apps/api`, in the same process,
-  so there is no proxy and login cookies are first-party. Server-rendered pages
-  read data from the API in-process too, without an HTTP round trip.
+- **Two services, one domain.** The project's top-level rewrites send
+  `/api/*` to the `api` service (the Express app in `apps/api`, which sees the
+  path unchanged, `/api/v1/...`) and everything else to the `storefront`
+  service (Next.js: the shop in `app/(shop)`, the admin in `app/admin`).
+  Browsers call `/api/v1` on the same domain, so login cookies are
+  first-party.
+- **Server-side reads use a service binding.** The storefront's server
+  rendering reads the catalogue from the API at the internal `API_URL` that
+  Vercel injects (`bindings` in `vercel.json`). Those requests carry a token
+  derived from `JWT_ACCESS_SECRET` so they skip the per-IP rate limits.
 - Shop and admin share the site, so a staff member signed in to the admin is
   also signed in to the shop.
 - Emails are sent before the function finishes (`waitUntil`).

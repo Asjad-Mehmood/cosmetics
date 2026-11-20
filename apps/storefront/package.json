@@ -15,7 +15,6 @@
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "5.2.8",
     "@hookform/resolvers": "^5.9.2",
-    "@store/api": "workspace:*",
     "@store/types": "workspace:*",
     "@store/ui": "workspace:*",
     "@store/validation": "workspace:*",

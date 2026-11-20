@@ -1,26 +1,33 @@
 import type { RequestHandler } from "express";
-import { randomUUID, timingSafeEqual } from "node:crypto";
-
-const KEY = Symbol.for("amazongroup.internalRequestToken");
-const store = globalThis as unknown as Record<symbol, string | undefined>;
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { env } from "../config/env";
 
 /**
- * A random token that exists only in this process's memory. The storefront's
- * server-side rendering calls the API in-process (see embedded.ts) with it,
- * so those calls skip the per-IP rate limits. Nothing outside the process can
- * know it.
+ * The storefront's server-side rendering reads the catalogue from this API
+ * over the `API_URL` service binding. All those reads come from the
+ * storefront's servers, so they would quickly hit the per-IP rate limits;
+ * with this header they skip them.
+ *
+ * The token is derived from JWT_ACCESS_SECRET, which both services already
+ * share (one Vercel project, one set of environment variables), so there is
+ * nothing extra to configure and nobody outside the project can produce it.
+ * The storefront computes the same value in lib/server-api.ts.
  */
-export const internalRequestToken = (): string => (store[KEY] ??= randomUUID());
+export const internalRequestToken = (secret = env.JWT_ACCESS_SECRET): string =>
+  createHmac("sha256", secret).update("amazon-group:internal-request").digest("hex");
 
 export const INTERNAL_HEADER = "x-internal-request";
 
 export const internalRequest: RequestHandler = (req, res, next) => {
   const given = req.headers[INTERNAL_HEADER];
   delete req.headers[INTERNAL_HEADER];
-  if (typeof given === "string" && given.length === internalRequestToken().length) {
-    if (timingSafeEqual(Buffer.from(given), Buffer.from(internalRequestToken()))) {
-      res.locals.trustedServer = true;
-    }
+  const expected = internalRequestToken();
+  if (
+    typeof given === "string" &&
+    given.length === expected.length &&
+    timingSafeEqual(Buffer.from(given), Buffer.from(expected))
+  ) {
+    res.locals.trustedServer = true;
   }
   next();
 };

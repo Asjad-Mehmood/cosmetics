@@ -5,9 +5,9 @@ import type { NextConfig } from "next";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-// Locally the API's settings live in apps/api/.env (database, secrets…). This
-// site serves the API too, so load them (already-set variables win). On
-// Vercel they come from the project's environment variables instead.
+// Locally the shared settings live in apps/api/.env (JWT_ACCESS_SECRET, used
+// to sign the storefront's server-side API reads). Already-set variables win.
+// On Vercel both services get the project's environment variables instead.
 const apiEnv = join(here, "../api/.env");
 if (existsSync(apiEnv)) process.loadEnvFile(apiEnv);
 
@@ -21,8 +21,10 @@ const securityHeaders = [
 const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
 /**
- * One site: the shop (app/(shop)), the admin panel (app/admin) and the API
- * (pages/api/v1, from apps/api).
+ * The `storefront` service: the shop (app/(shop)) and the admin panel
+ * (app/admin). The API is the separate `api` service (apps/api): on Vercel the
+ * project's top-level rewrites send /api/* to it, so it shares this domain
+ * and its cookies are first-party.
  */
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -34,22 +36,15 @@ const nextConfig: NextConfig = {
   },
   // Workspace packages ship TypeScript source.
   transpilePackages: ["@store/ui", "@store/types", "@store/validation"],
-  // The API is loaded as built (apps/api/dist), with its own dependencies
-  // (Prisma, argon2, pdfkit…), rather than bundled into the site. It is a
-  // workspace package outside node_modules, which Next would otherwise bundle.
-  webpack(config, { isServer }) {
-    if (isServer) {
-      config.externals = [
-        ({ request }: { request?: string }, callback: (err?: null, result?: string) => void) =>
-          request?.startsWith("@store/api") ? callback(null, `import ${request}`) : callback(),
-        ...(Array.isArray(config.externals) ? config.externals : [config.externals]),
-      ];
-    }
-    return config;
-  },
-  // Trace files from the whole monorepo, so the API's dependencies (and the
-  // Prisma engine) are deployed with the site.
+  // Trace files from the whole monorepo (workspace packages live outside this app).
   outputFileTracingRoot: join(here, "../.."),
+  // Local development without `vercel dev`: send /api/* to the API server
+  // (pnpm dev runs it on port 4000), as Vercel's top-level rewrites do.
+  async rewrites() {
+    if (process.env.VERCEL) return [];
+    const api = process.env.API_URL ?? "http://localhost:4000";
+    return [{ source: "/api/:path*", destination: `${api.replace(/\/$/, "")}/api/:path*` }];
+  },
   // Image hosts resize pictures themselves (see lib/image-loader.ts), so this
   // works on any host without an image-optimisation quota.
   images: { loader: "custom", loaderFile: "./lib/image-loader.ts" },
