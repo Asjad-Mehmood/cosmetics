@@ -1,4 +1,4 @@
-import { formatMoney } from "@hoodie/types";
+import { formatMoney } from "@store/types";
 import { env } from "../../config/env";
 import { addDays, dayOf, startOfDay } from "../../lib/dates";
 import { emailLayout, esc } from "../../lib/email-layout";

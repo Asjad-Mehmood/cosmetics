@@ -6,33 +6,34 @@ test("creates a product, generates variants, adjusts stock and publishes it", as
   page,
   request,
 }) => {
-  const title = `E2E Hoodie ${Date.now().toString(36)}`;
+  const title = `E2E Serum ${Date.now().toString(36)}`;
   await adminLogin(page, "/products/new");
 
   await page.getByLabel("Title", { exact: true }).fill(title);
   await page
     .getByLabel("Description", { exact: true })
-    .fill("A hoodie created by the admin end-to-end test.");
+    .fill("A serum created by the admin end-to-end test.");
   await page.getByLabel("Price", { exact: true }).fill("2999");
   await page.getByRole("button", { name: "Create product" }).click();
   await expect(page).toHaveURL(/\/products\/[a-z0-9]+$/);
   await expect(page.getByText("Product created")).toBeVisible();
 
-  // Generate S, M, L, XL in Black with 5 each.
+  // Generate four pack sizes in the "Standard" shade with 5 each.
+  await page.getByLabel("Sizes", { exact: true }).fill("100 ml, 15 ml, 30 ml, 50 ml");
   await page.getByLabel("Starting stock per variant").fill("5");
   await page.getByRole("button", { name: "Generate 4 variants" }).click();
   await expect(page.getByText("Created 4 variant(s)")).toBeVisible();
-  await expect(page.getByLabel(/^SKU for Black/)).toHaveCount(4);
+  await expect(page.getByLabel(/^SKU for Standard/)).toHaveCount(4);
 
   // Restock one size.
   await page
-    .getByRole("row", { name: /Black \/ M/ })
+    .getByRole("row", { name: /Standard \/ 30 ml/ })
     .getByRole("button", { name: "Adjust" })
     .click();
-  const dialog = page.getByRole("dialog", { name: /Adjust stock: Black \/ M/ });
+  const dialog = page.getByRole("dialog", { name: /Adjust stock: Standard \/ 30 ml/ });
   await dialog.getByLabel("Units").fill("10");
   await dialog.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByText("Stock for Black / M is now 15")).toBeVisible();
+  await expect(page.getByText("Stock for Standard / 30 ml is now 15")).toBeVisible();
 
   // Publish.
   await page.getByLabel("Visibility").selectOption("ACTIVE");

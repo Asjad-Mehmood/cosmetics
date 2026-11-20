@@ -1,8 +1,8 @@
 "use client";
 
-import type { ApiResponse, SearchSuggestionsDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Dialog, cn } from "@hoodie/ui";
+import type { ApiResponse, SearchSuggestionsDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Dialog, cn } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -112,7 +112,7 @@ export function SearchBox() {
           <input
             type="search"
             role="combobox"
-            aria-label="Search hoodies"
+            aria-label="Search products"
             aria-expanded={options.length > 0}
             aria-controls={listId}
             aria-autocomplete="list"
@@ -120,7 +120,7 @@ export function SearchBox() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Search hoodies, e.g. zip, oversized, sherpa"
+            placeholder="Search products, e.g. serum, sunscreen, vitamin C"
             className="border-line focus:border-ink focus:ring-ink/10 h-12 w-full rounded-lg border px-4 text-base focus:outline-none focus:ring-2"
             autoFocus
           />

@@ -1,4 +1,4 @@
-import { formatMoney } from "@hoodie/types";
+import { formatMoney } from "@store/types";
 import { emailLayout, esc } from "../../lib/email-layout";
 import type { Mail } from "../../lib/mailer";
 import { orderLink } from "./order-access";
@@ -75,10 +75,10 @@ export function deliveredEmail(o: FullOrder): Mail {
   return {
     to: o.email,
     subject: `Order ${o.orderNumber} was delivered`,
-    text: `Order ${o.orderNumber} was delivered. Enjoy your new hoodie! Wrong size? Exchanges are free for 14 days.\n${url}\n`,
+    text: `Order ${o.orderNumber} was delivered. We hope you love it. Unopened beauty and personal care items can be returned within 7 days.\n${url}\n`,
     html: emailLayout(
       "Delivered!",
-      `<p>Order <strong>${esc(o.orderNumber)}</strong> was delivered. Enjoy your new hoodie!</p><p style="color:#555">Wrong size? Exchanges are free for 14 days.</p>`,
+      `<p>Order <strong>${esc(o.orderNumber)}</strong> was delivered. We hope you love it.</p><p style="color:#555">Unopened beauty and personal care items can be returned within 7 days.</p>`,
       { label: "View your order", url },
     ),
   };

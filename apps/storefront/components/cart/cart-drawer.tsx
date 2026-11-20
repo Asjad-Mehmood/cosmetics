@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, Skeleton } from "@hoodie/ui";
+import { Dialog, Skeleton } from "@store/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -42,12 +42,12 @@ export function CartDrawer() {
       ) : !cart || cart.items.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-medium">Your cart is empty</p>
-          <p className="text-muted mt-1 text-sm">Find your next favourite hoodie.</p>
+          <p className="text-muted mt-1 text-sm">Find your next favourite.</p>
           <Link
             href="/shop"
             className="bg-ink mt-6 inline-flex h-10 items-center rounded-lg px-5 text-sm font-semibold text-white"
           >
-            Shop hoodies
+            Shop products
           </Link>
         </div>
       ) : (

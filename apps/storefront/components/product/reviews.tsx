@@ -1,8 +1,8 @@
 "use client";
 
-import type { ApiResponse, MyReviewDTO, ReviewEligibilityDTO, ReviewsPageDTO } from "@hoodie/types";
-import { reviewSchema } from "@hoodie/validation";
-import { Button, cn, Field, Input } from "@hoodie/ui";
+import type { ApiResponse, MyReviewDTO, ReviewEligibilityDTO, ReviewsPageDTO } from "@store/types";
+import { reviewSchema } from "@store/validation";
+import { Button, cn, Field, Input } from "@store/ui";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
@@ -122,7 +122,7 @@ function ReviewForm({
         label="Your review"
         htmlFor="review-body"
         error={errors.body}
-        hint="How's the fit, fabric and size? It helps other shoppers choose."
+        hint="How did it work for you? Mention your skin or hair type to help other shoppers choose."
       >
         <textarea
           id="review-body"
@@ -186,10 +186,10 @@ function WriteReview({ slug }: { slug: string }) {
           <Link href={`/login?next=/products/${slug}%23reviews`} className="text-ink underline">
             Sign in
           </Link>{" "}
-          to review a hoodie you&apos;ve bought.
+          to review a product you&apos;ve bought.
         </>
       ) : (
-        "You can review this hoodie once an order with it has been delivered to you."
+        "You can review this product once an order with it has been delivered to you."
       )}
     </p>
   );

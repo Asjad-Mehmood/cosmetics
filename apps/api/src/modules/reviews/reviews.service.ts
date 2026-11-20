@@ -5,12 +5,12 @@ import type {
   ReviewEligibilityDTO,
   ReviewsPageDTO,
   ReviewSummaryDTO,
-} from "@hoodie/types";
+} from "@store/types";
 import type {
   adminReviewListQuerySchema,
   ReviewInput,
   reviewListQuerySchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { OrderStatus, Prisma, Review } from "@prisma/client";
 import type { z } from "zod";
 import { paginated, skipTake } from "../../lib/http";

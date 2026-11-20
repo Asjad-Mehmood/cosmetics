@@ -1,10 +1,10 @@
-import { ErrorCode, type CouponDTO, type ShippingZoneDTO } from "@hoodie/types";
+import { ErrorCode, type CouponDTO, type ShippingZoneDTO } from "@store/types";
 import type {
   CreateCouponInput,
   CreateShippingZoneInput,
   UpdateCouponInput,
   UpdateShippingZoneInput,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Coupon, ShippingZone } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/app-error";

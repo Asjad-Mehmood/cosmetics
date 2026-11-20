@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "@hoodie/validation";
-import { Button, Field, Input } from "@hoodie/ui";
+import { registerSchema } from "@store/validation";
+import { Button, Field, Input } from "@store/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -29,7 +29,7 @@ export function RegisterForm() {
       { ...values, phone: values.phone || undefined },
       {
         onSuccess: () => {
-          toast.success("Welcome to Urban Store!");
+          toast.success("Welcome to Amazon Group!");
           router.push(next);
         },
         onError: (err) => setFormError(applyApiError(err, setError)),

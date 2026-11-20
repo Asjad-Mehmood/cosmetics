@@ -1,4 +1,4 @@
-import { paginationSchema, returnRequestSchema, trackOrderSchema } from "@hoodie/validation";
+import { paginationSchema, returnRequestSchema, trackOrderSchema } from "@store/validation";
 import { z } from "zod";
 import { ok } from "../../lib/http";
 import { storeInfo } from "../../lib/settings";

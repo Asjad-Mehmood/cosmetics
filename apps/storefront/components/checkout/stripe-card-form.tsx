@@ -1,7 +1,7 @@
 "use client";
 
-import { formatMoney } from "@hoodie/types";
-import { Button } from "@hoodie/ui";
+import { formatMoney } from "@store/types";
+import { Button } from "@store/ui";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { useMemo, useState } from "react";

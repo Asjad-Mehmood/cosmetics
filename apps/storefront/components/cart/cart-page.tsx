@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Container, Skeleton } from "@hoodie/ui";
+import { Card, Container, Skeleton } from "@store/ui";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { CartLine } from "./cart-line";

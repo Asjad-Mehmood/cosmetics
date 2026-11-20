@@ -1,8 +1,7 @@
 "use client";
 
-import type { ApiResponse, Fit, ProductStatus } from "@hoodie/types";
-import { FITS } from "@hoodie/types";
-import { Button, Field, Input, Skeleton } from "@hoodie/ui";
+import type { ApiResponse, ProductStatus } from "@store/types";
+import { Button, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useRouter } from "@/admin/lib/navigation";
@@ -25,9 +24,9 @@ interface FormValues {
   title: string;
   slug: string;
   description: string;
-  fit: Fit;
-  fabric: string;
-  careInfo: string;
+  ingredients: string;
+  howToUse: string;
+  warnings: string;
   basePrice: string;
   compareAtPrice: string;
   status: ProductStatus;
@@ -44,15 +43,13 @@ interface ImageRow {
   color: string;
 }
 
-const FIT_LABEL: Record<Fit, string> = { REGULAR: "Regular", OVERSIZED: "Oversized", SLIM: "Slim" };
-
 const defaults = (p?: AdminProduct): FormValues => ({
   title: p?.title ?? "",
   slug: p?.slug ?? "",
   description: p?.description ?? "",
-  fit: p?.fit ?? "REGULAR",
-  fabric: p?.fabric ?? "",
-  careInfo: p?.careInfo ?? "",
+  ingredients: p?.ingredients ?? "",
+  howToUse: p?.howToUse ?? "",
+  warnings: p?.warnings ?? "",
   basePrice: fromMinor(p?.basePrice),
   compareAtPrice: fromMinor(p?.compareAtPrice),
   status: p?.status ?? "DRAFT",
@@ -269,9 +266,9 @@ function ProductEditor({ product }: { product?: AdminProduct }) {
       title: v.title.trim(),
       ...(v.slug.trim() ? { slug: v.slug.trim() } : {}),
       description: v.description.trim(),
-      fit: v.fit,
-      fabric: v.fabric.trim(),
-      careInfo: v.careInfo.trim(),
+      ingredients: v.ingredients.trim(),
+      howToUse: v.howToUse.trim(),
+      warnings: v.warnings.trim(),
       basePrice,
       compareAtPrice: compareAt,
       status: v.status,
@@ -394,34 +391,39 @@ function ProductEditor({ product }: { product?: AdminProduct }) {
                 })}
               />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Fit" htmlFor="fit">
-                <Select id="fit" {...register("fit")}>
-                  {FITS.map((f) => (
-                    <option key={f} value={f}>
-                      {FIT_LABEL[f]}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field
-                label="Fabric"
-                htmlFor="fabric"
-                error={errors.fabric?.message}
-                className="sm:col-span-2"
-              >
-                <Input
-                  id="fabric"
-                  placeholder="e.g. 80% cotton, 20% polyester, 320 GSM"
-                  {...register("fabric")}
-                />
-              </Field>
-            </div>
-            <Field label="Care" htmlFor="careInfo" error={errors.careInfo?.message}>
-              <Input
-                id="careInfo"
-                placeholder="e.g. Machine wash cold, inside out"
-                {...register("careInfo")}
+            <Field
+              label="Ingredients"
+              htmlFor="ingredients"
+              error={errors.ingredients?.message}
+              hint="The full ingredient list from the pack, or the composition for medicines."
+            >
+              <Textarea
+                id="ingredients"
+                rows={3}
+                placeholder="e.g. Aqua, Ascorbic Acid, Glycerin, Niacinamide…"
+                {...register("ingredients", {
+                  maxLength: { value: 5000, message: "At most 5,000 characters" },
+                })}
+              />
+            </Field>
+            <Field label="How to use" htmlFor="howToUse" error={errors.howToUse?.message}>
+              <Textarea
+                id="howToUse"
+                rows={3}
+                placeholder="e.g. Apply 3-4 drops to clean skin every morning, then moisturise."
+                {...register("howToUse", {
+                  maxLength: { value: 2000, message: "At most 2,000 characters" },
+                })}
+              />
+            </Field>
+            <Field label="Warnings" htmlFor="warnings" error={errors.warnings?.message}>
+              <Textarea
+                id="warnings"
+                rows={2}
+                placeholder="e.g. For external use only. Avoid contact with eyes. Patch test first."
+                {...register("warnings", {
+                  maxLength: { value: 2000, message: "At most 2,000 characters" },
+                })}
               />
             </Field>
           </Section>

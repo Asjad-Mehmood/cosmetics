@@ -41,7 +41,7 @@ describe("reviews", () => {
     const order = await placeOrderAs(agent, user.email, [[product.variants[0]!.id, 1]]);
     expect((await agent.get(`${base}/eligibility`)).body.data.reason).toBe("not_purchased");
     expect(
-      (await agent.put(base).send({ rating: 5, body: "Great hoodie, very warm." })).status,
+      (await agent.put(base).send({ rating: 5, body: "Great serum, my skin loves it." })).status,
     ).toBe(403);
 
     await deliver(order.orderNumber, staff);
@@ -327,7 +327,7 @@ describe("search", () => {
     const titled = await createTestProduct();
     await prisma.product.update({
       where: { id: titled.id },
-      data: { title: `${word} Hoodie`, soldCount: 0 },
+      data: { title: `${word} Serum`, soldCount: 0 },
     });
     const mentioned = await createTestProduct();
     await prisma.product.update({
@@ -345,8 +345,8 @@ describe("search", () => {
     const fuzzy = await request(app).get(`/api/v1/products?q=${typo}&sort=relevance`);
     expect(fuzzy.body.data.map((p: { slug: string }) => p.slug)).toContain(titled.slug);
 
-    const both = await request(app).get(`/api/v1/products?q=${word}%20black&sort=relevance`);
-    expect(both.body.data[0].slug).toBe(titled.slug); // colour from the variants
+    const both = await request(app).get(`/api/v1/products?q=${word}%20standard&sort=relevance`);
+    expect(both.body.data[0].slug).toBe(titled.slug); // shade from the variants
 
     const suggest = await request(app).get(`/api/v1/search/suggest?q=${word.toLowerCase()}`);
     expect(suggest.body.data.products[0]).toMatchObject({ slug: titled.slug, price: 300000 });
@@ -399,12 +399,12 @@ describe("returns", () => {
 
     const tooMany = await request(app)
       .post(`${url}/returns?token=${token}`)
-      .send({ items: [{ orderItemId: item.id, quantity: 3 }], reason: "wrong_size" });
+      .send({ items: [{ orderItemId: item.id, quantity: 3 }], reason: "wrong_shade" });
     expect(tooMany.status).toBe(422);
 
     const created = await request(app)
       .post(`${url}/returns?token=${token}`)
-      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_size" });
+      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_shade" });
     expect(created.status).toBe(201);
     expect(created.body.data).toMatchObject({ status: "RETURN_REQUESTED", canReturn: false });
     expect(created.body.data.returns[0]).toMatchObject({ status: "REQUESTED", itemsValue: 300000 });
@@ -414,7 +414,7 @@ describe("returns", () => {
 
     const again = await request(app)
       .post(`${url}/returns?token=${token}`)
-      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_size" });
+      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_shade" });
     expect(again.status).toBe(409);
 
     const list = await staff.get("/api/v1/admin/returns?status=open&limit=100");
@@ -482,7 +482,7 @@ describe("returns", () => {
     });
     const late = await request(app)
       .post(`/api/v1/orders/${number}/returns?token=${token}`)
-      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_size" });
+      .send({ items: [{ orderItemId: item.id, quantity: 1 }], reason: "wrong_shade" });
     expect(late.status).toBe(409);
     expect(late.body.error.message).toMatch(/window/);
   });

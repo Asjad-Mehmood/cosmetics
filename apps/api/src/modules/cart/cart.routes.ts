@@ -1,4 +1,4 @@
-import { addCartItemSchema, applyCouponSchema, updateCartItemSchema } from "@hoodie/validation";
+import { addCartItemSchema, applyCouponSchema, updateCartItemSchema } from "@store/validation";
 import type { Request } from "express";
 import { COOKIE, setCartCookie } from "../../lib/cookies";
 import { ok } from "../../lib/http";

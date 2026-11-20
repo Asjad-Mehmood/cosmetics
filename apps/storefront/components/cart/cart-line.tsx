@@ -1,8 +1,8 @@
 "use client";
 
-import type { CartItemDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { cn } from "@hoodie/ui";
+import type { CartItemDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { cn } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";

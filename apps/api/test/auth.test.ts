@@ -239,7 +239,7 @@ describe("password reset", () => {
 
     const res = await request(app)
       .post("/api/v1/auth/reset-password")
-      .send({ token, password: "NewHoodie456" });
+      .send({ token, password: "NewGlow4567" });
     expect(res.status).toBe(204);
 
     expect((await agent.post("/api/v1/auth/refresh")).status).toBe(401);
@@ -249,7 +249,7 @@ describe("password reset", () => {
     expect(oldLogin.status).toBe(401);
     const newLogin = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email: user.email, password: "NewHoodie456" });
+      .send({ email: user.email, password: "NewGlow4567" });
     expect(newLogin.status).toBe(200);
 
     const reuse = await request(app)

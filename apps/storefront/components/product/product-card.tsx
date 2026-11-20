@@ -1,8 +1,7 @@
-import type { ProductCardDTO } from "@hoodie/types";
-import { Badge } from "@hoodie/ui";
+import type { ProductCardDTO } from "@store/types";
+import { Badge } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
-import { FIT_LABEL } from "@/lib/size-guide";
 import { Price } from "./price";
 import { Stars } from "./stars";
 import { WishlistButton } from "./wishlist-button";
@@ -54,7 +53,6 @@ export function ProductCard({
           <h3 className="text-sm font-medium leading-snug group-hover:underline">
             {product.title}
           </h3>
-          <p className="text-muted text-xs">{FIT_LABEL[product.fit]}</p>
           {product.reviewCount > 0 && (
             <p className="text-muted flex items-center gap-1.5 text-xs">
               <Stars rating={product.avgRating} size={12} />

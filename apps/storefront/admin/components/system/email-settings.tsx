@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, EmailSettingsDTO } from "@hoodie/types";
-import { Badge, Button, Field, Input, Skeleton } from "@hoodie/ui";
+import type { ApiResponse, EmailSettingsDTO } from "@store/types";
+import { Badge, Button, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -166,7 +166,7 @@ export function EmailSettings() {
               error={err("from")}
               hint={
                 provider === "smtp"
-                  ? 'Usually the same address you sign in with, e.g. "Urban Store <orders@yourdomain.com>".'
+                  ? 'Usually the same address you sign in with, e.g. "Amazon Group <orders@yourdomain.com>".'
                   : "An address on a domain you verified in Resend."
               }
             >

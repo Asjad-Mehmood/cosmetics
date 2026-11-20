@@ -1,5 +1,5 @@
-import type { CategoryDTO, CollectionDTO } from "@hoodie/types";
-import { Container, Logo } from "@hoodie/ui";
+import type { CategoryDTO, CollectionDTO } from "@store/types";
+import { Container, Logo } from "@store/ui";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { getDataSafe } from "@/lib/server-api";
@@ -42,10 +42,10 @@ export async function Header() {
             Best sellers
           </Link>
           <Link
-            href="/size-guide"
+            href="/track-order"
             className="hover:bg-surface rounded-lg px-3 py-2 text-sm font-medium"
           >
-            Size guide
+            Track order
           </Link>
         </nav>
 

@@ -1,4 +1,4 @@
-import type { ProductCardDTO } from "@hoodie/types";
+import type { ProductCardDTO } from "@store/types";
 import { ok } from "../../lib/http";
 import { prisma } from "../../lib/prisma";
 import { defineRoutes, route } from "../../lib/route";

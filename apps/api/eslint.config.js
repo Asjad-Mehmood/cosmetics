@@ -1,4 +1,4 @@
-import base from "@hoodie/config/eslint/base";
+import base from "@store/config/eslint/base";
 
 export default [
   ...base,

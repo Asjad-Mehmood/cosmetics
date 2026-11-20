@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,

@@ -1,4 +1,4 @@
-import { Container, Logo } from "@hoodie/ui";
+import { Container, Logo } from "@store/ui";
 import Link from "next/link";
 import { footerNav, siteConfig } from "@/lib/config";
 import { NewsletterForm } from "../home/newsletter-form";
@@ -11,7 +11,7 @@ export function Footer() {
           <Logo markClassName="size-7" />
           <p className="text-muted mt-3 max-w-sm text-sm">{siteConfig.description}</p>
           <div className="mt-6 max-w-sm">
-            <p className="text-sm font-semibold">Get new drops first</p>
+            <p className="text-sm font-semibold">Get offers and new arrivals first</p>
             <NewsletterForm />
           </div>
         </div>

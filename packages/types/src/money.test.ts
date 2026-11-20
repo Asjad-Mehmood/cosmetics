@@ -23,7 +23,24 @@ describe("money", () => {
 });
 
 describe("compareSizes", () => {
-  it("sorts sizes XS → XXL with unknown sizes last", () => {
-    expect(["XL", "S", "ONE", "XS", "M"].sort(compareSizes)).toEqual(["XS", "S", "M", "XL", "ONE"]);
+  it("sorts pack sizes by amount, converting units", () => {
+    expect(["1 l", "250 ml", "30 ml", "500ml"].sort(compareSizes)).toEqual([
+      "30 ml",
+      "250 ml",
+      "500ml",
+      "1 l",
+    ]);
+    expect(["100 g", "1 kg", "50 g"].sort(compareSizes)).toEqual(["50 g", "100 g", "1 kg"]);
+    expect(["60 tablets", "30 tablets"].sort(compareSizes)).toEqual(["30 tablets", "60 tablets"]);
+  });
+
+  it("puts measured sizes first, then letter sizes, then the rest", () => {
+    expect(["One size", "XL", "S", "50 ml", "M"].sort(compareSizes)).toEqual([
+      "50 ml",
+      "S",
+      "M",
+      "XL",
+      "One size",
+    ]);
   });
 });

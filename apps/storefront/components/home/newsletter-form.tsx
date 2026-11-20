@@ -1,7 +1,7 @@
 "use client";
 
-import { newsletterSchema } from "@hoodie/validation";
-import { Button, Input } from "@hoodie/ui";
+import { newsletterSchema } from "@store/validation";
+import { Button, Input } from "@store/ui";
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";

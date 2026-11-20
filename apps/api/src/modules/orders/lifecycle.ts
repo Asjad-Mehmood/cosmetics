@@ -1,5 +1,5 @@
-import { ErrorCode, type OrderStatus } from "@hoodie/types";
-import type { UpdateOrderStatusInput } from "@hoodie/validation";
+import { ErrorCode, type OrderStatus } from "@store/types";
+import type { UpdateOrderStatusInput } from "@store/validation";
 import type { Prisma } from "@prisma/client";
 import { logger } from "../../lib/logger";
 import { sendMail } from "../../lib/mailer";

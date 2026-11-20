@@ -1,4 +1,4 @@
-// Hoodie Store database schema (v1).
+// Amazon Group database schema.
 //
 // Conventions
 // - Money is stored as Int in minor units (paisa / cents). Never Float.
@@ -29,12 +29,6 @@ enum ProductStatus {
   DRAFT
   ACTIVE
   ARCHIVED
-}
-
-enum Fit {
-  REGULAR
-  OVERSIZED
-  SLIM
 }
 
 enum OrderStatus {
@@ -213,9 +207,12 @@ model Product {
   title          String
   slug           String        @unique
   description    String
-  fit            Fit           @default(REGULAR)
-  fabric         String?
-  careInfo       String?
+  /// Full ingredient (INCI) list for cosmetics; composition for medicines.
+  ingredients    String?
+  /// Directions or dosage.
+  howToUse       String?
+  /// Warnings, side effects and who should not use it.
+  warnings       String?
   basePrice      Int
   compareAtPrice Int?
   status         ProductStatus @default(DRAFT)
@@ -376,7 +373,7 @@ model Coupon {
 
 model Order {
   id                String        @id @default(cuid())
-  /// Human-friendly number shown to customers, e.g. US-10025.
+  /// Human-friendly number shown to customers, e.g. AG-10025.
   orderNumber       String        @unique
   userId            String?
   email             String
@@ -408,7 +405,7 @@ model Order {
   cartId            String?
   paidAt            DateTime?
   deliveredAt       DateTime?
-  /// When the "how's your hoodie?" review email went out (sent once, ~7 days after delivery).
+  /// When the "how are you finding it?" review email went out (sent once, ~7 days after delivery).
   reviewRequestedAt DateTime?
   cancelledAt       DateTime?
   placedAt          DateTime      @default(now())
@@ -512,7 +509,7 @@ model ReturnRequest {
   id           String       @id @default(cuid())
   orderId      String
   status       ReturnStatus @default(REQUESTED)
-  /// Reason code, e.g. wrong_size (see RETURN_REASONS in @hoodie/validation).
+  /// Reason code, e.g. wrong_shade (see RETURN_REASONS in @store/validation).
   reason       String
   details      String?
   /// [{ orderItemId, quantity }]

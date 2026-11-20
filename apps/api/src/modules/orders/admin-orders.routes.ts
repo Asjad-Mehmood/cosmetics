@@ -1,10 +1,10 @@
-import { ORDER_STATUS_LABEL, type OrderAddressDTO } from "@hoodie/types";
+import { ORDER_STATUS_LABEL, type OrderAddressDTO } from "@store/types";
 import {
   adminOrderListQuerySchema,
   refundOrderSchema,
   updateAdminOrderSchema,
   updateOrderStatusSchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Response } from "express";
 import { audit } from "../../lib/audit";
 import { csvMoney, sendCsv } from "../../lib/csv";

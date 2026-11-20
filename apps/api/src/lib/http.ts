@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse, PaginationMeta } from "@hoodie/types";
+import type { ApiResponse, PaginatedResponse, PaginationMeta } from "@store/types";
 
 export const ok = <T>(data: T): ApiResponse<T> => ({ data });
 

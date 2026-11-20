@@ -1,9 +1,8 @@
 "use client";
 
-import type { FiltersDTO } from "@hoodie/types";
-import { Button, cn, Dialog, Input } from "@hoodie/ui";
+import type { FiltersDTO } from "@store/types";
+import { Button, cn, Dialog, Input } from "@store/ui";
 import { useState } from "react";
-import { FIT_LABEL } from "@/lib/size-guide";
 import { FilterIcon } from "../icons";
 import { useListingNav } from "./listing-nav";
 
@@ -80,7 +79,6 @@ export function FilterPanel({ filters }: { filters: FiltersDTO }) {
   const { params, update } = useListingNav();
   const [sizes, toggleSize] = useListParam("size");
   const [colors, toggleColor] = useListParam("color");
-  const [fits, toggleFit] = useListParam("fit");
   const inStock = params.get("inStock") === "true";
 
   return (
@@ -109,7 +107,7 @@ export function FilterPanel({ filters }: { filters: FiltersDTO }) {
       )}
 
       {filters.colors.length > 0 && (
-        <Section title="Colour">
+        <Section title="Shade">
           <ul className="space-y-1">
             {filters.colors.map((c) => (
               <li key={c.name}>
@@ -125,26 +123,6 @@ export function FilterPanel({ filters }: { filters: FiltersDTO }) {
                     style={{ backgroundColor: c.hex ?? undefined }}
                   />
                   {c.name}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
-
-      {filters.fits.length > 1 && (
-        <Section title="Fit">
-          <ul className="space-y-1">
-            {filters.fits.map((fit) => (
-              <li key={fit}>
-                <label className="hover:bg-surface flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={fits.includes(fit)}
-                    onChange={() => toggleFit(fit)}
-                    className="accent-ink size-4"
-                  />
-                  {FIT_LABEL[fit]}
                 </label>
               </li>
             ))}

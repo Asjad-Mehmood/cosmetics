@@ -1,4 +1,4 @@
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import Link from "next/link";
 import type { SearchParams } from "@/lib/listing";
 

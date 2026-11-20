@@ -14,15 +14,15 @@ describe("content endpoints", () => {
     });
     const res = await request(app).get("/api/v1/cms/home");
     expect(res.status).toBe(200);
-    expect(res.body.data.announcement).toMatch(/Free shipping/);
+    expect(res.body.data.announcement).toMatch(/genuine products/);
     const ids = res.body.data.banners.map((b: { id: string }) => b.id);
-    expect(ids).toContain("banner_winter_drop");
+    expect(ids).toContain("banner_skincare");
     expect(ids).not.toContain(expired.id);
   });
 
   it("serves published pages and the FAQ", async () => {
     expect((await request(app).get("/api/v1/cms/pages/returns")).body.data.title).toBe(
-      "Returns & Exchanges",
+      "Returns & Refunds",
     );
     expect((await request(app).get("/api/v1/cms/pages/nope")).status).toBe(404);
     const faq = await request(app).get("/api/v1/cms/faq");

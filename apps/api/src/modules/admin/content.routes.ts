@@ -1,4 +1,4 @@
-import type { AdminBannerDTO, AdminFaqDTO, AdminPageDTO, AnnouncementDTO } from "@hoodie/types";
+import type { AdminBannerDTO, AdminFaqDTO, AdminPageDTO, AnnouncementDTO } from "@store/types";
 import {
   announcementSchema,
   createBannerSchema,
@@ -7,7 +7,7 @@ import {
   updateBannerSchema,
   updateFaqSchema,
   updatePageSchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import type { Banner, Page } from "@prisma/client";
 import { audit } from "../../lib/audit";
 import { ok } from "../../lib/http";

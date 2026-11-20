@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@hoodie/ui";
+import { Skeleton } from "@store/ui";
 import Link from "next/link";
 import { ProductGrid } from "@/components/product/product-card";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -11,7 +11,7 @@ export function Wishlist() {
     <div>
       <h2 className="text-xl font-semibold">Wishlist</h2>
       <p className="text-muted mt-1 text-sm">
-        Hoodies you&apos;ve saved. Tap the heart on any product to add or remove it.
+        Products you&apos;ve saved. Tap the heart on any product to add or remove it.
       </p>
       <div className="mt-6">
         {list.isPending ? (
@@ -26,7 +26,7 @@ export function Wishlist() {
           <div className="border-line rounded-xl border border-dashed p-10 text-center">
             <p className="font-medium">Nothing saved yet</p>
             <Link href="/shop" className="mt-3 inline-block text-sm underline">
-              Browse hoodies
+              Browse products
             </Link>
           </div>
         )}

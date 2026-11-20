@@ -1,5 +1,5 @@
 {
-  "extends": "@hoodie/config/tsconfig/nextjs.json",
+  "extends": "@store/config/tsconfig/nextjs.json",
   "compilerOptions": {
     "paths": { "@/*": ["./*"] }
   },

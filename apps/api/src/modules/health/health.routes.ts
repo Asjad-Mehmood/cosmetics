@@ -1,4 +1,4 @@
-import type { HealthStatus } from "@hoodie/types";
+import type { HealthStatus } from "@store/types";
 import { ok } from "../../lib/http";
 import { prisma } from "../../lib/prisma";
 import { redisStatus } from "../../lib/redis";

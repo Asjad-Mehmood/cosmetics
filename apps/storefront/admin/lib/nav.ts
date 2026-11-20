@@ -1,4 +1,4 @@
-import { hasRole, Role } from "@hoodie/types";
+import { hasRole, Role } from "@store/types";
 
 export interface NavItem {
   label: string;
@@ -69,7 +69,7 @@ export const adminNav: NavSection[] = [
   },
 ];
 
-/** Same rule the API enforces (shared from @hoodie/types). */
+/** Same rule the API enforces (shared from @store/types). */
 export const canAccess = hasRole;
 
 /** Sidebar sections filtered to what `role` may see (empty sections removed). */

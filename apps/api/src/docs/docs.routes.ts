@@ -14,7 +14,7 @@ export function docsRouter(): Router {
     "/",
     swaggerUi.serve,
     swaggerUi.setup(spec, {
-      customSiteTitle: "Urban Store API",
+      customSiteTitle: "Amazon Group API",
       swaggerOptions: { persistAuthorization: true, withCredentials: true },
     }),
   );

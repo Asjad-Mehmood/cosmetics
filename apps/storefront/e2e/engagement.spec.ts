@@ -13,35 +13,35 @@ async function signIn(page: Page, email: string, password: string) {
 test("search suggests products as you type, even with a typo", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Open search" }).click();
-  await page.getByRole("combobox", { name: "Search hoodies" }).fill("sherpaa");
-  const option = page.getByRole("option", { name: /Sherpa Zip Hoodie/ });
+  await page.getByRole("combobox", { name: "Search products" }).fill("sunscren");
+  const option = page.getByRole("option", { name: /Daily Sunscreen Lotion/ });
   await expect(option).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/products\/sherpa-zip-hoodie$/);
+  await expect(page).toHaveURL(/\/products\/daily-sunscreen-spf-50$/);
 });
 
 test("remembers recently viewed products", async ({ page }) => {
-  await page.goto("/products/zip-up-fleece-hoodie");
+  await page.goto("/products/argan-oil-repair-shampoo");
   // The visit is recorded once the page is interactive.
   await expect
     .poll(() => page.evaluate(() => localStorage.getItem("recently-viewed")))
-    .toContain("zip-up-fleece-hoodie");
-  await page.goto("/products/urban-essential-pullover-hoodie");
+    .toContain("argan-oil-repair-shampoo");
+  await page.goto("/products/vitamin-c-brightening-serum");
   const strip = page.getByRole("region", { name: "Recently viewed" });
-  await expect(strip.getByRole("heading", { name: "Zip-Up Fleece Hoodie" })).toBeVisible();
+  await expect(strip.getByRole("heading", { name: "Argan Oil Repair Shampoo" })).toBeVisible();
 });
 
 test("guests are asked to sign in before saving to the wishlist", async ({ page }) => {
-  await page.goto("/products/urban-essential-pullover-hoodie");
+  await page.goto("/products/vitamin-c-brightening-serum");
   await page
-    .getByRole("button", { name: "Save Urban Essential Pullover Hoodie to wishlist" })
+    .getByRole("button", { name: "Save Vitamin C Brightening Serum to wishlist" })
     .first()
     .click();
-  await expect(page).toHaveURL("/login?next=%2Fproducts%2Furban-essential-pullover-hoodie");
+  await expect(page).toHaveURL("/login?next=%2Fproducts%2Fvitamin-c-brightening-serum");
 });
 
-test("a customer reviews a delivered hoodie, saves it, and requests a return", async ({
+test("a customer reviews a delivered product, saves it, and requests a return", async ({
   page,
   playwright,
 }) => {
@@ -72,7 +72,7 @@ test("a customer reviews a delivered hoodie, saves it, and requests a return", a
   await page.getByRole("button", { name: "Request a return" }).click();
   const dialog = page.getByRole("dialog", { name: "Request a return" });
   await dialog.getByRole("combobox", { name: /How many/ }).selectOption("1");
-  await dialog.getByLabel("Reason").selectOption("wrong_size");
+  await dialog.getByLabel("Reason").selectOption("wrong_shade");
   await dialog.getByLabel("Anything else? (optional)").fill("Please send an L instead.");
   await dialog.getByRole("button", { name: "Send request" }).click();
   await expect(page.getByText("We'll review your request within 2 working days")).toBeVisible();

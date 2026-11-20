@@ -1,4 +1,4 @@
 {
-  "extends": "@hoodie/config/tsconfig/react-library.json",
+  "extends": "@store/config/tsconfig/react-library.json",
   "include": ["src"]
 }

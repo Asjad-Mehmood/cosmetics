@@ -1,1186 +1,606 @@
-# Hoodie Store: Full-Stack E-commerce Project Plan
+# Cosmetics & Pharmacy Store: Conversion Plan
 
-A detailed plan for building a hoodie-selling website with a **customer storefront**, an **admin dashboard**, and a **backend API**.
+The plan turns a copy of **Urban Store** (the hoodie shop in `Asjad-Mehmood/E-commerce-`) into an online **cosmetics, personal-care and pharmacy store** for Pakistan. The shop, admin panel and API stay one site and one Vercel project.
 
----
-
-## Table of Contents
-
-1. [Project Overview](#1-project-overview)
-2. [Tech Stack](#2-tech-stack)
-3. [System Architecture](#3-system-architecture)
-4. [Repository Structure](#4-repository-structure)
-5. [User Roles & Permissions](#5-user-roles--permissions)
-6. [Client Side (Storefront)](#6-client-side-storefront)
-7. [Admin Side (Dashboard)](#7-admin-side-dashboard)
-8. [Backend](#8-backend)
-9. [Database Design](#9-database-design)
-10. [API Endpoints](#10-api-endpoints)
-11. [Key Business Flows](#11-key-business-flows)
-12. [Security](#12-security)
-13. [Performance, SEO & Accessibility](#13-performance-seo--accessibility)
-14. [Testing Strategy](#14-testing-strategy)
-15. [DevOps & Deployment](#15-devops--deployment)
-16. [Development Roadmap (Phases)](#16-development-roadmap-phases)
-17. [Task Checklist](#17-task-checklist)
-18. [Future Enhancements](#18-future-enhancements)
+> **Store name:** **Amazon Group** (order numbers `AG-10001`). Phase 1 is done: see the checklist in section 6.
 
 ---
 
-## 1. Project Overview
+## Contents
 
-### 1.1 Goal
-
-An online store that sells hoodies (and later other apparel). Customers can browse, filter, pick size and color, add to cart, check out, pay online or by Cash on Delivery, and track their orders. Admins manage products, stock, orders, customers, discounts and content, and can see sales analytics.
-
-### 1.2 Core Objectives
-
-- A fast, mobile-first storefront with good SEO.
-- Hoodie variants: **size × color**, each with its own stock and SKU.
-- Secure checkout with several payment methods.
-- A full admin panel with role-based access.
-- A scalable, maintainable codebase (TypeScript everywhere, one monorepo).
-
-### 1.3 Success Metrics
-
-| Metric                          | Target      |
-| ------------------------------- | ----------- |
-| Lighthouse performance (mobile) | ≥ 90        |
-| Time to Interactive             | < 3 s on 4G |
-| Checkout conversion             | ≥ 2.5%      |
-| API p95 latency                 | < 300 ms    |
-| Uptime                          | 99.9%       |
+0. [Summary](#0-summary)
+1. [Decisions needed from you](#1-decisions-needed-from-you)
+2. [Legal and compliance checklist (Pakistan)](#2-legal-and-compliance-checklist-pakistan)
+3. [How the copy is made](#3-how-the-copy-is-made)
+4. [What stays exactly as it is](#4-what-stays-exactly-as-it-is)
+5. [What changes, area by area](#5-what-changes-area-by-area)
+6. [Phases, tasks and acceptance criteria](#6-phases-tasks-and-acceptance-criteria)
+7. [Testing plan](#7-testing-plan)
+8. [What you need to provide](#8-what-you-need-to-provide)
+9. [Risks and how they are handled](#9-risks-and-how-they-are-handled)
+10. [Later (after launch)](#10-later-after-launch)
 
 ---
 
-## 2. Tech Stack
+## 0. Summary
 
-| Layer              | Choice                                                                                             | Why                                                         |
-| ------------------ | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Language           | **TypeScript**                                                                                     | One language, shared types across apps                      |
-| Storefront         | **Next.js 15 (App Router)** + React                                                                | SSR/SSG for SEO, image optimization                         |
-| Admin panel        | **Next.js** (separate app) or **React + Vite**                                                     | Kept apart from the storefront for security and bundle size |
-| UI                 | **Tailwind CSS** + **shadcn/ui**                                                                   | Fast, consistent design                                     |
-| State / data       | **TanStack Query** (server state), **Zustand** (cart/UI state)                                     | Simple and well-tested                                      |
-| Forms & validation | **React Hook Form** + **Zod**                                                                      | Zod schemas shared with the backend                         |
-| Backend            | **Node.js + Express** (or **NestJS** for more structure)                                           | REST API                                                    |
-| ORM                | **Prisma**                                                                                         | Type-safe queries, migrations                               |
-| Database           | **PostgreSQL**                                                                                     | Relational data: orders, variants, inventory                |
-| Cache / queues     | **Redis** + **BullMQ**                                                                             | Sessions, rate limiting, background jobs (emails)           |
-| Auth               | **JWT** (access + refresh tokens in httpOnly cookies), Google OAuth                                | Secure, stateless                                           |
-| Payments           | **Stripe** (cards), **Cash on Delivery**, optional local gateways (JazzCash / EasyPaisa / PayFast) | Covers international and local customers                    |
-| Images             | **Cloudinary** or **AWS S3 + CloudFront**                                                          | Upload, resize, CDN                                         |
-| Email              | **Resend** / **SendGrid** + **React Email** templates                                              | Transactional emails                                        |
-| Search             | PostgreSQL full-text search (later **Meilisearch**)                                                | Start simple                                                |
-| Monorepo           | **Turborepo** + **pnpm workspaces**                                                                | Shared packages, cached builds                              |
-| Testing            | **Vitest**, **Supertest**, **Playwright**                                                          | Unit, API and E2E tests                                     |
-| CI/CD              | **GitHub Actions**                                                                                 | Lint, test and deploy on push                               |
-| Hosting            | Vercel (frontends), Railway / Render / AWS (API), Neon / Supabase (Postgres), Upstash (Redis)      | Managed, low-ops                                            |
-| Monitoring         | **Sentry**, **UptimeRobot**, structured logs (Pino)                                                | Error and uptime tracking                                   |
+**Reuse about 80%, change about 20%.** Urban Store already has everything a shop needs. The work is in four areas:
 
----
+1. **Brand and content:** new name, logo, colours, pages and catalogue.
+2. **Product model:**
+   - hoodie "size × colour" becomes general **options**: shade, size (ml/g), pack size, strength;
+   - adds **brands**, ingredients, how to use, warnings, skin type and concern;
+   - medicine fields: generic name (salt), strength, dosage form, manufacturer, MRP, DRAP registration.
+3. **Pharmacy rules:**
+   - **batch and expiry tracking** (first-expiry-first-out);
+   - limits per order, cold-chain items, non-returnable items, controlled drugs blocked;
+   - pharmacist and licence details on the site.
+4. **Prescriptions:** upload at checkout, a pharmacist reviews and approves or rejects, and only then is the order confirmed.
 
-## 3. System Architecture
+**Launch in two stages:**
 
-```
-                ┌──────────────────────┐        ┌──────────────────────┐
-  Customers ──▶ │  Storefront (Next.js)│        │  Admin (Next.js)     │ ◀── Staff
-                │  shop.example.com    │        │  admin.example.com   │
-                └──────────┬───────────┘        └──────────┬───────────┘
-                           │  HTTPS / JSON (REST)          │
-                           └──────────────┬────────────────┘
-                                          ▼
-                              ┌────────────────────────┐
-                              │  Backend API (Express) │  api.example.com
-                              │  Auth · Products · Cart│
-                              │  Orders · Payments ... │
-                              └───┬──────┬──────┬──────┘
-                                  │      │      │
-                    ┌─────────────┘      │      └──────────────┐
-                    ▼                    ▼                     ▼
-             ┌────────────┐       ┌────────────┐        ┌──────────────┐
-             │ PostgreSQL │       │   Redis    │        │ Worker       │
-             │ (Prisma)   │       │ cache/queue│◀──────▶│ (BullMQ jobs)│
-             └────────────┘       └────────────┘        └──────┬───────┘
-                                                               │
-        External services: Stripe (webhooks) · Cloudinary · Email · Courier APIs
-```
+| Stage                | Sells                                                                                                                      | When                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **A: launch**        | Cosmetics, skincare, hair, fragrance, personal and baby care, vitamins and supplements, **OTC medicines**, medical devices | As soon as Phases 1–5, 7 and 8 are done                                                   |
+| **B: prescriptions** | Prescription (Rx) medicines with a pharmacist-verified upload                                                              | After Phase 6 **and** once the drug-sale licence and pharmacist are confirmed (section 2) |
 
-**Principles**
-
-- The API is the single source of truth. Both frontends talk only to the API.
-- Stripe webhooks confirm payments on the server. Never trust the client.
-- Slow work (emails, image processing, reports) runs in background jobs.
-- Validation schemas live in a shared `packages/validation` package used by the frontends and the API.
+Payments stay **Cash on Delivery only**. As in Urban Store, email is set up in the admin and nothing is sent until then, and images need no paid account.
 
 ---
 
-## 4. Repository Structure
+## 1. Decisions needed from you
 
-```
-E-commerce-/
-├── apps/
-│   ├── storefront/          # Next.js customer site
-│   │   ├── app/             # routes (App Router)
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── lib/             # api client, utils
-│   │   └── store/           # Zustand (cart, ui)
-│   ├── admin/               # Next.js admin dashboard
-│   │   ├── app/
-│   │   ├── components/
-│   │   └── lib/
-│   └── api/                 # Express backend
-│       ├── src/
-│       │   ├── config/      # env, db, redis, stripe
-│       │   ├── modules/     # auth, users, products, cart, orders, ...
-│       │   │   └── products/
-│       │   │       ├── products.routes.ts
-│       │   │       ├── products.controller.ts
-│       │   │       ├── products.service.ts
-│       │   │       └── products.test.ts
-│       │   ├── middleware/  # auth, rbac, error, rateLimit, validate
-│       │   ├── jobs/        # BullMQ workers (email, stock alerts)
-│       │   ├── utils/
-│       │   └── server.ts
-│       └── prisma/
-│           ├── schema.prisma
-│           ├── migrations/
-│           └── seed.ts
-├── packages/
-│   ├── ui/                  # shared React components
-│   ├── validation/          # Zod schemas
-│   ├── types/               # shared TS types / DTOs
-│   ├── config/              # eslint, tsconfig, tailwind presets
-│   └── emails/              # React Email templates
-├── .github/workflows/       # CI/CD
-├── docker-compose.yml       # local Postgres + Redis
-├── turbo.json
-├── pnpm-workspace.yaml
-├── .env.example
-├── PLAN.md
-└── README.md
-```
+Please answer these before Phase 1. The default used if you don't decide is in brackets.
+
+1. **Store name and domain.** ✅ **Amazon Group**. Domain still to choose (the docs use `amazongroup.pk` as an example).
+2. **Look and feel:** ✅ left to us: deep teal `#0F5E63` with a rose accent `#E0697E`, and a white care droplet with a rose plus on a teal tile.
+3. **Stage B:** ✅ prescriptions are in scope. A **retail drug-sale licence** and a **registered pharmacist** are still needed before prescription medicines go live.
+4. **Cities you deliver to** and delivery fees. [Same three zones as Urban Store: Lahore; Karachi/Islamabad/Rawalpindi; rest of Pakistan]
+5. **Cold-chain items** (insulin, some vaccines and eye drops). Sell them? Only in your own city? [Not in Stage A]
+6. **Return rules:**
+   - medicines: only if damaged, wrong or expired;
+   - cosmetics: unopened, within 7 days.
+   - [as above]
+7. **Starter catalogue:** which brands and products you actually stock. [About 60 demo products, replaced by your stock list]
+8. **WhatsApp number** for a "Ask a pharmacist" button. [none until provided]
+9. **Keep Git history** from Urban Store in the new repo, or start with one clean commit? [Keep history]
 
 ---
 
-## 5. User Roles & Permissions
+## 2. Legal and compliance checklist (Pakistan)
 
-| Role                | Access                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| **Guest**           | Browse, search, cart, guest checkout                                                       |
-| **Customer**        | Everything a guest can do, plus account, order history, wishlist, reviews, saved addresses |
-| **Support** (admin) | View orders and customers, update order status, reply to messages                          |
-| **Manager** (admin) | Products, inventory, categories, coupons, content, plus everything Support can do          |
-| **Super Admin**     | Everything, including staff accounts, settings, payment config and analytics               |
+> This is a practical checklist, **not legal advice**. Drug-sale rules are set by DRAP and the provincial health departments, and they change. Confirm each point with a pharmacy-licensing consultant or lawyer before Stage B.
 
-RBAC is enforced in API middleware (`requireRole('MANAGER')`) **and** reflected in the admin UI, which hides menu items a role can't use.
+**For Stage A (cosmetics, OTC, supplements, devices):**
 
----
+- [ ] Business registration and NTN (FBR). Add sales tax registration if your turnover requires it.
+- [ ] Buy only from **authorised distributors**, and keep invoices. Fakes are the biggest risk in cosmetics.
+- [ ] OTC medicines are sold under a pharmacy or medical-store licence in most provinces. Confirm whether your licence category covers selling online.
+- [ ] Never sell above the printed **MRP** (maximum retail price) on medicine packs. The system enforces this.
+- [ ] Supplements and nutraceuticals: sell only DRAP-enlisted or registered products.
+- [ ] Medical devices (glucometers, BP monitors): sell only DRAP-registered or enlisted ones.
 
-## 6. Client Side (Storefront)
+**Extra for Stage B (prescription medicines):**
 
-### 6.1 Pages & Routes
-
-| Route                                                  | Page                 | Key contents                                                                                                           |
-| ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `/`                                                    | Home                 | Hero banner, featured hoodies, new arrivals, best sellers, collections, testimonials, newsletter                       |
-| `/shop`                                                | All products         | Grid, filters, sort, pagination / infinite scroll                                                                      |
-| `/categories/[slug]`                                   | Category             | e.g. Pullover, Zip-Up, Oversized, Graphic                                                                              |
-| `/collections/[slug]`                                  | Collection           | e.g. New Arrivals, Best Sellers, Winter Essentials                                                                     |
-| `/products/[slug]`                                     | Product detail       | Gallery, size and color picker, stock status, size guide, description, fabric and care info, reviews, related products |
-| `/search?q=`                                           | Search results       | Full-text search with filters                                                                                          |
-| `/cart`                                                | Cart                 | Line items, quantity update, coupon, subtotal, shipping estimate                                                       |
-| `/checkout`                                            | Checkout             | Steps: Contact → Shipping → Delivery method → Payment → Review                                                         |
-| `/checkout/success`                                    | Order confirmation   | Order number, summary, next steps                                                                                      |
-| `/login`, `/register`                                  | Auth                 | Email/password, Google login                                                                                           |
-| `/forgot-password`, `/reset-password`                  | Password reset       | Token-based                                                                                                            |
-| `/account`                                             | Dashboard            | Overview                                                                                                               |
-| `/account/orders`                                      | Order history        | List with status                                                                                                       |
-| `/account/orders/[id]`                                 | Order detail         | Items, tracking timeline, invoice download, return request                                                             |
-| `/account/addresses`                                   | Address book         | CRUD, set default                                                                                                      |
-| `/account/wishlist`                                    | Wishlist             | Saved items, move to cart                                                                                              |
-| `/account/profile`                                     | Profile              | Name, email, password, phone                                                                                           |
-| `/track-order`                                         | Guest order tracking | Order # + email                                                                                                        |
-| `/size-guide`                                          | Size chart           | Measurements per fit (regular / oversized)                                                                             |
-| `/about`, `/contact`, `/faq`                           | Content pages        | Contact form goes to the admin inbox                                                                                   |
-| `/policies/shipping`, `/returns`, `/privacy`, `/terms` | Legal                | CMS-managed                                                                                                            |
-| `404`, `500`                                           | Error pages          | Friendly, with links back                                                                                              |
-
-### 6.2 Hoodie-Specific Features
-
-- **Variant picker**: color swatches change the gallery images. Size buttons are disabled when that size is out of stock.
-- **Size guide modal** with a measurement table (chest, length, sleeve) and a "find my size" helper (height/weight → suggested size).
-- **Fit info**: Regular / Oversized / Slim, with a model's height and the size they wear.
-- **Fabric details**: GSM (e.g. 320 GSM fleece), cotton/poly blend, care instructions.
-- **Low stock badge** ("Only 3 left in M").
-- **Notify me when back in stock** for sold-out variants.
-- _(Optional, Phase 5)_ **Custom hoodie designer**: upload a print or add text, with a live preview.
-
-### 6.3 Filtering & Sorting
-
-- Filters: category, size, color, price range, fit, fabric, in stock only, on sale.
-- Sorting: newest, price low→high, price high→low, best selling, top rated.
-- Filters are stored in URL query params so they can be shared and are crawlable.
-
-### 6.4 Cart Behavior
-
-- Guests: the cart lives on the server, identified by an httpOnly `cart_token` cookie (no local storage needed).
-- On login, the guest cart **merges** into the user's server cart.
-- The server re-checks stock and price on every cart change and at checkout.
-- Slide-out mini cart drawer with an "Added to cart" confirmation.
-
-### 6.5 Checkout
-
-- Guest checkout allowed, with an optional "create account" at the end.
-- Address form with validation (phone format, postal code).
-- Delivery options: Standard / Express, with prices from admin shipping rules.
-- Payment: Stripe card (Payment Element), Cash on Delivery, and optional local wallets.
-- Coupon code and free-shipping threshold banner ("Spend Rs 1,500 more for free shipping").
-- Order summary with tax and shipping breakdown.
-
-### 6.6 UI / UX Requirements
-
-- Mobile-first responsive layout (breakpoints: 640 / 768 / 1024 / 1280).
-- Sticky header with mega-menu, search and cart icon with item count.
-- Skeleton loaders, optimistic UI for cart and wishlist.
-- Toast notifications.
-- Dark/light mode (optional).
-- Accessible components (keyboard navigation, ARIA labels, contrast).
-
-### 6.7 Storefront Components (shared `packages/ui`)
-
-`Header`, `Footer`, `MegaMenu`, `SearchBar`, `ProductCard`, `ProductGrid`, `ProductGallery`, `VariantSelector`, `SizeGuideModal`, `PriceTag`, `RatingStars`, `ReviewList`, `ReviewForm`, `CartDrawer`, `CartItem`, `CouponInput`, `CheckoutStepper`, `AddressForm`, `OrderTimeline`, `Breadcrumbs`, `Pagination`, `FilterSidebar`, `Badge`, `Button`, `Input`, `Modal`, `Toast`, `Skeleton`.
+- [ ] A **retail drug-sale licence** for your premises, under your province's drug rules.
+- [ ] A **qualified pharmacist** (Category A, registered with the Pharmacy Council) in charge. The pharmacist reviews every prescription; the site records who approved each one.
+- [ ] Show the licence number, the pharmacist in charge with registration number, and the premises address on every page (footer). The system has settings for these.
+- [ ] **Never sell controlled drugs online**: narcotics, psychotropics, and anything your licence or DRAP says needs special handling. The system makes it impossible to publish a product marked controlled.
+- [ ] Keep prescription records for the period your licence requires. The system keeps them, private, with who approved them and when.
+- [ ] Privacy: prescriptions are health data. Only pharmacists, and the customer who uploaded one, can open it. Never use them for marketing.
+- [ ] No "testimonials" for medicines. Reviews are switched off for medicine product types.
 
 ---
 
-## 7. Admin Side (Dashboard)
+## 3. How the copy is made
 
-### 7.1 Layout
-
-Sidebar navigation, top bar (search, notifications, profile), breadcrumbs, and data tables with search, filter, sort, pagination, bulk actions and CSV export.
-
-### 7.2 Modules & Pages
-
-| Module                       | Route                             | Features                                                                                                                                                                                                                                                                                                  |
-| ---------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dashboard**                | `/`                               | KPIs (revenue today/week/month, orders, AOV, new customers, conversion), sales chart, top products, low-stock alerts, recent orders                                                                                                                                                                       |
-| **Products**                 | `/products`                       | List, search, filter by status/category, bulk publish/unpublish/delete                                                                                                                                                                                                                                    |
-|                              | `/products/new`, `/products/[id]` | Title, slug, description (rich text), category, tags, fit, fabric, price, compare-at price, SEO fields, image upload (drag & drop, reorder), **variant matrix generator** (pick sizes and colors to generate SKUs), per-variant price/stock/SKU/barcode, per-color images, status (draft/active/archived) |
-| **Categories & Collections** | `/categories`, `/collections`     | CRUD, nesting, banner image, manual or rule-based collections                                                                                                                                                                                                                                             |
-| **Inventory**                | `/inventory`                      | Stock per variant, quick edit, stock adjustment with reason (restock, damage, correction), adjustment history, low-stock threshold                                                                                                                                                                        |
-| **Orders**                   | `/orders`                         | List with status filter, date range, payment method, search by #/email/phone                                                                                                                                                                                                                              |
-|                              | `/orders/[id]`                    | Customer and address, items, payment status, timeline, change status, add tracking number, internal notes, print invoice / packing slip, refund (full/partial via Stripe), cancel                                                                                                                         |
-| **Returns**                  | `/returns`                        | Approve/reject return requests, restock on receipt, issue refund                                                                                                                                                                                                                                          |
-| **Customers**                | `/customers`                      | List, profile, order history, lifetime value, block/unblock, notes                                                                                                                                                                                                                                        |
-| **Reviews**                  | `/reviews`                        | Moderate (approve/hide), reply                                                                                                                                                                                                                                                                            |
-| **Discounts**                | `/coupons`                        | Percentage / fixed / free shipping, min order, usage limit (total and per user), start/end dates, applies to products/categories                                                                                                                                                                          |
-| **Shipping**                 | `/settings/shipping`              | Zones (cities/countries), flat or weight-based rates, free-shipping threshold, COD fee                                                                                                                                                                                                                    |
-| **Content (CMS)**            | `/content`                        | Homepage banners/sliders, announcement bar, FAQ, policy pages                                                                                                                                                                                                                                             |
-| **Messages**                 | `/messages`                       | Contact-form submissions and status                                                                                                                                                                                                                                                                       |
-| **Reports**                  | `/reports`                        | Sales by day/product/category, best sellers, inventory valuation, CSV export                                                                                                                                                                                                                              |
-| **Staff**                    | `/staff`                          | Invite admin users, assign roles, deactivate                                                                                                                                                                                                                                                              |
-| **Settings**                 | `/settings`                       | Store info, currency, tax rate, payment methods toggle, email templates, SEO defaults                                                                                                                                                                                                                     |
-| **Activity Log**             | `/audit-log`                      | Who changed what and when                                                                                                                                                                                                                                                                                 |
-
-### 7.3 Admin Notifications
-
-- Real-time new-order notification (polling or Server-Sent Events).
-- Daily email digest: sales summary and low stock.
+1. **Merge the open fix first.** Urban Store PR #3 (database transaction timeouts) is merged into `E-commerce-` `main`, so the copy starts with it.
+2. **Import the code into `cosmetics`.** Push `E-commerce-` `main` to the empty `cosmetics` repo, keeping history (or as one clean commit, if you prefer).
+3. **Branch:** all conversion work happens on a feature branch, through pull requests, with CI green before each merge, as before.
+4. **New services, nothing shared with Urban Store:**
+   - a new Vercel project, Root Directory `apps/storefront`;
+   - a new Neon database in Singapore;
+   - new secrets (`JWT_ACCESS_SECRET`, `CRON_SECRET`, seed admin).
+5. **The two stores live independently after the copy.** A fix in one is ported to the other by hand. This is simpler and safer than one codebase serving both shops.
 
 ---
 
-## 8. Backend
+## 4. What stays exactly as it is
 
-### 8.1 Modules
+These parts move across unchanged, apart from renaming and copy.
 
-Each module has `routes → controller → service → Prisma`. Business logic goes in services.
-
-| Module                       | Responsibility                                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| `auth`                       | Register, login, logout, refresh token, email verification, forgot/reset password, Google OAuth |
-| `users`                      | Profile, addresses, admin user management                                                       |
-| `products`                   | Product CRUD, variants, images, slug generation, publish status                                 |
-| `categories` / `collections` | Taxonomy                                                                                        |
-| `inventory`                  | Stock levels, reservations, adjustments, low-stock alerts                                       |
-| `cart`                       | Guest and user carts, merge, price/stock validation                                             |
-| `wishlist`                   | Add/remove                                                                                      |
-| `checkout`                   | Compute totals (subtotal, discount, shipping, tax), create order and payment intent             |
-| `orders`                     | Order lifecycle, status history, invoices                                                       |
-| `payments`                   | Stripe intents, webhooks, refunds, COD handling                                                 |
-| `shipping`                   | Zones, rates, tracking numbers                                                                  |
-| `coupons`                    | Validation and application rules                                                                |
-| `reviews`                    | Create (verified buyers only), moderation                                                       |
-| `cms`                        | Banners, pages, FAQ                                                                             |
-| `notifications`              | Email queue, back-in-stock alerts                                                               |
-| `analytics`                  | Dashboard aggregates, reports                                                                   |
-| `uploads`                    | Signed upload URLs for Cloudinary/S3                                                            |
-| `audit`                      | Log admin actions                                                                               |
-
-### 8.2 Middleware
-
-- `authenticate`: verify JWT from the httpOnly cookie.
-- `authorize(...roles)`: RBAC.
-- `validate(schema)`: Zod validation of body/query/params.
-- `rateLimit`: Redis-backed, stricter on auth and checkout.
-- `errorHandler`: consistent error format `{ error: { code, message, details } }`.
-- `requestLogger`: Pino with request IDs.
-- `helmet`, `cors` (allow only the storefront and admin origins), `compression`.
-
-### 8.3 Background Jobs (BullMQ)
-
-- Send emails (welcome, verify email, order confirmation, shipped, delivered, password reset, abandoned cart).
-- Release expired stock reservations.
-- Back-in-stock notifications.
-- Abandoned cart reminders (1h / 24h).
-- Nightly analytics aggregation.
-
-### 8.4 Order Status Lifecycle
-
-```
-PENDING_PAYMENT ──▶ PAID / CONFIRMED (COD) ──▶ PROCESSING ──▶ SHIPPED ──▶ DELIVERED
-       │                     │                      │
-       ▼                     ▼                      ▼
-   CANCELLED             CANCELLED              RETURN_REQUESTED ──▶ RETURNED ──▶ REFUNDED
-```
-
-Every status change is written to `OrderStatusHistory` and can trigger an email.
+- **Architecture:** one Next.js site with the shop at `/`, the admin at `/admin` and the API at `/api/v1`; the Vercel build migrates and seeds; daily cron; `DEPLOYMENT.md` flow.
+- **Accounts:** register and log in, cookies with refresh rotation, password reset, email verification, Google sign-in (optional), addresses, account pages.
+- **Shopping:**
+  - cart (guest and signed in, merged at login), wishlist, recently viewed;
+  - back-in-stock alerts, abandoned-cart reminders, newsletter.
+- **Checkout:**
+  - live quote, shipping zones and COD fee, coupons, idempotent ordering;
+  - atomic stock updates, order numbers, guest order links, track order, cancel;
+  - PDF invoice and packing slip.
+- **Admin:**
+  - dashboard, reports and CSV exports, orders (fulfil, cancel, refund);
+  - customers, messages, coupons, content (banners, pages, FAQ, announcement);
+  - shipping zones, staff and roles, store settings, email settings, activity log.
+- **Infrastructure:**
+  - images in the database or from a CDN, with the custom loader;
+  - rate limits, CSRF origin check, audit log, encrypted secrets, accessibility tests;
+  - the CI pipeline and the Playwright suite structure.
 
 ---
 
-## 9. Database Design
+## 5. What changes, area by area
 
-### 9.1 Entity Relationship Overview
+### 5.1 Branding and naming
 
-```
-User 1─* Address
-User 1─* Order 1─* OrderItem *─1 ProductVariant
-User 1─1 Cart 1─* CartItem *─1 ProductVariant
-User 1─* Review *─1 Product
-User 1─* WishlistItem *─1 Product
-Product 1─* ProductVariant (size × color)
-Product 1─* ProductImage (optionally linked to a color)
-Product *─* Category
-Product *─* Collection
-Order 1─* Payment
-Order 1─* OrderStatusHistory
-Order *─1 Coupon
-ProductVariant 1─* InventoryAdjustment
-```
+| Item                                         | Urban Store            | New store                                                                         |
+| -------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| Store name, logo, favicon, OG image          | Urban Store, hood mark | Amazon Group (droplet + plus); new SVG mark, favicon and generated share image    |
+| Colours (`packages/ui/src/styles/theme.css`) | ink + orange           | rose + teal + ink. Status colours stay WCAG AA                                    |
+| Package scope                                | `@hoodie/*`            | `@store/*` (about 190 imports, scripted rename)                                   |
+| Order number prefix                          | `US-`                  | `AG-`                                                                             |
+| Emails, addresses, footer text               | Urban Store            | new name, with the licence and pharmacist line once set                           |
+| Descriptions, SEO, structured data           | hoodies, "streetwear"  | beauty, skincare and pharmacy. Structured data becomes `Pharmacy` + `OnlineStore` |
 
-### 9.2 Prisma Schema (draft)
+### 5.2 Product data model (Prisma)
+
+**Removed:** `enum Fit`, and `Product.fit`, `fabric` and `careInfo`.
+
+**New enums**
 
 ```prisma
-enum Role          { CUSTOMER SUPPORT MANAGER SUPER_ADMIN }
-enum ProductStatus { DRAFT ACTIVE ARCHIVED }
-enum Fit           { REGULAR OVERSIZED SLIM }
-enum OrderStatus   { PENDING_PAYMENT CONFIRMED PAID PROCESSING SHIPPED DELIVERED CANCELLED RETURN_REQUESTED RETURNED REFUNDED }
-enum PaymentMethod { STRIPE COD JAZZCASH EASYPAISA }
-enum PaymentStatus { PENDING SUCCEEDED FAILED REFUNDED PARTIALLY_REFUNDED }
-enum DiscountType  { PERCENTAGE FIXED FREE_SHIPPING }
-
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String?
-  name          String
-  phone         String?
-  role          Role      @default(CUSTOMER)
-  emailVerified DateTime?
-  googleId      String?   @unique
-  isBlocked     Boolean   @default(false)
-  addresses     Address[]
-  orders        Order[]
-  reviews       Review[]
-  wishlist      WishlistItem[]
-  cart          Cart?
-  refreshTokens RefreshToken[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+enum ProductType {
+  MAKEUP
+  SKINCARE
+  HAIRCARE
+  FRAGRANCE
+  BATH_BODY
+  PERSONAL_CARE
+  MOTHER_BABY
+  SUPPLEMENT
+  OTC_MEDICINE
+  PRESCRIPTION_MEDICINE
+  MEDICAL_DEVICE
 }
 
-model RefreshToken {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String   @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime @default(now())
+enum DosageForm {
+  TABLET CAPSULE SYRUP SUSPENSION DROPS SPRAY INHALER
+  CREAM OINTMENT GEL LOTION SACHET INJECTION PATCH OTHER
 }
 
-model Address {
-  id         String  @id @default(cuid())
-  userId     String
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fullName   String
-  phone      String
-  line1      String
-  line2      String?
-  city       String
-  state      String?
-  postalCode String
-  country    String  @default("PK")
-  isDefault  Boolean @default(false)
-}
+enum PrescriptionStatus { PENDING APPROVED REJECTED }
+```
 
-model Category {
-  id          String     @id @default(cuid())
+**New `Brand` model**
+
+```prisma
+model Brand {
+  id          String   @id @default(cuid())
   name        String
-  slug        String     @unique
+  slug        String   @unique
+  logoUrl     String?
   description String?
-  imageUrl    String?
-  parentId    String?
-  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children    Category[] @relation("CategoryTree")
+  country     String?  // "Pakistan", "France"…
+  isFeatured  Boolean  @default(false)
+  position    Int      @default(0)
   products    Product[]
 }
+```
 
-model Collection {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String?
-  bannerUrl   String?
-  isFeatured  Boolean   @default(false)
-  products    Product[]
-}
+**`Product`: new fields**
 
-model Product {
-  id              String           @id @default(cuid())
-  title           String
-  slug            String           @unique
-  description     String
-  fit             Fit              @default(REGULAR)
-  fabric          String?          // e.g. "80% cotton / 20% polyester, 320 GSM"
-  careInfo        String?
-  basePrice       Int              // stored in minor units (paisa/cents)
-  compareAtPrice  Int?
-  status          ProductStatus    @default(DRAFT)
-  isFeatured      Boolean          @default(false)
-  seoTitle        String?
-  seoDescription  String?
-  categories      Category[]
-  collections     Collection[]
-  variants        ProductVariant[]
-  images          ProductImage[]
-  reviews         Review[]
-  avgRating       Float            @default(0)
-  reviewCount     Int              @default(0)
-  soldCount       Int              @default(0)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  @@index([status, createdAt])
-}
+| Field                         | Type                 | Purpose                                                                                              |
+| ----------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `type`                        | `ProductType`        | Drives the rules: reviews, returns, Rx, which fields the admin form shows                            |
+| `brandId`                     | `String?`            | Brand pages and filter                                                                               |
+| `option1Name` / `option2Name` | `String` / `String?` | Labels for the two variant options, e.g. "Size" + "Shade", "Pack size" + –, "Strength" + "Pack size" |
+| `ingredients`                 | `String?`            | Full INCI list for cosmetics; composition for medicines                                              |
+| `howToUse`                    | `String?`            | Directions or dosage text, shown as a tab                                                            |
+| `warnings`                    | `String?`            | Warnings, side effects, contraindications                                                            |
+| `skinTypes`                   | `String[]`           | `OILY`, `DRY`, `COMBINATION`, `SENSITIVE`, `NORMAL` (cosmetics filter)                               |
+| `concerns`                    | `String[]`           | `ACNE`, `PIGMENTATION`, `ANTI_AGEING`, `HYDRATION`, `SUN_PROTECTION`, `HAIR_FALL`, `DANDRUFF`…       |
+| `gender`                      | `String?`            | `WOMEN`, `MEN`, `UNISEX` (fragrance and grooming)                                                    |
+| `genericName`                 | `String?`            | Salt or formula, e.g. "Paracetamol", "Ibuprofen + Paracetamol" (search, alternatives)                |
+| `strength`                    | `String?`            | e.g. "500 mg", "120 mg/5 ml"                                                                         |
+| `dosageForm`                  | `DosageForm?`        | Tablet, syrup…                                                                                       |
+| `manufacturer`                | `String?`            | e.g. "GSK Pakistan"                                                                                  |
+| `drapRegNo`                   | `String?`            | DRAP registration number, shown on medicine pages                                                    |
+| `requiresPrescription`        | `Boolean`            | True for Rx items; checkout asks for a prescription                                                  |
+| `isControlled`                | `Boolean`            | Validation refuses `ACTIVE` while true                                                               |
+| `storage`                     | `String?`            | "Store below 25 °C", "Refrigerate 2–8 °C"                                                            |
+| `coldChain`                   | `Boolean`            | Only deliverable to zones that allow cold chain                                                      |
+| `returnable`                  | `Boolean`            | Default false for medicines; drives the returns flow                                                 |
+| `maxPerOrder`                 | `Int?`               | Quantity cap per order (e.g. 3 packs of a painkiller)                                                |
 
-model ProductVariant {
-  id            String   @id @default(cuid())
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  sku           String   @unique
-  size          String   // XS, S, M, L, XL, XXL
-  color         String   // "Jet Black"
-  colorHex      String?  // "#111111"
-  price         Int?     // overrides basePrice if set
-  stock         Int      @default(0)
-  reserved      Int      @default(0)
-  lowStockAt    Int      @default(5)
-  weightGrams   Int?
-  isActive      Boolean  @default(true)
-  adjustments   InventoryAdjustment[]
-  @@unique([productId, size, color])
-}
+**`ProductVariant` changes**
 
-model ProductImage {
-  id        String  @id @default(cuid())
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  url       String
-  alt       String?
-  color     String? // links image to a color variant
-  position  Int     @default(0)
-}
+- Rename `size` → `option1`, `color` → `option2` (nullable), `colorHex` → `swatchHex`. Shade swatches reuse the colour swatch UI.
+- Add `mrp Int?`: the printed maximum retail price. Validation keeps the selling price at or below MRP.
+- Add `barcode String?`: the EAN on the pack, for scanning when receiving stock and packing.
+- `stock` becomes the **sum of usable batches**, kept in sync by the inventory service (5.6).
 
-model InventoryAdjustment {
-  id         String         @id @default(cuid())
-  variantId  String
-  variant    ProductVariant @relation(fields: [variantId], references: [id])
-  change     Int            // +10 restock, -2 damaged
-  reason     String
-  adminId    String?
-  createdAt  DateTime       @default(now())
-}
+**New: batch and expiry tracking**
 
-model Cart {
-  id        String     @id @default(cuid())
-  userId    String?    @unique
-  user      User?      @relation(fields: [userId], references: [id])
-  token     String?    @unique // guest cart token
-  items     CartItem[]
-  updatedAt DateTime   @updatedAt
-}
-
-model CartItem {
-  id        String @id @default(cuid())
-  cartId    String
-  cart      Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  variantId String
-  quantity  Int
-  @@unique([cartId, variantId])
-}
-
-model WishlistItem {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId String
-  createdAt DateTime @default(now())
-  @@unique([userId, productId])
-}
-
-model Coupon {
-  id             String       @id @default(cuid())
-  code           String       @unique
-  type           DiscountType
-  value          Int          // percent or amount in minor units
-  minOrderAmount Int?
-  maxUses        Int?
-  maxUsesPerUser Int?
-  usedCount      Int          @default(0)
-  startsAt       DateTime?
-  endsAt         DateTime?
-  isActive       Boolean      @default(true)
-  orders         Order[]
-}
-
-model Order {
-  id              String        @id @default(cuid())
-  orderNumber     String        @unique // e.g. HD-10025
-  userId          String?
-  user            User?         @relation(fields: [userId], references: [id])
-  email           String
-  phone           String
-  shippingAddress Json          // snapshot at order time
-  billingAddress  Json?
-  status          OrderStatus   @default(PENDING_PAYMENT)
-  paymentMethod   PaymentMethod
-  subtotal        Int
-  discountTotal   Int           @default(0)
-  shippingTotal   Int           @default(0)
-  taxTotal        Int           @default(0)
-  grandTotal      Int
-  couponId        String?
-  coupon          Coupon?       @relation(fields: [couponId], references: [id])
-  shippingMethod  String
-  trackingNumber  String?
-  courier         String?
-  notes           String?       // customer note
-  adminNotes      String?
-  items           OrderItem[]
-  payments        Payment[]
-  history         OrderStatusHistory[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  @@index([status, createdAt])
-}
-
-model OrderItem {
-  id          String @id @default(cuid())
-  orderId     String
-  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  variantId   String
-  // snapshot fields so historical orders don't change if the product changes
-  productTitle String
-  size         String
-  color        String
-  sku          String
-  imageUrl     String?
-  unitPrice    Int
-  quantity     Int
-  lineTotal    Int
-}
-
-model Payment {
-  id              String        @id @default(cuid())
-  orderId         String
-  order           Order         @relation(fields: [orderId], references: [id])
-  method          PaymentMethod
-  status          PaymentStatus @default(PENDING)
-  amount          Int
-  providerRef     String?       // Stripe PaymentIntent id
-  refundedAmount  Int           @default(0)
-  rawResponse     Json?
-  createdAt       DateTime      @default(now())
-}
-
-model OrderStatusHistory {
-  id        String      @id @default(cuid())
-  orderId   String
-  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  status    OrderStatus
-  note      String?
-  changedBy String?
-  createdAt DateTime    @default(now())
-}
-
-model Review {
+```prisma
+model StockBatch {
   id         String   @id @default(cuid())
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  rating     Int      // 1-5
-  title      String?
-  body       String
-  images     String[]
-  isApproved Boolean  @default(false)
-  adminReply String?
-  createdAt  DateTime @default(now())
-  @@unique([productId, userId])
+  variantId  String
+  batchNo    String
+  expiryDate DateTime
+  quantity   Int               // units left in this batch
+  costPrice  Int?              // for margin reports (optional)
+  supplier   String?
+  receivedAt DateTime @default(now())
+  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  allocations OrderItemBatch[]
+  @@unique([variantId, batchNo])
+  @@index([variantId, expiryDate])
 }
 
-model ShippingZone {
-  id                String  @id @default(cuid())
-  name              String  // "Lahore", "Rest of Pakistan"
-  regions           String[]
-  standardRate      Int
-  expressRate       Int?
-  freeOverAmount    Int?
-  codFee            Int     @default(0)
-  estimatedDays     String  // "2-4"
+model OrderItemBatch {           // which batch each sold unit came from (recalls, packing slip)
+  orderItemId String
+  batchId     String
+  quantity    Int
+  @@id([orderItemId, batchId])
 }
-
-model Banner      { id String @id @default(cuid()) title String imageUrl String link String? position Int @default(0) isActive Boolean @default(true) }
-model Page        { id String @id @default(cuid()) slug String @unique title String content String updatedAt DateTime @updatedAt }
-model Faq         { id String @id @default(cuid()) question String answer String position Int @default(0) }
-model ContactMessage { id String @id @default(cuid()) name String email String subject String? message String status String @default("NEW") createdAt DateTime @default(now()) }
-model StockAlert  { id String @id @default(cuid()) email String variantId String notifiedAt DateTime? createdAt DateTime @default(now()) @@unique([email, variantId]) }
-model AuditLog    { id String @id @default(cuid()) adminId String action String entity String entityId String diff Json? createdAt DateTime @default(now()) }
-model Setting     { key String @id value Json }
 ```
 
-> **Money rule:** always store money as integers in minor units (paisa/cents). Never use floats.
+**New: prescriptions (Stage B)**
 
----
-
-## 10. API Endpoints
-
-Base URL: `/api/v1`. All responses are JSON. Admin routes are prefixed with `/admin` and need an admin role.
-
-### 10.1 Auth
-
-| Method | Endpoint                                 | Description                             |
-| ------ | ---------------------------------------- | --------------------------------------- |
-| POST   | `/auth/register`                         | Create account, send verification email |
-| POST   | `/auth/login`                            | Set access and refresh cookies          |
-| POST   | `/auth/logout`                           | Revoke refresh token                    |
-| POST   | `/auth/refresh`                          | Rotate tokens                           |
-| GET    | `/auth/me`                               | Current user                            |
-| POST   | `/auth/verify-email`                     | Verify with token                       |
-| POST   | `/auth/forgot-password`                  | Send reset email                        |
-| POST   | `/auth/reset-password`                   | Reset with token                        |
-| GET    | `/auth/google` / `/auth/google/callback` | OAuth                                   |
-
-### 10.2 Public Catalog
-
-| Method | Endpoint                              | Description                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------- |
-| GET    | `/products`                           | List with `?category=&size=&color=&minPrice=&maxPrice=&fit=&sort=&page=&limit=` |
-| GET    | `/products/:slug`                     | Detail with variants, images, rating                                            |
-| GET    | `/products/:id/related`               | Related products                                                                |
-| GET    | `/products/:id/reviews`               | Approved reviews (paginated)                                                    |
-| GET    | `/categories`                         | Category tree                                                                   |
-| GET    | `/collections` / `/collections/:slug` | Collections                                                                     |
-| GET    | `/search?q=`                          | Search                                                                          |
-| GET    | `/filters`                            | Available sizes, colors, price range (for the filter UI)                        |
-| GET    | `/cms/home`                           | Banners, featured sections                                                      |
-| GET    | `/cms/pages/:slug`                    | Policy/content page                                                             |
-| GET    | `/cms/faq`                            | FAQ                                                                             |
-| POST   | `/contact`                            | Contact form                                                                    |
-| POST   | `/stock-alerts`                       | Back-in-stock subscribe                                                         |
-| POST   | `/newsletter`                         | Subscribe                                                                       |
-
-### 10.3 Cart & Checkout
-
-| Method | Endpoint                               | Description                                               |
-| ------ | -------------------------------------- | --------------------------------------------------------- |
-| GET    | `/cart`                                | Get cart (user or guest token)                            |
-| POST   | `/cart/items`                          | Add `{ variantId, quantity }`                             |
-| PATCH  | `/cart/items/:id`                      | Update quantity                                           |
-| DELETE | `/cart/items/:id`                      | Remove                                                    |
-| DELETE | `/cart`                                | Empty the cart (guest cart merges automatically on login) |
-| POST   | `/cart/coupon` / DELETE `/cart/coupon` | Apply/remove coupon                                       |
-| POST   | `/checkout/quote`                      | Totals for address + shipping method                      |
-| POST   | `/checkout`                            | Create order. For Stripe, returns `clientSecret`          |
-| POST   | `/payments/stripe/webhook`             | Stripe webhook (raw body, signature verified)             |
-
-### 10.4 Customer Account (auth required)
-
-| Method                | Endpoint                        | Description                               |
-| --------------------- | ------------------------------- | ----------------------------------------- |
-| PATCH                 | `/me`                           | Update profile                            |
-| PATCH                 | `/auth/password`                | Change password (signs out other devices) |
-| GET/POST/PATCH/DELETE | `/me/addresses[/:id]`           | Address book                              |
-| GET                   | `/me/orders` / `/me/orders/:id` | Order history                             |
-| POST                  | `/me/orders/:id/cancel`         | Cancel (if not yet shipped)               |
-| POST                  | `/me/orders/:id/return`         | Request return                            |
-| GET                   | `/me/orders/:id/invoice`        | PDF invoice                               |
-| GET/POST/DELETE       | `/me/wishlist[/:productId]`     | Wishlist                                  |
-| POST                  | `/products/:id/reviews`         | Write review (verified purchase)          |
-| GET                   | `/orders/track?number=&email=`  | Guest tracking (public)                   |
-
-### 10.5 Admin
-
-| Method            | Endpoint                                              | Description                                          |
-| ----------------- | ----------------------------------------------------- | ---------------------------------------------------- |
-| GET               | `/admin/dashboard`                                    | KPIs and charts data                                 |
-| GET/POST          | `/admin/products`                                     | List / create                                        |
-| GET/PATCH/DELETE  | `/admin/products/:id`                                 | Read / update / archive                              |
-| POST              | `/admin/products/:id/variants/generate`               | Generate size × color matrix                         |
-| POST/PATCH/DELETE | `/admin/products/:id/variants`, `/admin/variants/:id` | Add / update (price, SKU, active) / delete a variant |
-| POST/GET          | `/admin/variants/:id/adjust-stock`, `/stock-history`  | Adjust stock with a reason; history                  |
-| POST              | `/admin/products/bulk`                                | Bulk publish/archive/delete                          |
-| POST              | `/admin/uploads/sign`                                 | Signed upload URL                                    |
-| CRUD              | `/admin/categories`, `/admin/collections`             | Taxonomy                                             |
-| GET               | `/admin/inventory`                                    | Stock list, low-stock filter                         |
-| POST              | `/admin/inventory/:variantId/adjust`                  | Adjust with reason                                   |
-| GET               | `/admin/orders`                                       | List with filters                                    |
-| GET/PATCH         | `/admin/orders/:id`                                   | Detail, update status/tracking/notes                 |
-| POST              | `/admin/orders/:id/refund`                            | Full/partial refund                                  |
-| GET               | `/admin/orders/:id/packing-slip`                      | PDF                                                  |
-| GET               | `/admin/orders/export`                                | CSV                                                  |
-| GET/PATCH         | `/admin/returns[/:id]`                                | Return management                                    |
-| GET               | `/admin/customers` / `/admin/customers/:id`           | Customer list/detail                                 |
-| PATCH             | `/admin/customers/:id/block`                          | Block/unblock                                        |
-| GET/PATCH/DELETE  | `/admin/reviews[/:id]`                                | Moderation                                           |
-| CRUD              | `/admin/coupons`                                      | Discounts                                            |
-| CRUD              | `/admin/shipping-zones`                               | Shipping                                             |
-| CRUD              | `/admin/banners`, `/admin/pages`, `/admin/faq`        | CMS                                                  |
-| GET/PATCH         | `/admin/messages[/:id]`                               | Contact inbox                                        |
-| GET               | `/admin/reports/sales?from=&to=&groupBy=`             | Reports                                              |
-| CRUD              | `/admin/staff`                                        | Staff users and roles (Super Admin)                  |
-| GET/PATCH         | `/admin/settings`                                     | Store settings                                       |
-| GET               | `/admin/audit-log`                                    | Activity log                                         |
-
-### 10.6 Standard Response Shapes
-
-```json
-// list
-{ "data": [ ... ], "meta": { "page": 1, "limit": 20, "total": 134, "totalPages": 7 } }
-
-// error
-{ "error": { "code": "OUT_OF_STOCK", "message": "Size M in Black is out of stock", "details": { "variantId": "..." } } }
+```prisma
+model Prescription {
+  id              String             @id @default(cuid())
+  userId          String?
+  orderId         String?            @unique
+  mediaIds        String[]           // private uploads (photos/PDF), up to 3 pages
+  patientName     String
+  doctorName      String?
+  issuedOn        DateTime?
+  status          PrescriptionStatus @default(PENDING)
+  reviewedById    String?            // pharmacist who decided
+  reviewedAt      DateTime?
+  pharmacistNote  String?            // internal
+  rejectionReason String?            // shown to the customer
+  createdAt       DateTime           @default(now())
+}
 ```
 
----
+**Other model changes**
 
-## 11. Key Business Flows
+- `Media`: add `isPrivate Boolean` and `ownerId String?`. Private files are never served from the public `/media` route, only through an authenticated route (5.8).
+- `OrderStatus`: add `AWAITING_PRESCRIPTION`.
+- `OrderItem` snapshot: add `requiresPrescription`, `genericName` and `strength`, so the invoice stays right if the product changes later.
+- `User`: add `pharmacistRegNo String?`. Only staff with this set can approve prescriptions (5.11).
+- `ShippingZone`: add `coldChainAvailable Boolean`.
+- `Coupon`: add `excludeTypes ProductType[]`, e.g. no discount codes on prescription medicines.
 
-### 11.1 Checkout with Stripe
+**Migrations:** the new store starts with an empty database, so the Urban Store migrations are squashed into one fresh baseline migration with the new schema. This is cleaner than a chain of renames.
 
-1. The client sends `POST /checkout` with the cart, address, shipping method and `paymentMethod=STRIPE`.
-2. The server, inside a **DB transaction**:
-   - re-validates prices, stock and coupon;
-   - computes totals on the server;
-   - **reserves stock** (`reserved += qty`) for 15 minutes;
-   - creates the `Order` (`PENDING_PAYMENT`) and `OrderItems` (snapshots);
-   - creates a Stripe PaymentIntent (with an idempotency key) and a `Payment` row.
-3. It returns `clientSecret`, and the client confirms payment with the Stripe Payment Element.
-4. **Stripe webhook** `payment_intent.succeeded`: mark the order `PAID`, convert the reservation to a sale (`stock -= qty`, `reserved -= qty`), add coupon usage, clear the cart, and queue a confirmation email.
-5. `payment_intent.payment_failed` or reservation expiry: release the reserved stock and mark the order `CANCELLED`.
+### 5.3 Categories and navigation
 
-### 11.2 Checkout with Cash on Delivery
+The tree uses the existing `Category.parentId` (two levels). The header becomes a **mega menu**.
 
-Same validation. The order is created as `CONFIRMED`, stock is decremented right away, the COD fee is added, and the confirmation email is sent. An admin can phone-verify before marking it `PROCESSING`.
+- **Makeup:** Face (foundation, concealer, powder, blush, primer), Eyes (mascara, liner, kajal, eyeshadow, brows), Lips (lipstick, gloss, liner, balm), Nails, Brushes & tools
+- **Skincare:** Cleansers, Toners, Serums, Moisturisers, Sunscreen, Masks, Eye care, Acne care, Lip care
+- **Hair care:** Shampoo, Conditioner, Oils & serums, Hair colour, Treatments, Styling
+- **Fragrance:** Women, Men, Body mists, Attar
+- **Bath & body:** Body wash, Lotions, Deodorants, Hand & foot care
+- **Personal care:** Oral care, Shaving, Feminine care, Men's grooming
+- **Mother & baby:** Diapers & wipes, Baby skin & hair, Feeding, Maternity
+- **Vitamins & supplements:** Multivitamins, Calcium & vitamin D, Omega-3, Iron, Immunity, Protein & sports
+- **Pharmacy (OTC):** Pain & fever, Cold & flu, Allergy, Digestive care, First aid, Eye & ear, Skin treatments, ORS & rehydration
+- **Prescription medicines** (Stage B): Diabetes, Blood pressure, Heart, Cholesterol, Thyroid, Antibiotics, Respiratory…
+- **Medical devices:** BP monitors, Glucometers & strips, Thermometers, Nebulisers, Masks & gloves
 
-### 11.3 Preventing Overselling
+**Collections** (curated): New arrivals, Best sellers, Deals, Sun care edit, Winter skincare, Ramadan & Eid gifts, Under Rs 1,000.
 
-- Use `UPDATE ... SET reserved = reserved + :q WHERE id = :id AND stock - reserved >= :q` (an atomic conditional update). If 0 rows change, the item is out of stock.
-- A scheduled job releases expired reservations every minute.
+### 5.4 Shop pages
 
-### 11.4 Returns & Refunds
+| Page                  | Change                                                                                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home                  | Hero banners (beauty plus pharmacy), shop by category (icons), shop by brand (logo strip), shop by concern (acne, pigmentation…), deals, best sellers, a "Pharmacy essentials" row, an upload-prescription call to action (Stage B), trust badges (100% authentic, COD, pharmacist-checked) |
+| Category / listing    | Filters: **brand**, **product type**, **skin type**, **concern**, price, in stock, Rx/OTC; sort by popularity, price, newest                                                                                                                                                                |
+| **Brand pages** (new) | `/brands` A–Z, and `/brands/[slug]` with logo, description and products                                                                                                                                                                                                                     |
+| Product page          | See 5.5                                                                                                                                                                                                                                                                                     |
+| Size guide            | **Removed** (page, button, `lib/size-guide.ts`)                                                                                                                                                                                                                                             |
+| Account               | New **Prescriptions** tab (Stage B): upload, status, reuse a valid one                                                                                                                                                                                                                      |
+| Footer                | Licence number, pharmacist in charge, address, WhatsApp, "Authentic products" and "Prescription policy" links                                                                                                                                                                               |
 
-Customer requests a return within N days of delivery → admin approves → item received → admin marks it returned (optionally restocking it) → refund via Stripe API, or manually for COD → email.
+### 5.5 Product page
 
-### 11.5 Back-in-Stock
+- Brand name links to the brand page; then title, rating (non-medicine types only).
+- **Price block:** the selling price, the MRP struck through when discounted, and "You save Rs X".
+- **Options:**
+  - `option1` / `option2` labelled by the product, e.g. "Shade" swatches + "Size: 30 ml / 50 ml";
+  - "Strength: 250 mg / 500 mg" + "Pack: 10 / 20 tablets".
+- **Badges:** "Prescription required", "Refrigerated item", "Non-returnable", "Only N per order", "100% authentic".
+- **Tabs:** Description · Ingredients · How to use / Dosage · Warnings & side effects · Storage.
+- **Medicine facts box:** generic name, strength, form, manufacturer, DRAP registration number.
+- **"Same formula alternatives":** other products with the same generic name and strength, cheapest first.
+- **Disclaimer on medicines:** "This information is for reference only. Follow your doctor's or pharmacist's advice."
+- **Ask a pharmacist:** a WhatsApp link with the product name pre-filled.
 
-When an admin raises stock on a variant from 0 to more than 0, a job emails everyone in `StockAlert` for that variant.
+### 5.6 Inventory, batches and expiry
 
----
+**Receiving stock (admin):** pick the variant (or scan the barcode), then enter the batch number, expiry date, quantity and optionally cost and supplier. This creates or adds to a `StockBatch` and writes the inventory adjustment log as today.
 
-## 12. Security
+**Selling (FEFO, first expiry first out):** inside the existing order transaction, units are taken from the earliest-expiring **usable** batch first. Each allocation is recorded in `OrderItemBatch`. Cancelling or restocking a return puts units back into the same batches.
 
-- Passwords hashed with **argon2** (or bcrypt, cost 12).
-- JWT access token (15 min) and refresh token (7–30 days, rotated, stored hashed) in **httpOnly, Secure, SameSite** cookies.
-- CSRF protection for cookie auth (SameSite plus a CSRF token on state-changing requests).
-- Zod validation on **every** input. Prisma parameterizes queries, which prevents SQL injection.
-- Rate limiting: login 5/min/IP, register, forgot-password, checkout, contact form.
-- `helmet` security headers and a strict CORS allowlist.
-- Stripe webhook signature verification. Prices are **never** trusted from the client.
-- The admin app runs on a separate subdomain. Optional 2FA (TOTP) for admins.
-- File uploads: type and size checks, upload straight to Cloudinary/S3 via signed URLs.
-- Sanitize rich-text HTML (DOMPurify) before rendering.
-- Secrets live in environment variables only. `.env` is never committed, and `.env.example` documents the keys.
-- Audit log for all admin write actions.
-- Run `npm audit` / Dependabot regularly.
-- Never store card data. Stripe handles PCI compliance.
+**Usable** means the batch expires after today plus the **minimum shelf life** setting (default 90 days for medicines, 180 for cosmetics). No customer receives short-dated stock.
 
----
+**Daily cron additions:**
 
-## 13. Performance, SEO & Accessibility
+- expired batches are taken out of available stock;
+- the daily summary email lists items **expiring within 90 days** and expired stock to write off.
 
-**Performance**
+**Packing slip:** shows the batch number and expiry for each line, so the packer picks the right box.
 
-- SSG/ISR for product and collection pages (revalidate on product update via an on-demand revalidation webhook).
-- `next/image` with responsive sizes, AVIF/WebP, lazy loading.
-- Redis cache for hot endpoints (home, categories, filters).
-- DB indexes on slugs, status, createdAt, foreign keys.
-- Code splitting and minimal client JS on the storefront.
+**Reports:**
 
-**SEO**
+- expiry report (by month);
+- stock valuation at cost (now possible because cost price is stored);
+- batch trace ("who received batch X?") for recalls.
 
-- Per-page `<title>`, meta description, Open Graph and Twitter cards.
-- `Product`, `BreadcrumbList`, `Organization` and `Review` JSON-LD structured data.
-- `sitemap.xml` and `robots.txt` generated automatically.
-- Clean slugs (`/products/classic-oversized-black-hoodie`), canonical URLs.
+### 5.7 Cart and checkout rules
 
-**Accessibility (WCAG 2.1 AA)**
+| Rule                                                     | Where it's enforced                                                                                      |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `maxPerOrder`                                            | Add to cart, change quantity, quote and checkout. The message reads "You can order up to 3 of this item" |
+| Selling price ≤ MRP                                      | Admin product validation                                                                                 |
+| Controlled items cannot be active                        | Admin validation and a database check                                                                    |
+| Cold-chain items only to zones with `coldChainAvailable` | Quote says "Not deliverable to your city", and checkout refuses                                          |
+| Coupons exclude some product types (e.g. Rx)             | Coupon evaluation; the excluded lines are shown                                                          |
+| Rx in cart → prescription step (Stage B)                 | Checkout UI and API (5.8)                                                                                |
 
-- Semantic HTML, alt text on images, focus states, keyboard-navigable menus and modals, color contrast ≥ 4.5:1, labelled form fields with error messages.
-
-**Analytics**
-
-- Google Analytics 4 / Plausible, Meta Pixel (optional), e-commerce events: `view_item`, `add_to_cart`, `begin_checkout`, `purchase`.
-
----
-
-## 14. Testing Strategy
-
-| Type              | Tool                                        | Coverage                                                                                                  |
-| ----------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Unit              | Vitest                                      | Services: pricing, coupon rules, shipping calc, stock reservation                                         |
-| Integration / API | Vitest + Supertest + test Postgres (Docker) | Every endpoint: happy path, validation, auth/RBAC                                                         |
-| Component         | React Testing Library                       | VariantSelector, Cart, Checkout forms                                                                     |
-| E2E               | Playwright                                  | Browse → add to cart → checkout (Stripe test card + COD), login, admin creates product, admin ships order |
-| Load              | k6                                          | Product listing and checkout under load                                                                   |
-| Manual QA         | Checklist                                   | Mobile devices, browsers, payment edge cases                                                              |
-
-Target ≥ 80% coverage on backend services. CI blocks merges when tests fail.
-
----
-
-## 15. DevOps & Deployment
-
-### 15.1 Environments
-
-`local` (Docker Compose: Postgres + Redis) → `staging` (auto-deploy from `develop`) → `production` (deploy from `main` after approval).
-
-### 15.2 Environment Variables (`.env.example`)
+### 5.8 Prescription workflow (Stage B)
 
 ```
-DATABASE_URL=
-REDIS_URL=
-JWT_ACCESS_SECRET=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-RESEND_API_KEY=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-STOREFRONT_URL=
-ADMIN_URL=
-NEXT_PUBLIC_API_URL=
-SENTRY_DSN=
+Customer adds an Rx item → checkout shows "Upload prescription" (photo or PDF, up to 3 pages)
+   or picks a still-valid approved prescription from their account
+→ order placed with status AWAITING_PRESCRIPTION; stock is RESERVED (not sold) for 48 h
+→ pharmacist queue in the admin: view images (zoom/rotate), patient, doctor, date, cart lines
+     ├─ Approve → stock reserved → sold (FEFO), order CONFIRMED, customer emailed
+     └─ Reject (reason required) → reservation released, order CANCELLED, customer emailed with the reason
+→ not reviewed in 48 h → cancelled automatically (daily/hourly job), customer told
 ```
 
-### 15.3 CI/CD (GitHub Actions)
+- **Reuses the card-payment reservation logic:** reserve now, sell on confirmation, release on expiry. Rx orders behave like an unpaid card order that a pharmacist confirms instead of Stripe.
+- **Private storage:** uploads go into `Media` with `isPrivate: true`. They are served by `GET /api/v1/prescriptions/:id/files/:n` only to the owner or to a staff member with `pharmacistRegNo`. They are never cached publicly (`Cache-Control: private, no-store`) and never in sitemaps.
+- **Audit:** approve and reject decisions go to the audit log with the pharmacist's name and registration number.
+- **Mixed carts** (Rx + cosmetics): one order; the whole order waits for approval. This is simpler for COD delivery.
 
-1. On PR: install → lint → typecheck → unit and integration tests → build.
-2. On merge to `develop`: deploy to staging, then run Playwright E2E against staging.
-3. On merge to `main`: run `prisma migrate deploy`, then deploy the API, storefront and admin.
+### 5.9 Orders, returns and reviews
 
-### 15.4 Operations
+- **Order timeline:** gains "Prescription received", "Approved by pharmacist (name)" and "Rejected: reason".
+- **Returns:** the request form only lists `returnable` items. Medicines can only be returned as "Damaged / wrong item / expired on arrival", and need a photo. The window comes from settings (default 7 days).
+- **Reviews:** turned off for `OTC_MEDICINE` and `PRESCRIPTION_MEDICINE` (no review form, no stars). Kept for all other types, with moderation as today. The "How's your hoodie?" email becomes "How are you finding your purchase?" and skips medicines.
 
-- Daily automated DB backups with point-in-time recovery.
-- Sentry for frontend and backend errors. Uptime monitoring on `/health`.
-- Structured logs with request IDs.
-- Git branching: `main` (prod), `develop` (staging), `feature/*` branches with PR reviews.
+### 5.10 Search and discovery
 
----
+- The search index adds **generic name, brand name and ingredients** next to the title. "paracetamol" finds Panadol and Calpol; "niacinamide" finds serums.
+- **Synonyms table** (admin-editable): e.g. "sunblock" ↔ "sunscreen", "facewash" ↔ "cleanser", plus common misspellings.
+- Suggestions show the brand and an Rx badge.
+- "Shop by concern" and "shop by skin type" landing pages, using the new fields.
 
-## 16. Development Roadmap (Phases)
+### 5.11 Admin panel
 
-Estimated for 1–2 developers. Adjust to your team size.
+| Area                             | Change                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product form                     | **Type** selector first. The fields shown depend on it: cosmetics show brand, shade/size, ingredients, skin types, concerns; medicines show generic name, strength, form, manufacturer, DRAP number, MRP, Rx and controlled flags, storage, cold chain, max per order. The variant generator uses the option labels |
+| **Brands** (new)                 | Create and edit, logo upload, featured order                                                                                                                                                                                                                                                                        |
+| Inventory                        | Batches per variant: receive stock, adjust, write off expired; filters for expiring soon and expired                                                                                                                                                                                                                |
+| **Prescriptions** (new, Stage B) | Queue (oldest first), viewer, approve and reject, history, search by customer                                                                                                                                                                                                                                       |
+| Dashboard                        | New cards: "Prescriptions waiting", "Expiring in 90 days", "Expired in stock"                                                                                                                                                                                                                                       |
+| Reports                          | Expiry report, stock at cost, sales by brand and by product type                                                                                                                                                                                                                                                    |
+| Store settings                   | Pharmacist in charge (name, registration number), drug licence number, minimum shelf life (medicines / cosmetics), prescription review window (48 h), WhatsApp number                                                                                                                                               |
+| Staff                            | Pharmacist registration number field. Only those staff can approve prescriptions, **whatever their role** (a manager who isn't a pharmacist can't approve)                                                                                                                                                          |
+| Notifications badge              | Adds prescriptions waiting                                                                                                                                                                                                                                                                                          |
 
-### Phase 0: Setup & Design (Week 1) ✅ code complete
+### 5.12 Roles and permissions
 
-> Done: monorepo, shared packages, API skeleton with health check and error handling, full Prisma schema + initial migration, idempotent seed (8 hoodies / 90 variants), storefront and admin shells, lint/format/commit hooks, CI. Still open: brand and Figma designs.
+The roles stay `SUPPORT < MANAGER < SUPER_ADMIN`.
 
-- Finalize requirements, brand (logo, colors, fonts), and sitemap.
-- Wireframes and UI design in Figma: home, PLP, PDP, cart, checkout, account, admin dashboard, product form, order detail.
-- Set up the monorepo (Turborepo + pnpm), ESLint, Prettier, Husky, Docker Compose, CI skeleton.
-- Prisma schema v1, migrations, seed script (sample hoodies, sizes, colors, admin user).
+**Prescription approval is a capability, not a rank:** it needs `pharmacistRegNo` on the staff account. Prescription images are visible to pharmacists and Super Admins only (Super Admins for audit).
 
-**Deliverable:** running empty apps, DB seeded, CI green.
+### 5.13 Emails
 
-### Phase 1: Backend Core (Weeks 2–3) ✅ complete
+| New or changed                    | Content                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Prescription received             | "We've received your prescription for order AG-…; a pharmacist will review it within 48 hours" |
+| Prescription approved             | Order confirmation, with "Checked by pharmacist (name)"                                        |
+| Prescription rejected             | The reason, how to upload a new one, and confirmation that nothing will be charged (COD)       |
+| Prescription not reviewed in time | Apology, order cancelled, how to reorder                                                       |
+| Daily summary (staff)             | Adds prescriptions waiting, expiring and expired stock                                         |
+| Review request                    | Generic wording; skips medicines                                                               |
 
-> Done: auth (register, login, refresh rotation with theft detection, logout, email verification, password reset/change), profile and address book, RBAC, Redis-backed rate limiting, CSRF origin check, public catalog with filters/search/sort, admin products/variants/stock/categories/collections with audit log, Cloudinary upload signing, guest + user cart with automatic merge on login, OpenAPI docs at `/api/docs`, 120 API tests on an isolated test database.
->
-> Changes from the original plan:
->
-> - Change password is `PATCH /auth/password` (not `/me/password`): the refresh cookie that identifies "this device" is only sent to `/auth` paths.
-> - The guest cart merges automatically on login/register, so there is no separate `/cart/merge` endpoint.
-> - Stock adjustments are `POST /admin/variants/:id/adjust-stock` (plus `GET …/stock-history`). Stock cannot be set directly, so every change is recorded.
-> - Refresh tokens are opaque random strings stored hashed, so `JWT_REFRESH_SECRET` is not needed.
-> - Google OAuth moves to Phase 5 (needs OAuth credentials). API docs live at `/api/docs`.
+All of these still send nothing until email is set up in the admin.
 
-- Auth (register/login/refresh/logout, email verification, reset password).
-- RBAC middleware, error handling, validation, logging, rate limiting.
-- Products, variants, images, categories, collections (CRUD and public endpoints with filters).
-- Image upload via signed URLs.
-- Cart (guest and user, merge).
-- API tests for all of the above.
+### 5.14 Content pages (seeded, editable in the admin)
 
-**Deliverable:** documented API (Swagger/OpenAPI at `/docs`).
+- **About us:** who we are, authentic sourcing, the pharmacist on staff.
+- **Authenticity guarantee:** authorised distributors only, batch and expiry checked.
+- **Prescription policy:** what we accept, how to upload, what we can't sell (controlled drugs), privacy.
+- **Shipping:** cities, times, cold chain rules.
+- **Returns & refunds:** cosmetics (unopened, 7 days) and medicines (only damaged, wrong or expired), COD refunds by bank transfer or JazzCash/Easypaisa.
+- **Privacy:** adds a section on health data and prescriptions.
+- **Terms:** adds a medical disclaimer, no medical advice, and our right to refuse Rx orders.
+- **FAQ:** how to upload a prescription, are products authentic, expiry dates, shades, COD.
 
-### Phase 2: Storefront MVP (Weeks 3–5) ✅ complete
+### 5.15 Starter catalogue (seed)
 
-> Done: header with mega-menu, mobile menu, announcement bar and footer; home page (CMS hero, categories, new arrivals, best sellers); shop, category, collection and search pages with URL-based filters (size, colour, fit, price, in stock), sort and pagination; product page with colour-aware gallery, size/colour picker, low-stock and sold-out states, back-in-stock sign-up, size guide with size finder, JSON-LD; cart drawer and cart page; sign in, register, forgot/reset password, email verification; account overview, profile, password and address book; FAQ, size guide, policies, about and contact pages; sitemap and robots; 18 Playwright end-to-end tests (desktop + mobile) in CI.
->
-> Changes from the original plan:
->
-> - The guest cart lives on the server (cart cookie), not in local storage, so it survives devices and merges on login. Zustand only holds UI state (drawers).
-> - Categories live at `/categories/[slug]`; `/collections/[slug]` is for collections.
-> - Public content endpoints were added to the API: `GET /cms/home`, `/cms/pages/:slug`, `/cms/faq`, `POST /contact`, `/newsletter`, `/stock-alerts`, and `GET /auth/session` (returns null for guests instead of a 401).
-> - The access-token cookie now lasts as long as the session, so an expired token is reported (401 TOKEN_EXPIRED) and refreshed, instead of the shopper silently becoming a guest.
-> - Wishlist, order history and order tracking links stay hidden until those features exist (Phases 3 and 5). The checkout button shows "coming soon" until Phase 3.
+- **About 60 demo products** across the categories (for example 25 beauty/skincare/hair, 6 fragrance, 8 personal and baby care, 8 vitamins, 9 OTC, 4 devices), with 10–15 real brands.
+- Prices are researched from current Pakistani retail listings when the seed is written. Medicines use the printed MRP.
+- **Images:**
+  - Banners and category tiles use free Unsplash photos of beauty and pharmacy scenes, with no brand logos visible.
+  - **Product photos must be your own or from your distributors.** Brand packaging photos from other websites belong to their owners.
+  - Until real photos exist, the seed uses clean generated placeholders: a coloured tile with the product type icon and name.
+- When you send your stock list (a spreadsheet: name, brand, type, generic, strength, size/shade, MRP, price, barcode), it is loaded by a small **CSV import** in the admin, added in Phase 3.
 
-- Layout: header, footer, mega-menu, mobile nav.
-- Home page, shop/collection page with filters and sorting, product detail with variant picker and size guide.
-- Cart drawer and cart page.
-- Login/register, account pages (profile, addresses).
-- Responsive design and loading/empty/error states.
+### 5.16 SEO
 
-**Deliverable:** customers can browse and build a cart.
+- Product structured data: `Product` for cosmetics; `Drug` / `MedicalWebPage` details for medicines (generic name, dosage form, prescription status).
+- Store structured data: `Pharmacy` + `OnlineStore`, with the address and licence once set.
+- Sitemap: products, brands, categories and pages. Never prescriptions, account or admin pages.
 
-### Phase 3: Checkout, Payments & Orders (Weeks 5–7) ✅ complete
+### 5.17 Deployment
 
-> Done: shipping zones and delivery options, coupons on the cart, live checkout quote, checkout for guests and signed-in customers (saved addresses), Cash on Delivery, card payments through a provider layer (real Stripe with webhooks, or a built-in demo mode using Stripe test cards), stock reservation with 15-minute expiry, double-submit protection, sequential order numbers (HD-10001…), order confirmation/shipped/delivered/cancelled emails, order page with timeline, customer cancellation, invoice PDF, account order history, guest order tracking, admin order status endpoint (processing → shipped → delivered).
->
-> Changes from the original plan:
->
-> - **Demo payment mode**: without Stripe keys, card payments use a built-in stand-in for Stripe test mode (only Stripe's public test card numbers, no money moves). Setting `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` and `STRIPE_WEBHOOK_SECRET` switches to real Stripe with no code changes. Demo mode is disabled in production unless explicitly allowed.
-> - Unpaid reservations are released by an in-process scheduled job (every minute) rather than BullMQ; every stock change is an atomic conditional update, so it is safe on multiple servers. Emails are sent inline for now. BullMQ arrives with the heavier jobs in Phase 5.
-> - Email templates live in the API (`src/lib/email-layout.ts`, `*.emails.ts`) instead of a separate React Email package.
-> - Guest order links use an HMAC token derived from the order id (no stored secret), so a retried checkout returns the same link.
-> - Percentage coupons round down to whole rupees.
-> - Paid card orders are cancelled through a refund, which comes with the admin orders screen in Phase 4.
+The same as Urban Store's `DEPLOYMENT.md`:
 
-- Shipping zones and rates, coupons, checkout quote.
-- Checkout flow (guest and logged in), Stripe Payment Element, COD.
-- Webhooks, stock reservation, order creation, order status history.
-- Transactional emails (order confirmation, shipped, delivered).
-- Customer order history, order detail with timeline, guest tracking, invoice PDF.
+1. a new Vercel project (Root Directory `apps/storefront`);
+2. Neon (Singapore) connected through Storage;
+3. four variables: `JWT_ACCESS_SECRET`, `CRON_SECRET`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`;
+4. deploy.
 
-**Deliverable:** end-to-end purchase works in Stripe test mode.
-
-### Phase 4: Admin Dashboard (Weeks 7–9) ✅ complete
-
-> Done: staff sign-in with role-based menu and page access; dashboard (net sales, orders, average order value, new customers vs the previous period, daily sales chart with a table view, top products, low stock, recent orders, payment mix); orders (filters, search, CSV export, fulfilment with courier and tracking, cancel, full and partial refunds through Stripe/demo or recorded for COD, notes, invoice and packing slip PDFs); customers (lifetime value, orders, addresses, notes, block); messages inbox with email replies; products (bulk actions, editor, image manager with upload, size × colour generator, per-variant settings); inventory with reasoned adjustments and history; categories and collections; coupons; shipping zones; content (announcement bar, scheduled banners, pages, FAQ); reports (sales by day/week/month, products, categories, inventory value, CSV); staff (email invitations, roles, deactivate, remove); store settings; activity log; new-order alerts by polling every 30 seconds.
->
-> Changes from the original plan:
->
-> - Returns and review moderation move to Phase 5, together with the customer-side returns and reviews they depend on.
-> - Product descriptions are plain text with paragraphs (no rich-text editor yet).
-> - Coupons apply to the whole cart; "applies to products/categories" is not built. Shipping rates are flat per zone (no weight-based rates).
-> - The dashboard shows no conversion rate: that needs visit analytics (Phase 6).
-> - New orders are announced by polling rather than Server-Sent Events, and the daily email digest is not built yet (Phase 5, with the background job queue).
-> - Images upload straight to Cloudinary when it is configured. Without it, they are stored on the API server (development default).
-> - Reports value inventory at selling prices, because cost prices are not recorded.
-> - SEO defaults stay in the storefront config rather than store settings.
-
-- Admin auth and layout, role-based menu.
-- Products management with variant matrix generator and image manager.
-- Inventory management and adjustments.
-- Orders management: status updates, tracking, refunds, invoices/packing slips, CSV export.
-- Customers, reviews moderation, coupons, shipping settings.
-- CMS: banners, pages, FAQ, announcement bar.
-- Dashboard KPIs and charts, reports.
-- Staff management, settings, audit log.
-
-**Deliverable:** the store can be fully run from the admin panel.
-
-### Phase 5: Engagement Features (Weeks 9–10) ✅ complete
-
-> Done: reviews and ratings from verified buyers with moderation and public replies, review-request email a week after delivery; wishlist; back-in-stock emails; newsletter welcome email, signed unsubscribe links, subscriber list and CSV export; abandoned-cart reminders (after 1 hour and 1 day); typo-tolerant search with ranking and search-as-you-type suggestions; "You may also like" based on products bought together; recently viewed; returns (customer request within the return window, approve / decline, receive with restock, refund through the payment provider or recorded for COD); BullMQ job queue with retrying emails and scheduled jobs; daily summary email for managers; Google sign-in.
->
-> Changes from the original plan:
->
-> - Reviews need a delivered order containing the product (from the reviewer's account, or placed with their verified email). Photo uploads on reviews are not built.
-> - Returns are refunds only; exchanges are handled by the customer noting the size they want and staff placing a new order.
-> - Cart reminders go to signed-in customers only, because guest carts have no email address until checkout.
-> - Newsletter campaigns are sent from an external email tool using the CSV export; the store only collects subscribers.
-> - Without Redis, the daily summary email is skipped; everything else falls back to in-process timers.
-> - Custom hoodie designer (optional) is not built; it stays in Future Enhancements.
-
-- Reviews and ratings (verified purchases), wishlist.
-- Back-in-stock alerts, newsletter, abandoned cart emails.
-- Search improvements, related products, "recently viewed".
-- Returns and refunds flow.
-
-### Phase 6: Polish, QA & Launch (Weeks 10–12) ✅ complete
-
-> Done:
->
-> - **Brand:** the store is **Urban Store**, with its own logo, favicon and share image.
-> - **Catalogue:** real products with Pakistani pricing (Rs 2,699–5,499), real photos per colour and category images.
-> - **Payments:** Cash on Delivery only; cards switch on only once Stripe keys exist.
-> - **Email:** set up in the admin (SMTP or Resend, secrets encrypted, test button). Nothing is sent until it is.
-> - **Images:** uploads are stored in Postgres, so no Cloudinary account is needed.
-> - **Deployment:** Vercel with Neon Postgres (DEPLOYMENT.md).
->   - The API is one serverless function; migrations and the seed run in its build, and a daily cron runs the scheduled jobs.
->   - The storefront and admin proxy `/api/v1`, so cookies stay first-party.
-> - **SEO:** Organization/WebSite structured data, a generated Open Graph image, sitemap, product and FAQ structured data.
-> - **Accessibility:** axe checks (WCAG 2.1 AA) on 14 storefront and 10 admin pages in the e2e suite, with the issues they found fixed (status colour contrast, label/name mismatches, heading order).
-> - **Performance:** Lighthouse (mobile) scores 92–93 for performance, 98–100 for accessibility and best practices, and 92–100 for SEO. Images are resized by their CDN (no image-optimisation quota), and the first images load eagerly.
-> - **Load test:** autocannon with 50 connections against one local API process. Product list about 495 req/s (p99 143 ms), product page about 840 req/s (p99 86 ms), search suggestions about 770 req/s (p99 92 ms).
-> - **Security review:**
->   - `pnpm audit` is clean for shipped code: nodemailer upgraded to 10.3, PostCSS overridden to 8.5.32. Two findings remain, both in build-time tooling (Prisma CLI config loader, ESLint).
->   - Already in place: OWASP basics such as parameterised queries, argon2id, httpOnly SameSite cookies, Origin-checked writes, rate limits, Zod validation everywhere, secure headers, and an audit log.
->   - New: proxy-forwarded IPs are trusted only with a shared secret, and the cron endpoint needs `CRON_SECRET`.
-> - **Analytics:** Vercel Web Analytics and Speed Insights. They use no cookies, so no consent banner is needed; the privacy policy says only essential cookies are used.
->
-> The shop, the admin panel (`/admin`) and the API (`/api/v1`) were then merged into one Next.js app, so the store is a single Vercel project.
->
-> Left for the store owner (see DEPLOYMENT.md): set up the Vercel project and the Neon database, set the environment variables, add a custom domain, set real stock levels, and set up email in the admin. Neon keeps point-in-time restore for backups; Vercel provides logs and HTTPS.
-
-- SEO (meta, JSON-LD, sitemap), performance tuning, accessibility audit.
-- Full E2E test suite, load testing, security review (OWASP checklist).
-- Legal pages, cookie consent, analytics.
-- Production infrastructure, domain, SSL, backups, monitoring.
-- Switch Stripe to live mode, load real products, soft launch, then public launch.
-
-### Timeline Summary
-
-| Phase               | Weeks | Output                    |
-| ------------------- | ----- | ------------------------- |
-| 0 Setup & Design    | 1     | Repo, designs, schema     |
-| 1 Backend Core      | 2–3   | Auth, catalog, cart API   |
-| 2 Storefront MVP    | 3–5   | Browse and cart UI        |
-| 3 Checkout & Orders | 5–7   | Payments, orders, emails  |
-| 4 Admin Dashboard   | 7–9   | Full store management     |
-| 5 Engagement        | 9–10  | Reviews, wishlist, alerts |
-| 6 QA & Launch       | 10–12 | Production launch         |
+The custom domain is added in the project settings.
 
 ---
 
-## 17. Task Checklist
+## 6. Phases, tasks and acceptance criteria
 
-### Setup (Phase 0 ✅ done)
+Each phase is one pull request (or two for the large ones), merged only with CI green: lint, typecheck, unit and API tests, build, and e2e. Size: **S** ≈ one working session, **M** ≈ 2–3, **L** ≈ 4–6.
 
-- [x] Init Turborepo + pnpm workspaces
-- [x] Create `apps/storefront`, `apps/admin`, `apps/api`
-- [x] Create `packages/ui`, `packages/validation`, `packages/types`, `packages/config`
-- [ ] Create `packages/emails` (moved to Phase 3, when transactional emails are built)
-- [x] Docker Compose (Postgres, Redis)
-- [x] ESLint, Prettier, Husky, lint-staged, commitlint
-- [x] GitHub Actions CI
-- [x] `.env.example`, README with setup steps
-- [ ] Brand identity and Figma designs (logo, palette, fonts, key screens), which need a designer
+### Phase 0: Decisions and preparation (you) · S
 
-### Backend
+- [ ] Answer section 1. Start the licence checklist (section 2).
+- [ ] Send the logo idea or colours, and the brand list or stock spreadsheet if you have one.
 
-- [x] Prisma schema, migrations, seed
-- [x] Express app: helmet, cors, compression, pino, error handler
-- [x] Auth module (JWT cookies, refresh rotation, email verify, reset)
-- [x] Google OAuth
-- [x] RBAC middleware
-- [x] Rate limiting (Redis) and CSRF origin check
-- [x] Profile and address book
-- [x] Products / variants / images / categories / collections
-- [x] Stock adjustments with history
-- [x] Filters and search endpoints
-- [x] Upload signing (Cloudinary)
-- [x] Cart and merge
-- [x] Coupons
-- [x] Shipping zones and quote
-- [x] Checkout with stock reservation (transaction)
-- [x] Stripe PaymentIntent and webhooks (+ demo mode), refunds
-- [x] COD flow
-- [x] Orders and status history, invoice PDF
-- [x] Reviews, wishlist, returns
-- [x] CMS (banners, pages, FAQ, announcement), contact inbox, newsletter sign-up
-- [x] BullMQ workers: emails, reservation expiry, stock alerts, abandoned cart, daily summary, review requests
-- [x] Admin endpoints: dashboard, reports, customers, staff, settings, audit log
-- [x] OpenAPI docs
-- [x] API tests (Phase 1 scope; extended each phase)
+### Phase 1: Copy and rebrand · S · ✅ done
 
-### Storefront
+- [x] Import Urban Store into `cosmetics` with its history, including the order fix from Urban Store PR #3.
+- [x] Rename packages `@hoodie/*` → `@store/*`. Rename the store, emails, order prefix `AG-`, footer, metadata, database and queue names.
+- [x] New logo (SVG mark + wordmark), favicon, OG image and colour tokens (teal + rose). Contrast checked by the accessibility tests.
+- [x] Remove hoodie-specific code: `Fit`, the size guide and clothing copy in emails, invoices, pages and tests.
+- [x] Pulled forward from Phase 2: product **ingredients**, **how to use** and **warnings** (replacing fabric and care), free-text pack sizes ("30 ml", "60 softgels") sorted naturally, the colour picker renamed **Shade** and hidden when there is only one.
+- [x] Returns: 7-day window for unopened items; reasons "Wrong shade or size" and "Expired or close to expiry".
+- [x] Temporary seed: 9 demo products (8 live, 1 draft) in 5 categories, brand-free Unsplash photos, pack sizes with their own prices.
+- **Done when:** the site builds and every test passes (246 API, 51 end-to-end, unit tests), with no "hoodie"/"Urban Store" left in the app except in Git history. ✅
 
-- [x] Design system and shared components (Button, Input, Field, Dialog/Drawer, Badge, Card, Skeleton)
-- [x] Header / footer / mega-menu / mobile nav
-- [x] Home page
-- [x] Shop, category and collection pages with filters/sort/pagination
-- [x] Product detail page (gallery, variant picker, size guide, reviews)
-- [x] Search
-- [x] Cart drawer and cart page
-- [x] Checkout with Stripe (or demo cards) and COD
-- [x] Order success page
-- [x] Auth pages (sign in, register, forgot/reset password, verify email)
-- [x] Account: overview, profile, password, addresses
-- [x] Account: orders, order detail
-- [x] Account: wishlist
-- [x] Guest order tracking
-- [x] Content pages (about, contact, FAQ, policies, size guide)
-- [x] SEO (metadata, JSON-LD, sitemap, robots, real 404s)
-- [ ] Analytics events
+### Phase 2: Product model, brands and categories · L
 
-### Admin (Phases 4–5 ✅)
+- [ ] Schema changes in 5.2 except batches and prescriptions: `ProductType`, `Brand`, options rename, cosmetic and medicine fields, MRP, barcode, coupon exclusions, cold-chain zone flag. Fresh baseline migration.
+- [ ] API: product, brand and filter endpoints; validation (price ≤ MRP, controlled ≠ active); mappers and DTOs in `packages/types`; Zod schemas in `packages/validation`.
+- [ ] Category tree, mega menu, brand pages, new filters (brand, type, skin type, concern, Rx/OTC).
+- [ ] Product page (5.5) with option labels, tabs, medicine facts, badges, MRP block, disclaimer, WhatsApp button.
+- [ ] Admin product form by type, Brands page, variant generator with option labels.
+- **Done when:** a manager can create a lipstick (shades) and an OTC tablet (strength × pack) in the admin. Both show correctly in the shop and filter correctly, and API tests cover every rule.
 
-- [x] Admin login and protected layout
-- [x] Dashboard KPIs and charts
-- [x] Products list and form (variant matrix, images)
-- [x] Categories and collections
-- [x] Inventory and adjustments
-- [x] Orders list/detail, status, tracking, refunds, PDFs, CSV export
-- [x] Returns
-- [x] Customers
-- [x] Reviews moderation
-- [x] Coupons
-- [x] Shipping settings
-- [x] CMS
-- [x] Messages inbox
-- [x] Reports
-- [x] Staff and roles
-- [x] Store settings
-- [x] Audit log
+### Phase 3: Catalogue, content and import · M
 
-### Launch
+- [ ] Seed about 60 products, 10–15 brands, the category tree and collections. Banners from Unsplash; product placeholders generated.
+- [ ] Write all content pages (5.14) and the FAQ.
+- [ ] Admin **CSV import** (create or update products and variants by SKU or barcode) with a preview and error report.
+- **Done when:** the home page, category pages and brand pages look complete on phone and desktop, and importing a 50-row spreadsheet works.
 
-- [x] E2E tests (Playwright): storefront, checkout and admin; extended each phase
-- [ ] Lighthouse and accessibility audit
-- [ ] Security review
-- [ ] Production deploy, domain, SSL
-- [ ] Backups and monitoring
-- [ ] Stripe live mode
-- [ ] Real product data and photos
+### Phase 4: Batches and expiry · M
+
+- [ ] `StockBatch` and `OrderItemBatch`; stock kept equal to the sum of usable batches.
+- [ ] FEFO allocation in the checkout transaction; restock to the same batch on cancel or return.
+- [ ] Admin receiving (with barcode entry), batch list, write-off; expiry filters and report; packing slip batch and expiry.
+- [ ] Minimum-shelf-life setting; the daily cron removes expired stock and adds expiry to the daily summary.
+- **Done when:** tests prove a sale takes the earliest-expiring usable batch, never an expired or short-dated one, and stays correct with two shoppers buying the last units at once.
+
+### Phase 5: Pharmacy rules (Stage A complete) · M
+
+- [ ] Max per order, cold-chain zones, coupon exclusions, non-returnable items and the medicine return reasons.
+- [ ] Reviews off for medicine types; neutral review-request email.
+- [ ] Settings: pharmacist, licence, WhatsApp; footer and structured data use them.
+- [ ] Medicine disclaimers and "same formula alternatives".
+- **Done when:** every rule in 5.7 and 5.9 has an API test and at least one e2e test. **Stage A can launch after Phases 7–8.**
+
+### Phase 6: Prescriptions (Stage B) · L · _start once the licence and pharmacist are confirmed_
+
+- [ ] `Prescription` model, private media and the authenticated file route; uploads (images or PDF, resized in the browser, at most 3 pages).
+- [ ] Checkout prescription step; account Prescriptions tab with reuse of an approved one.
+- [ ] Order status `AWAITING_PRESCRIPTION`, a 48-hour reservation, and auto-cancel.
+- [ ] Admin pharmacist queue with viewer, approve and reject, audit log, and dashboard and notification counts.
+- [ ] Emails in 5.13.
+- **Done when:** e2e covers upload → reject with reason → re-upload → approve → deliver. Security tests show another customer, or staff without `pharmacistRegNo`, can't open or approve a prescription.
+
+### Phase 7: Search and discovery · M
+
+- [ ] Search on generic name, brand and ingredients; admin-editable synonyms; suggestions with badges.
+- [ ] Concern and skin-type landing pages; brand A–Z.
+- **Done when:** "paracetamol", "sunblock" and "niacinamde" (misspelt) all return the right products.
+
+### Phase 8: QA, launch and handover · M
+
+- [ ] Accessibility (axe) on all new pages; Lighthouse ≥ 90 on mobile.
+- [ ] Security review: prescriptions, private media, permissions, uploads.
+- [ ] Full e2e run; a load test on listing, search and checkout.
+- [ ] `README`, `DEPLOYMENT.md` and a short **staff guide** (receiving stock, packing with batches, reviewing prescriptions, writing off expired stock).
+- [ ] Vercel and Neon set up, a production deploy, and a test order.
+- **Done when:** a real COD order is placed and delivered end to end on the live site.
+
+**Order of work:** 1 → 2 → 3 → 4 → 5 → 7 → 8 (**Stage A live**) → 6 (**Stage B**, when licensed).
 
 ---
 
-## 18. Future Enhancements
+## 7. Testing plan
 
-- Custom hoodie designer (upload artwork, text, live mockup preview).
-- Loyalty points and referral program.
-- Gift cards.
-- Multi-currency and multi-language.
-- Product bundles ("Buy 2 hoodies, get 10% off").
-- Pre-orders and limited drops with countdown timers.
-- Courier API integration (TCS, Leopards, M&P, DHL) for auto-generated tracking.
-- WhatsApp order notifications.
-- Mobile app (React Native / Expo) using the same API.
-- AI size recommendation and product recommendations.
-- Meilisearch/Algolia for instant search.
+**API tests (Vitest + Supertest)**, added per phase:
+
+- **Products:** price ≤ MRP; controlled can't be active; options validate by type; brand CRUD; filters (brand, type, skin type, concern, Rx).
+- **Cart and checkout:** max per order (cart, quote, checkout); cold-chain zone refusal; coupon exclusions.
+- **Batches:** FEFO order; minimum shelf life; expired excluded; concurrent last-unit sale; cancel and return restock to the same batch; the daily expiry job.
+- **Returns:** non-returnable items refused; medicine return reasons only.
+- **Reviews:** refused for medicine types.
+- **Prescriptions:**
+  - upload limits and types;
+  - private file access (owner, pharmacist, nobody else);
+  - approve and reject transitions, reservation and release, 48-hour auto-cancel;
+  - only `pharmacistRegNo` staff can approve;
+  - audit log entries.
+
+**E2E (Playwright)**, extending the 51 Urban Store tests:
+
+- browse by brand and concern;
+- shade selection;
+- an OTC order over the per-order limit is refused;
+- an OTC order by COD succeeds;
+- the expiry report;
+- receiving stock with batch and expiry in the admin;
+- prescription upload → pharmacist approval → order confirmed (Stage B);
+- accessibility checks on all new pages.
+
+**Manual checks before launch:**
+
+- phone (Android Chrome) checkout;
+- PDF invoice and packing slip with batch numbers;
+- emails rendered in Gmail.
+
+---
+
+## 8. What you need to provide
+
+| When           | What                                                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Before Phase 1 | Store name and domain; colours or logo idea; whether Stage B is planned                                                                                       |
+| Phase 3        | Brand list, or your stock spreadsheet (name, brand, type, generic name, strength, size/shade, MRP, selling price, barcode); product photos when you have them |
+| Phase 5        | Pharmacist in charge (name, registration number), drug licence number, premises address, WhatsApp number, delivery cities and fees                            |
+| Phase 8        | Vercel and Neon set up (as for Urban Store); email (Gmail app password or Resend)                                                                             |
+
+---
+
+## 9. Risks and how they are handled
+
+| Risk                                                         | Handling                                                                                                                    |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Selling Rx or controlled medicines without the right licence | Stage B is built but switched off until the licence is confirmed; controlled items can never be published                   |
+| Counterfeit cosmetics                                        | Brand pages show "sourced from authorised distributors"; batch numbers are recorded for every sale, so recalls are possible |
+| Expired or short-dated stock reaching customers              | FEFO plus the minimum-shelf-life rule; daily expiry alerts                                                                  |
+| Health-data privacy                                          | Private storage, strict access, no public caching, audit log                                                                |
+| Product photo rights                                         | Only your own or distributor photos for products; Unsplash only for general imagery                                         |
+| Slow pages if the database is far away                       | Neon in Singapore, matching the function region; transaction timeouts already raised (PR #3)                                |
+| The two stores drift apart                                   | A short "ported fixes" list in each README; important fixes copied across                                                   |
+
+---
+
+## 10. Later (after launch)
+
+- **Refill reminders** for monthly medicines (email or WhatsApp a few days before they run out).
+- **Loyalty points** and referral codes.
+- **WhatsApp order updates** (WhatsApp Business API).
+- **Urdu** interface and Roman-Urdu search terms.
+- **Card payments** (Stripe is already built in and just needs keys) or local wallets (JazzCash/Easypaisa).
+- **Doctor e-consultation** partner link; **lab test booking**.
+- **Mobile app** (the API is ready for it).

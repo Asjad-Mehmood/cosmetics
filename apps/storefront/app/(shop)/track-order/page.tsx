@@ -1,4 +1,4 @@
-import { Container } from "@hoodie/ui";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { TrackOrder } from "@/components/orders/track-order";
 

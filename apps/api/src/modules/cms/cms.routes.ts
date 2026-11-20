@@ -1,5 +1,5 @@
-import type { BannerDTO, FaqDTO, HomeContentDTO, PageDTO } from "@hoodie/types";
-import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@hoodie/validation";
+import type { BannerDTO, FaqDTO, HomeContentDTO, PageDTO } from "@store/types";
+import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@store/validation";
 import { ok } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";
 import { prisma } from "../../lib/prisma";

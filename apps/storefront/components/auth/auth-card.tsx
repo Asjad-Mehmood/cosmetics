@@ -1,4 +1,4 @@
-import { Container } from "@hoodie/ui";
+import { Container } from "@store/ui";
 import type { ReactNode } from "react";
 
 export function AuthCard({

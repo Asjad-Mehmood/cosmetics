@@ -1,6 +1,6 @@
 "use client";
 
-import type { AdminNotificationsDTO, ApiResponse } from "@hoodie/types";
+import type { AdminNotificationsDTO, ApiResponse } from "@store/types";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "@/admin/lib/navigation";
 import { useEffect, useRef } from "react";

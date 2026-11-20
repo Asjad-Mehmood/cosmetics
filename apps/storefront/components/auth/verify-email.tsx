@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApiResponse, AuthUser } from "@hoodie/types";
+import type { ApiResponse, AuthUser } from "@store/types";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

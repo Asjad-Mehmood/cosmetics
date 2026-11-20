@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Dialog, Field, Input } from "@hoodie/ui";
+import { Badge, Button, Dialog, Field, Input } from "@store/ui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,7 +57,7 @@ const CONFIG = {
     title: "Collections",
     one: "collection",
     description:
-      "Hand-picked groups of products, such as Winter Drop or Best Sellers. Featured collections appear on the homepage.",
+      "Hand-picked groups of products, such as Summer Skincare or Best Sellers. Featured collections appear on the homepage.",
     storePath: "/collections",
     imageField: "bannerUrl",
     folder: "collections",

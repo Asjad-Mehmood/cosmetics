@@ -1,5 +1,5 @@
-import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@hoodie/types";
-import { Card, Container } from "@hoodie/ui";
+import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
+import { Card, Container } from "@store/ui";
 import Image from "next/image";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
 import Link from "next/link";
@@ -10,15 +10,23 @@ import { getData, getDataSafe, getList } from "@/lib/server-api";
 
 const perks = [
   {
+    icon: ShieldIcon,
+    title: "100% genuine products",
+    body: "Sourced from brands and authorised distributors only.",
+  },
+  {
     icon: TruckIcon,
     title: "Fast nationwide delivery",
-    body: "1-2 days in Lahore, 2-5 days across Pakistan.",
+    body: "1-2 days in Lahore, 2-5 days across Pakistan. Cash on Delivery.",
   },
-  { icon: RefreshIcon, title: "14-day free exchanges", body: "Wrong size? Swap it for free." },
-  { icon: ShieldIcon, title: "Cash on Delivery", body: "Pay in cash when your parcel arrives." },
+  {
+    icon: RefreshIcon,
+    title: "Easy returns",
+    body: "Unopened beauty and personal care items within 7 days.",
+  },
 ];
 
-const TILE_TONES = ["bg-[#1E3A5F]", "bg-[#36454F]", "bg-[#8B7355]", "bg-[#111111]"];
+const TILE_TONES = ["bg-[#0f5e63]", "bg-[#9c3d52]", "bg-[#2f4858]", "bg-[#5b4a6b]"];
 
 function Section({
   title,
@@ -92,22 +100,22 @@ export default async function HomePage() {
       <section className="bg-ink text-white">
         <Container className="grid items-center gap-10 py-14 md:grid-cols-2 md:py-20">
           <div>
-            <p className="text-brand-500 text-sm font-semibold uppercase tracking-widest">
-              New season
+            <p className="text-accent-500 text-sm font-semibold uppercase tracking-widest">
+              Beauty &amp; pharmacy
             </p>
             <h1 className="mt-4 text-balance text-4xl font-black tracking-tight sm:text-6xl">
-              {hero?.title ?? "Heavyweight hoodies, built to last."}
+              {hero?.title ?? "Genuine beauty and health care, delivered."}
             </h1>
             <p className="mt-6 max-w-md text-lg text-white/70">
               {hero?.subtitle ??
-                "320–400 GSM cotton fleece in pullover, zip-up and oversized fits."}
+                "Skincare, makeup, hair care, fragrance, vitamins and everyday health essentials from brands you trust."}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={hero?.link ?? "/shop"}
                 className="text-ink inline-flex h-12 items-center rounded-lg bg-white px-6 font-semibold hover:bg-white/90"
               >
-                {hero?.ctaLabel ?? "Shop all hoodies"}
+                {hero?.ctaLabel ?? "Shop now"}
               </Link>
               <Link
                 href="/shop"
@@ -135,7 +143,7 @@ export default async function HomePage() {
       {categories && categories.length > 0 && (
         <section>
           <Container className="pt-14">
-            <h2 className="text-2xl font-bold tracking-tight">Shop by style</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Shop by category</h2>
             <div
               className={`mt-6 grid grid-cols-2 gap-4 ${categories.length === 5 ? "md:grid-cols-3 lg:grid-cols-5" : "lg:grid-cols-4"}`}
             >
@@ -161,7 +169,7 @@ export default async function HomePage() {
                   )}
                   <span className="relative text-lg font-bold group-hover:underline">{c.name}</span>
                   <span className="relative text-sm text-white/80">
-                    {c.productCount} {c.productCount === 1 ? "style" : "styles"}
+                    {c.productCount} {c.productCount === 1 ? "product" : "products"}
                   </span>
                 </Link>
               ))}

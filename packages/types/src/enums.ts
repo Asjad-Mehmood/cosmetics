@@ -47,14 +47,6 @@ export const ProductStatus = {
 export type ProductStatus = (typeof ProductStatus)[keyof typeof ProductStatus];
 export const PRODUCT_STATUSES = values(ProductStatus);
 
-export const Fit = {
-  REGULAR: "REGULAR",
-  OVERSIZED: "OVERSIZED",
-  SLIM: "SLIM",
-} as const;
-export type Fit = (typeof Fit)[keyof typeof Fit];
-export const FITS = values(Fit);
-
 export const OrderStatus = {
   PENDING_PAYMENT: "PENDING_PAYMENT",
   CONFIRMED: "CONFIRMED",

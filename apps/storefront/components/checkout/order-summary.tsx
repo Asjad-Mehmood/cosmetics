@@ -1,8 +1,8 @@
 "use client";
 
-import type { CartDTO, QuoteDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Skeleton } from "@hoodie/ui";
+import type { CartDTO, QuoteDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Skeleton } from "@store/ui";
 import Image from "next/image";
 import { CouponForm } from "../cart/coupon-form";
 

@@ -1,5 +1,5 @@
-import type { FiltersDTO, ProductCardDTO } from "@hoodie/types";
-import { Container } from "@hoodie/ui";
+import type { FiltersDTO, ProductCardDTO } from "@store/types";
+import { Container } from "@store/ui";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { countActiveFilters, parseFilters, toApiQuery, type SearchParams } from "@/lib/listing";
@@ -82,7 +82,7 @@ export async function ProductListing({
                   <ProductGrid products={products.data} priorityCount={4} />
                 ) : (
                   <div className="bg-surface rounded-2xl px-6 py-20 text-center">
-                    <p className="text-lg font-semibold">No hoodies match these filters</p>
+                    <p className="text-lg font-semibold">No products match these filters</p>
                     <p className="text-muted mt-2 text-sm">Try removing a filter or two.</p>
                     <Link
                       href={pathname}

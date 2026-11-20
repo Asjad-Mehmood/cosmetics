@@ -1,5 +1,5 @@
-import { formatMoney } from "@hoodie/types";
-import { cn } from "@hoodie/ui";
+import { formatMoney } from "@store/types";
+import { cn } from "@store/ui";
 
 export function Price({
   price,

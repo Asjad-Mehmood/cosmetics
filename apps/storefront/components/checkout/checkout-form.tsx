@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AddressDTO, ApiResponse, CheckoutResultDTO, QuoteDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { checkoutSchema } from "@hoodie/validation";
-import { Badge, Button, Card, cn, Container, Field, Input, Skeleton } from "@hoodie/ui";
+import type { AddressDTO, ApiResponse, CheckoutResultDTO, QuoteDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { checkoutSchema } from "@store/validation";
+import { Badge, Button, Card, cn, Container, Field, Input, Skeleton } from "@store/ui";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@hoodie/ui";
+import { Button, Input } from "@store/ui";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useImageUpload } from "@/admin/hooks/use-upload";

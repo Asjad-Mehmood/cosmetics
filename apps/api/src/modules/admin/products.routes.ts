@@ -7,7 +7,7 @@ import {
   stockAdjustmentSchema,
   updateProductSchema,
   updateVariantSchema,
-} from "@hoodie/validation";
+} from "@store/validation";
 import { audit } from "../../lib/audit";
 import { ok } from "../../lib/http";
 import { defineRoutes, route } from "../../lib/route";

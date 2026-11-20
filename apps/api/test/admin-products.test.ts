@@ -16,7 +16,7 @@ beforeAll(async () => {
 const uid = () => randomUUID().slice(0, 6).toUpperCase();
 
 const newProduct = (overrides: Record<string, unknown> = {}) => ({
-  title: `Admin Hoodie ${uid()}`,
+  title: `Admin Serum ${uid()}`,
   description: "Made by the admin test suite.",
   basePrice: 350000,
   ...overrides,
@@ -24,29 +24,29 @@ const newProduct = (overrides: Record<string, unknown> = {}) => ({
 
 describe("create product", () => {
   it("creates a draft with variants, images and categories, generating a unique slug", async () => {
-    const pullover = await prisma.category.findUniqueOrThrow({ where: { slug: "pullover" } });
-    const title = `Cloud Fleece Hoodie ${uid()}`;
+    const skincare = await prisma.category.findUniqueOrThrow({ where: { slug: "skincare" } });
+    const title = `Cloud Hydrating Cream ${uid()}`;
     const sku = uid();
 
     const res = await admin.post("/api/v1/admin/products").send(
       newProduct({
         title,
-        categoryIds: [pullover.id],
-        images: [{ url: "https://res.cloudinary.com/demo/a.jpg", alt: "front", color: "Black" }],
+        categoryIds: [skincare.id],
+        images: [{ url: "https://res.cloudinary.com/demo/a.jpg", alt: "front", color: "Standard" }],
         variants: [
-          { sku: `${sku}-M`, size: "M", color: "Black", stock: 4 },
-          { sku: `${sku}-L`, size: "L", color: "Black" },
+          { sku: `${sku}-50`, size: "50 ml", color: "Standard", stock: 4 },
+          { sku: `${sku}-100`, size: "100 ml", color: "Standard" },
         ],
       }),
     );
 
     expect(res.status).toBe(201);
     const p = res.body.data;
-    expect(p).toMatchObject({ title, status: "DRAFT", fit: "REGULAR", publishedAt: null });
+    expect(p).toMatchObject({ title, status: "DRAFT", publishedAt: null });
     expect(p.slug).toBe(title.toLowerCase().replace(/ /g, "-"));
-    expect(p.categories).toEqual([expect.objectContaining({ slug: "pullover" })]);
+    expect(p.categories).toEqual([expect.objectContaining({ slug: "skincare" })]);
     expect(p.variants).toHaveLength(2);
-    expect(p.variants.find((v: { size: string }) => v.size === "M")).toMatchObject({
+    expect(p.variants.find((v: { size: string }) => v.size === "50 ml")).toMatchObject({
       stock: 4,
       available: 4,
       effectivePrice: 350000,
@@ -75,13 +75,13 @@ describe("create product", () => {
 
     const sku = await admin
       .post("/api/v1/admin/products")
-      .send(newProduct({ variants: [{ sku: "UEP-JET-M", size: "M", color: "Black" }] }));
+      .send(newProduct({ variants: [{ sku: "VCS-STA-15ML", size: "15 ml", color: "Standard" }] }));
     expect(sku.status).toBe(409);
-    expect(sku.body.error.message).toContain("UEP-JET-M");
+    expect(sku.body.error.message).toContain("VCS-STA-15ML");
 
     const slug = await admin
       .post("/api/v1/admin/products")
-      .send(newProduct({ slug: "urban-essential-pullover-hoodie" }));
+      .send(newProduct({ slug: "vitamin-c-brightening-serum" }));
     expect(slug.status).toBe(409);
   });
 });
@@ -92,16 +92,16 @@ describe("update product", () => {
       newProduct({
         status: "ACTIVE",
         isFeatured: true,
-        categoryIds: [(await prisma.category.findUniqueOrThrow({ where: { slug: "custom" } })).id],
+        categoryIds: [(await prisma.category.findUniqueOrThrow({ where: { slug: "makeup" } })).id],
         images: [{ url: "https://res.cloudinary.com/demo/keep.jpg" }],
       }),
     );
     const id = created.body.data.id;
 
-    const res = await admin.patch(`/api/v1/admin/products/${id}`).send({ title: "Renamed Hoodie" });
+    const res = await admin.patch(`/api/v1/admin/products/${id}`).send({ title: "Renamed Serum" });
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({
-      title: "Renamed Hoodie",
+      title: "Renamed Serum",
       status: "ACTIVE",
       isFeatured: true,
     });
@@ -186,27 +186,27 @@ describe("list, archive and bulk actions", () => {
 });
 
 describe("variants", () => {
-  it("generates the size × colour matrix and skips existing combinations on re-run", async () => {
+  it("generates the size × shade matrix and skips existing combinations on re-run", async () => {
     const created = await admin.post("/api/v1/admin/products").send(newProduct());
     const id = created.body.data.id;
     const prefix = `G${uid()}`;
 
     const first = await admin.post(`/api/v1/admin/products/${id}/variants/generate`).send({
-      sizes: ["S", "M"],
-      colors: [{ name: "Jet Black", hex: "#111111" }],
+      sizes: ["30 ml", "3.5 g"],
+      colors: [{ name: "Nude Rose", hex: "#C98B83" }],
       skuPrefix: prefix,
       initialStock: 5,
     });
     expect(first.status).toBe(201);
     expect(first.body.data).toMatchObject({ created: 2, skipped: 0 });
     expect(first.body.data.variants.map((v: { sku: string }) => v.sku).sort()).toEqual([
-      `${prefix}-JET-M`,
-      `${prefix}-JET-S`,
+      `${prefix}-NUD-3.5G`,
+      `${prefix}-NUD-30ML`,
     ]);
 
     const second = await admin.post(`/api/v1/admin/products/${id}/variants/generate`).send({
-      sizes: ["S", "M"],
-      colors: [{ name: "Jet Black" }, { name: "Sand", hex: "#D6C4A8" }],
+      sizes: ["30 ml", "3.5 g"],
+      colors: [{ name: "Nude Rose" }, { name: "Berry Wine", hex: "#7E2E4A" }],
       skuPrefix: prefix,
     });
     expect(second.body.data).toMatchObject({ created: 2, skipped: 2 });
@@ -218,12 +218,12 @@ describe("variants", () => {
     const sku = `V${uid()}`;
     const added = await admin
       .post(`/api/v1/admin/products/${product.id}/variants`)
-      .send({ sku, size: "XL", color: "Black" });
+      .send({ sku, size: "100 ml", color: "Standard" });
     expect(added.status).toBe(201);
 
     const dup = await admin
       .post(`/api/v1/admin/products/${product.id}/variants`)
-      .send({ sku: `${sku}2`, size: "XL", color: "black" });
+      .send({ sku: `${sku}2`, size: "100 ml", color: "standard" });
     expect(dup.status).toBe(409);
 
     const updated = await admin

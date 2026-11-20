@@ -1,7 +1,7 @@
 "use client";
 
-import { hasRole, isAdminRole } from "@hoodie/types";
-import { Button, Dialog, Logo, Skeleton } from "@hoodie/ui";
+import { hasRole, isAdminRole } from "@store/types";
+import { Button, Dialog, Logo, Skeleton } from "@store/ui";
 import Link from "@/admin/lib/link";
 import { usePathname, useRouter } from "@/admin/lib/navigation";
 import { useEffect, useState, type ReactNode } from "react";

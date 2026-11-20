@@ -13,8 +13,8 @@ async function fillAddress(page: Page, email: string) {
   await expect(main.getByText("Delivering to Karachi & Islamabad / Rawalpindi")).toBeVisible();
 }
 
-async function goToCheckout(page: Page, request: Parameters<typeof findVariant>[0]) {
-  const { slug, variant } = await findVariant(request, "available");
+async function goToCheckout(page: Page, request: Parameters<typeof findVariant>[0], minPrice = 0) {
+  const { slug, variant } = await findVariant(request, "available", minPrice);
   const drawer = await addToCart(page, slug, variant);
   await drawer.getByRole("link", { name: "Checkout" }).click();
   await expect(page).toHaveURL(/\/checkout$/);
@@ -32,11 +32,11 @@ test("guest Cash on Delivery checkout, then track and cancel the order", async (
   await expect(page.getByText("Cash on Delivery fee")).toBeVisible();
   await page.getByRole("button", { name: "Place order" }).click();
 
-  await expect(page).toHaveURL(/\/orders\/US-\d+\?token=.+&placed=1/);
+  await expect(page).toHaveURL(/\/orders\/AG-\d+\?token=.+&placed=1/);
   await expect(page.getByRole("heading", { name: "Your order is confirmed" })).toBeVisible();
   // Email isn't set up in the e2e store, so the page says to bookmark it instead.
   await expect(page.getByText(/Bookmark this page to follow your order/)).toBeVisible();
-  const number = (await page.getByRole("heading", { name: /^Order US-/ }).textContent())!.replace(
+  const number = (await page.getByRole("heading", { name: /^Order AG-/ }).textContent())!.replace(
     "Order ",
     "",
   );
@@ -67,7 +67,7 @@ test("card payment in demo mode: a declined card, then a successful one", async 
   await page.getByLabel(/Credit or debit card/).check();
   await page.getByRole("button", { name: "Continue to payment" }).click();
 
-  await expect(page).toHaveURL(/\/checkout\/pay\?order=US-\d+/);
+  await expect(page).toHaveURL(/\/checkout\/pay\?order=AG-\d+/);
   await expect(page.getByText("Demo payment mode: no real money is taken.")).toBeVisible();
   await expect(page.getByText(/Your items are reserved for \d+:\d{2}/)).toBeVisible();
 
@@ -92,11 +92,12 @@ test("signed-in checkout with a coupon saves the address and lists the order", a
   const email = uniqueEmail();
   await main.getByLabel("Full name").fill("Coupon Buyer");
   await main.getByLabel("Email").fill(email);
-  await main.getByLabel("Password").fill("Hoodie123");
+  await main.getByLabel("Password").fill("Glow12345");
   await main.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/account$/);
 
-  await goToCheckout(page, request);
+  // WELCOME10 needs an order of at least Rs 2,000.
+  await goToCheckout(page, request, 200000);
   await expect(main.getByLabel("Email")).toHaveValue(email);
   await main.getByLabel("Phone", { exact: true }).fill("03001234567");
   await main.getByLabel("Full name").fill("Coupon Buyer");
@@ -114,7 +115,7 @@ test("signed-in checkout with a coupon saves the address and lists the order", a
   await page.getByRole("button", { name: "Place order" }).click();
   await expect(page.getByRole("heading", { name: "Your order is confirmed" })).toBeVisible();
   await expect(page.getByText(/Discount \(WELCOME10\)/)).toBeVisible();
-  const number = (await page.getByRole("heading", { name: /^Order US-/ }).textContent())!.replace(
+  const number = (await page.getByRole("heading", { name: /^Order AG-/ }).textContent())!.replace(
     "Order ",
     "",
   );

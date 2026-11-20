@@ -1,8 +1,8 @@
 "use client";
 
-import type { CartDTO } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { cn } from "@hoodie/ui";
+import type { CartDTO } from "@store/types";
+import { formatMoney } from "@store/types";
+import { cn } from "@store/ui";
 import Link from "next/link";
 import { CouponForm } from "./coupon-form";
 

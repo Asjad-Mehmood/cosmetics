@@ -1,8 +1,8 @@
 "use client";
 
-import type { ApiResponse } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Button, Field, Input } from "@hoodie/ui";
+import type { ApiResponse } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Button, Field, Input } from "@store/ui";
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 

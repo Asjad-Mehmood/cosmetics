@@ -1,4 +1,4 @@
-import { MAX_QTY_PER_ITEM } from "@hoodie/validation";
+import { MAX_QTY_PER_ITEM } from "@store/validation";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { prisma } from "../src/lib/prisma";
@@ -141,7 +141,7 @@ describe("stock rules", () => {
 
     const res = await agent.get("/api/v1/cart");
     expect(res.body.data.items[0]).toMatchObject({ quantity: 4, maxQuantity: 1 });
-    expect(res.body.data.warnings).toEqual([expect.stringMatching(/^Only 1 left of Test Hoodie/)]);
+    expect(res.body.data.warnings).toEqual([expect.stringMatching(/^Only 1 left of Test Product/)]);
   });
 
   it("excludes unpublished products from the subtotal and flags them", async () => {
@@ -215,7 +215,7 @@ describe("signed-in cart", () => {
     const expired = await new SignJWT({ role: "CUSTOMER" })
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(user.id)
-      .setIssuer("hoodie-api")
+      .setIssuer("amazon-group-api")
       .setIssuedAt(Math.floor(Date.now() / 1000) - 3600)
       .setExpirationTime(Math.floor(Date.now() / 1000) - 60)
       .sign(new TextEncoder().encode(process.env.JWT_ACCESS_SECRET));

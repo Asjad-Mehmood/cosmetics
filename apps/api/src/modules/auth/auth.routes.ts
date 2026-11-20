@@ -5,8 +5,8 @@ import {
   registerSchema,
   resetPasswordSchema,
   verifyEmailSchema,
-} from "@hoodie/validation";
-import type { AuthProvidersDTO } from "@hoodie/types";
+} from "@store/validation";
+import type { AuthProvidersDTO } from "@store/types";
 import type { CookieOptions, Request, Response } from "express";
 import { z } from "zod";
 import { env } from "../../config/env";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@hoodie/ui";
+import { Button } from "@store/ui";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

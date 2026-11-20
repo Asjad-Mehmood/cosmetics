@@ -1,4 +1,4 @@
-import { PRODUCT_SORTS, type ProductSort } from "@hoodie/types";
+import { PRODUCT_SORTS, type ProductSort } from "@store/types";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -6,7 +6,6 @@ export interface ListingFilters {
   q?: string;
   size: string[];
   color: string[];
-  fit: string[];
   /** Price bounds in rupees (major units), as shown in the URL. */
   min?: number;
   max?: number;
@@ -30,7 +29,6 @@ export function parseFilters(sp: SearchParams): ListingFilters {
     q,
     size: list(sp.size),
     color: list(sp.color),
-    fit: list(sp.fit),
     min: num(sp.min),
     max: num(sp.max),
     inStock: first(sp.inStock) === "true",
@@ -55,7 +53,6 @@ export function toApiQuery(
   if (f.q) p.set("q", f.q);
   if (f.size.length) p.set("size", f.size.join(","));
   if (f.color.length) p.set("color", f.color.join(","));
-  if (f.fit.length) p.set("fit", f.fit.join(","));
   if (f.min !== undefined) p.set("minPrice", String(Math.round(f.min * 100)));
   if (f.max !== undefined) p.set("maxPrice", String(Math.round(f.max * 100)));
   if (f.inStock) p.set("inStock", "true");
@@ -78,7 +75,6 @@ export function countActiveFilters(f: ListingFilters): number {
   return (
     f.size.length +
     f.color.length +
-    f.fit.length +
     (f.min !== undefined || f.max !== undefined ? 1 : 0) +
     (f.inStock ? 1 : 0)
   );

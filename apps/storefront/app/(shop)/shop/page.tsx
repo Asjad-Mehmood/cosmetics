@@ -3,12 +3,11 @@ import { ProductListing } from "@/components/shop/product-listing";
 import type { SearchParams } from "@/lib/listing";
 
 export const metadata: Metadata = {
-  title: "Shop all hoodies",
-  description:
-    "Browse every hoodie: pullovers, zip-ups, oversized fits and custom embroidered styles.",
+  title: "Shop all products",
+  description: "Browse skincare, makeup, hair care, fragrance, vitamins and health essentials.",
   alternates: { canonical: "/shop" },
 };
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  return <ProductListing title="All hoodies" pathname="/shop" searchParams={await searchParams} />;
+  return <ProductListing title="All products" pathname="/shop" searchParams={await searchParams} />;
 }

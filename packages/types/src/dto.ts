@@ -5,7 +5,6 @@
 import type { ReturnDTO } from "./engagement";
 import type {
   DiscountType,
-  Fit,
   OrderStatus,
   PaymentMethod,
   PaymentStatus,
@@ -58,7 +57,6 @@ export interface ProductCardDTO {
   id: string;
   slug: string;
   title: string;
-  fit: Fit;
   /** Lowest selling price across active variants. */
   price: number;
   compareAtPrice: number | null;
@@ -97,8 +95,9 @@ export interface TaxonomyRef {
 
 export interface ProductDetailDTO extends Omit<ProductCardDTO, "image" | "hoverImage"> {
   description: string;
-  fabric: string | null;
-  careInfo: string | null;
+  ingredients: string | null;
+  howToUse: string | null;
+  warnings: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   images: ImageDTO[];
@@ -132,7 +131,6 @@ export interface CollectionDTO {
 export interface FiltersDTO {
   sizes: string[];
   colors: ColorOption[];
-  fits: Fit[];
   price: { min: number; max: number };
 }
 
@@ -179,7 +177,7 @@ export interface CartDTO {
   /** subtotal minus a valid coupon's discount (before shipping). */
   total: number;
   currency: string;
-  /** Problems to fix before checkout, e.g. "Only 2 left of Classic Hoodie (M, Black)". */
+  /** Problems to fix before checkout, e.g. "Only 2 left of Vitamin C Serum (30 ml, Standard)". */
   warnings: string[];
 }
 

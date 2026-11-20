@@ -1,4 +1,4 @@
-/** "Classic Pullover Hoodie!" → "classic-pullover-hoodie" */
+/** "Vitamin C Serum!" → "vitamin-c-serum" */
 export function slugify(input: string): string {
   return input
     .normalize("NFKD")

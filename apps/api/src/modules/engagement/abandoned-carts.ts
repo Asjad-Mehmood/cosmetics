@@ -1,4 +1,4 @@
-import { formatMoney } from "@hoodie/types";
+import { formatMoney } from "@store/types";
 import { env } from "../../config/env";
 import { emailLayout, esc } from "../../lib/email-layout";
 import { logger } from "../../lib/logger";
@@ -100,7 +100,7 @@ export async function sendCartReminders(now = new Date()): Promise<number> {
       text: `Hi ${user.name},\n\nYour cart still has ${available.length} item(s): ${lines.map((i) => i.variant.product.title).join(", ")}.\n${url}\n\nStop cart reminders: ${stop}\n`,
       html: emailLayout(
         first ? "Still thinking it over?" : "Your cart is still waiting",
-        `<p>Hi ${esc(user.name)}, your cart still has these hoodies. Sizes sell out, so we can't hold them for long.</p><table role="presentation" style="width:100%;border-collapse:collapse;margin:16px 0;border-top:1px solid #eee;border-bottom:1px solid #eee">${rows}</table>${more}`,
+        `<p>Hi ${esc(user.name)}, your cart still has these items. Popular products sell out, so we can't hold them for long.</p><table role="presentation" style="width:100%;border-collapse:collapse;margin:16px 0;border-top:1px solid #eee;border-bottom:1px solid #eee">${rows}</table>${more}`,
         { label: "Back to your cart", url },
         `<a href="${esc(stop)}" style="color:#888">Stop cart reminder emails</a>`,
       ),

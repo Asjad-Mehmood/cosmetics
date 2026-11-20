@@ -1,6 +1,6 @@
-import type { ProductCardDTO, ProductDetailDTO } from "@hoodie/types";
-import { toMajor } from "@hoodie/types";
-import { Container } from "@hoodie/ui";
+import type { ProductCardDTO, ProductDetailDTO } from "@store/types";
+import { toMajor } from "@store/types";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/product/product-card";
@@ -10,7 +10,6 @@ import { Reviews } from "@/components/product/reviews";
 import { Breadcrumbs } from "@/components/shop/product-listing";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe } from "@/lib/server-api";
-import { FIT_DESCRIPTION } from "@/lib/size-guide";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -68,12 +67,12 @@ function productJsonLd(p: ProductDetailDTO) {
 function Details({ product }: { product: ProductDetailDTO }) {
   const sections = [
     { title: "Description", body: product.description },
-    { title: "Fit", body: FIT_DESCRIPTION[product.fit] },
-    product.fabric && { title: "Fabric", body: product.fabric },
-    product.careInfo && { title: "Care", body: product.careInfo },
+    product.ingredients && { title: "Ingredients", body: product.ingredients },
+    product.howToUse && { title: "How to use", body: product.howToUse },
+    product.warnings && { title: "Warnings", body: product.warnings },
     {
       title: "Delivery & returns",
-      body: "Delivered in 1-2 working days in Lahore and 2-5 working days elsewhere. Free exchanges within 14 days of delivery.",
+      body: "Delivered in 1-2 working days in Lahore and 2-5 working days elsewhere. Unopened beauty and personal care items can be returned within 7 days of delivery. For hygiene and safety, opened items and medicines can only be returned if faulty or wrong.",
     },
   ].filter(Boolean) as { title: string; body: string }[];
 

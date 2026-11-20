@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, cn, Skeleton } from "@hoodie/ui";
+import { Container, cn, Skeleton } from "@store/ui";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";

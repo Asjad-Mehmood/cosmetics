@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ApiResponse, AuthUser } from "@hoodie/types";
-import { changePasswordSchema, updateProfileSchema } from "@hoodie/validation";
-import { Button, Field, Input } from "@hoodie/ui";
+import type { ApiResponse, AuthUser } from "@store/types";
+import { changePasswordSchema, updateProfileSchema } from "@store/validation";
+import { Button, Field, Input } from "@store/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

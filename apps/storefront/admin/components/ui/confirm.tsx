@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog } from "@hoodie/ui";
+import { Button, Dialog } from "@store/ui";
 import type { ReactNode } from "react";
 
 /** A yes/no dialog for destructive or important actions. */

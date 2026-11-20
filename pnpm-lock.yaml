@@ -35,10 +35,10 @@ importers:
 
   apps/api:
     dependencies:
-      '@hoodie/types':
+      '@store/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@hoodie/validation':
+      '@store/validation':
         specifier: workspace:*
         version: link:../../packages/validation
       '@prisma/client':
@@ -102,7 +102,7 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@hoodie/config':
+      '@store/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/compression':
@@ -162,16 +162,16 @@ importers:
 
   apps/storefront:
     dependencies:
-      '@hoodie/api':
+      '@store/api':
         specifier: workspace:*
         version: link:../api
-      '@hoodie/types':
+      '@store/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@hoodie/ui':
+      '@store/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@hoodie/validation':
+      '@store/validation':
         specifier: workspace:*
         version: link:../../packages/validation
       '@hookform/resolvers':
@@ -217,7 +217,7 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.14.0
         version: 4.14.0(playwright-core@1.63.0)
-      '@hoodie/config':
+      '@store/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@playwright/test':
@@ -274,7 +274,7 @@ importers:
 
   packages/types:
     devDependencies:
-      '@hoodie/config':
+      '@store/config':
         specifier: workspace:*
         version: link:../config
       eslint:
@@ -296,7 +296,7 @@ importers:
         specifier: ^3.3.1
         version: 3.7.0
     devDependencies:
-      '@hoodie/config':
+      '@store/config':
         specifier: workspace:*
         version: link:../config
       '@types/react':
@@ -317,14 +317,14 @@ importers:
 
   packages/validation:
     dependencies:
-      '@hoodie/types':
+      '@store/types':
         specifier: workspace:*
         version: link:../types
       zod:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@hoodie/config':
+      '@store/config':
         specifier: workspace:*
         version: link:../config
       eslint:

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApiResponse } from "@hoodie/types";
+import type { ApiResponse } from "@store/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api, errorMessage } from "@/admin/lib/api";

@@ -1,5 +1,5 @@
-import { ErrorCode, type UploadConfigDTO } from "@hoodie/types";
-import { uploadSignSchema } from "@hoodie/validation";
+import { ErrorCode, type UploadConfigDTO } from "@store/types";
+import { uploadSignSchema } from "@store/validation";
 import { createHash } from "node:crypto";
 import { env } from "../../config/env";
 import { ok } from "../../lib/http";
@@ -119,7 +119,7 @@ export const adminUploadsRouter = defineRoutes("/admin/uploads", "Admin: Uploads
         );
       }
       const timestamp = Math.floor(Date.now() / 1000);
-      const folder = `hoodie/${body.folder}`;
+      const folder = `amazon-group/${body.folder}`;
       return ok({
         uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         apiKey,

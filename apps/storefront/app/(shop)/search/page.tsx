@@ -1,4 +1,4 @@
-import { Button, Input } from "@hoodie/ui";
+import { Button, Input } from "@store/ui";
 import type { Metadata } from "next";
 import { ProductListing } from "@/components/shop/product-listing";
 import type { SearchParams } from "@/lib/listing";
@@ -21,14 +21,14 @@ export default async function SearchPage({
       header={
         <form action="/search" role="search" className="mb-10 flex max-w-xl gap-2">
           <label htmlFor="search-q" className="sr-only">
-            Search hoodies
+            Search products
           </label>
           <Input
             id="search-q"
             name="q"
             type="search"
             defaultValue={q}
-            placeholder="Search hoodies, e.g. zip, oversized, sherpa"
+            placeholder="Search products, e.g. serum, sunscreen, vitamin C"
             autoFocus={!q}
           />
           <Button type="submit">Search</Button>

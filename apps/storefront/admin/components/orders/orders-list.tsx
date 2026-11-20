@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminOrderListItemDTO, PaginatedResponse } from "@hoodie/types";
-import { Button, Input } from "@hoodie/ui";
+import type { AdminOrderListItemDTO, PaginatedResponse } from "@store/types";
+import { Button, Input } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useRouter } from "@/admin/lib/navigation";

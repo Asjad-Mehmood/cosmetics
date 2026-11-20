@@ -1,5 +1,5 @@
-import type { FaqDTO } from "@hoodie/types";
-import { Container } from "@hoodie/ui";
+import type { FaqDTO } from "@store/types";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataSafe } from "@/lib/server-api";

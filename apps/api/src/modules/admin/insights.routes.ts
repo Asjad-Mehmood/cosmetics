@@ -1,4 +1,4 @@
-import { dashboardQuerySchema, inventoryQuerySchema, reportQuerySchema } from "@hoodie/validation";
+import { dashboardQuerySchema, inventoryQuerySchema, reportQuerySchema } from "@store/validation";
 import { csvMoney, sendCsv } from "../../lib/csv";
 import { ok } from "../../lib/http";
 import { defineRoutes, route } from "../../lib/route";

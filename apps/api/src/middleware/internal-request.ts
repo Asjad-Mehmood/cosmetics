@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 
-const KEY = Symbol.for("urbanstore.internalRequestToken");
+const KEY = Symbol.for("amazongroup.internalRequestToken");
 const store = globalThis as unknown as Record<symbol, string | undefined>;
 
 /**

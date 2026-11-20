@@ -1,8 +1,8 @@
 "use client";
 
-import type { AdminOrderDTO, ApiResponse, OrderStatus } from "@hoodie/types";
-import { RETURN_REASON_LABEL } from "@hoodie/types";
-import { Badge, Button, Dialog, Field, Input, Skeleton } from "@hoodie/ui";
+import type { AdminOrderDTO, ApiResponse, OrderStatus } from "@store/types";
+import { RETURN_REASON_LABEL } from "@store/types";
+import { Badge, Button, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useEffect, useId, useState } from "react";

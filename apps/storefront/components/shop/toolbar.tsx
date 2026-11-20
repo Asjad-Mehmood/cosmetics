@@ -1,9 +1,8 @@
 "use client";
 
-import type { ProductSort } from "@hoodie/types";
-import { PRODUCT_SORTS } from "@hoodie/types";
+import type { ProductSort } from "@store/types";
+import { PRODUCT_SORTS } from "@store/types";
 import { defaultSort, SORT_LABELS } from "@/lib/listing";
-import { FIT_LABEL } from "@/lib/size-guide";
 import { useListingNav } from "./listing-nav";
 
 export function SortSelect({ value, search = false }: { value: ProductSort; search?: boolean }) {
@@ -33,16 +32,11 @@ export function ActiveFilters() {
   const { params, update } = useListingNav();
   const chips: { label: string; remove: () => void }[] = [];
 
-  for (const key of ["size", "color", "fit"] as const) {
+  for (const key of ["size", "color"] as const) {
     const values = params.get(key)?.split(",").filter(Boolean) ?? [];
     for (const v of values) {
       chips.push({
-        label:
-          key === "fit"
-            ? (FIT_LABEL[v as keyof typeof FIT_LABEL] ?? v)
-            : key === "size"
-              ? `Size ${v}`
-              : v,
+        label: key === "size" ? `Size ${v}` : v,
         remove: () => update({ [key]: values.filter((x) => x !== v).join(",") || null }),
       });
     }
@@ -74,9 +68,7 @@ export function ActiveFilters() {
       ))}
       <button
         type="button"
-        onClick={() =>
-          update({ size: null, color: null, fit: null, min: null, max: null, inStock: null })
-        }
+        onClick={() => update({ size: null, color: null, min: null, max: null, inStock: null })}
         className="text-muted text-xs underline"
       >
         Clear all

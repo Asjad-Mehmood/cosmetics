@@ -143,7 +143,7 @@ describe("database URL", () => {
   });
 
   it("leaves a local database alone", () => {
-    const local = "postgresql://hoodie:hoodie@localhost:5432/hoodie_store?schema=public";
+    const local = "postgresql://store:store@localhost:5432/amazon_group?schema=public";
     expect(databaseUrl(local)).toBe(local);
   });
 });

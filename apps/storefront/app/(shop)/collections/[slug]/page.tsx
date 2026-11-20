@@ -1,4 +1,4 @@
-import type { CollectionDTO } from "@hoodie/types";
+import type { CollectionDTO } from "@store/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";

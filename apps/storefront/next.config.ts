@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
       (productionUrl ? `https://${productionUrl}` : "http://localhost:3000"),
   },
   // Workspace packages ship TypeScript source.
-  transpilePackages: ["@hoodie/ui", "@hoodie/types", "@hoodie/validation"],
+  transpilePackages: ["@store/ui", "@store/types", "@store/validation"],
   // The API is loaded as built (apps/api/dist), with its own dependencies
   // (Prisma, argon2, pdfkit…), rather than bundled into the site. It is a
   // workspace package outside node_modules, which Next would otherwise bundle.
@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
     if (isServer) {
       config.externals = [
         ({ request }: { request?: string }, callback: (err?: null, result?: string) => void) =>
-          request?.startsWith("@hoodie/api") ? callback(null, `import ${request}`) : callback(),
+          request?.startsWith("@store/api") ? callback(null, `import ${request}`) : callback(),
         ...(Array.isArray(config.externals) ? config.externals : [config.externals]),
       ];
     }

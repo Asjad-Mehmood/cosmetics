@@ -1,7 +1,7 @@
 "use client";
 
-import type { AddressDTO, ApiResponse } from "@hoodie/types";
-import type { AddressInput } from "@hoodie/validation";
+import type { AddressDTO, ApiResponse } from "@store/types";
+import type { AddressInput } from "@store/validation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useMe } from "./use-auth";

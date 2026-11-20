@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { contactMessageSchema } from "@hoodie/validation";
-import { Button, Field, Input } from "@hoodie/ui";
+import { contactMessageSchema } from "@store/validation";
+import { Button, Field, Input } from "@store/ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMe } from "@/hooks/use-auth";
@@ -66,7 +66,7 @@ export function ContactForm() {
         </Field>
       </div>
       <Field label="Subject (optional)" htmlFor="contact-subject" error={errors.subject?.message}>
-        <Input id="contact-subject" placeholder="e.g. Order US-10025" {...register("subject")} />
+        <Input id="contact-subject" placeholder="e.g. Order AG-10025" {...register("subject")} />
       </Field>
       <Field label="Message" htmlFor="contact-message" error={errors.message?.message}>
         <textarea

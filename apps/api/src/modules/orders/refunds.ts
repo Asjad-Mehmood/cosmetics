@@ -1,5 +1,5 @@
-import { ErrorCode, formatMoney, type OrderStatus } from "@hoodie/types";
-import type { RefundOrderInput } from "@hoodie/validation";
+import { ErrorCode, formatMoney, type OrderStatus } from "@store/types";
+import type { RefundOrderInput } from "@store/validation";
 import { logger } from "../../lib/logger";
 import { sendMail } from "../../lib/mailer";
 import { prisma } from "../../lib/prisma";

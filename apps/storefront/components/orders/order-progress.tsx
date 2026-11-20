@@ -1,6 +1,6 @@
-import type { OrderEventDTO, OrderStatus } from "@hoodie/types";
-import { ORDER_STATUS_LABEL } from "@hoodie/types";
-import { cn } from "@hoodie/ui";
+import type { OrderEventDTO, OrderStatus } from "@store/types";
+import { ORDER_STATUS_LABEL } from "@store/types";
+import { cn } from "@store/ui";
 
 /** Returns happen after delivery, so those orders have completed every step. */
 const AFTER_DELIVERY: OrderStatus[] = ["DELIVERED", "RETURN_REQUESTED", "RETURNED"];

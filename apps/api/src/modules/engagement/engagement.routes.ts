@@ -1,5 +1,5 @@
-import type { NewsletterSubscriberDTO } from "@hoodie/types";
-import { newsletterListQuerySchema, unsubscribeSchema } from "@hoodie/validation";
+import type { NewsletterSubscriberDTO } from "@store/types";
+import { newsletterListQuerySchema, unsubscribeSchema } from "@store/validation";
 import type { Prisma } from "@prisma/client";
 import { sendCsv } from "../../lib/csv";
 import { paginated, skipTake } from "../../lib/http";

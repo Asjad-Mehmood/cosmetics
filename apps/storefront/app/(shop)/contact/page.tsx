@@ -1,4 +1,4 @@
-import { Container } from "@hoodie/ui";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/content/contact-form";
 
@@ -16,7 +16,7 @@ export default function ContactPage() {
         <dl className="mt-8 space-y-4 text-sm">
           <div>
             <dt className="font-semibold">Email</dt>
-            <dd className="text-muted">support@urbanstore.pk</dd>
+            <dd className="text-muted">support@amazongroup.pk</dd>
           </div>
           <div>
             <dt className="font-semibold">Hours</dt>

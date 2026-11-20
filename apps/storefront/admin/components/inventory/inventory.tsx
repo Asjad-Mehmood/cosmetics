@@ -1,7 +1,7 @@
 "use client";
 
-import type { InventoryRowDTO, PaginatedResponse } from "@hoodie/types";
-import { Badge, Button } from "@hoodie/ui";
+import type { InventoryRowDTO, PaginatedResponse } from "@store/types";
+import { Badge, Button } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export function Inventory() {
     <div className="space-y-5">
       <PageHeader
         title="Inventory"
-        description="Stock for every size and colour. Every change is recorded with a reason. Units held by orders awaiting card payment can't be sold to anyone else."
+        description="Stock for every size and shade. Every change is recorded with a reason. Units held by orders awaiting card payment can't be sold to anyone else."
       />
       <FilterTabs
         label="Stock level"

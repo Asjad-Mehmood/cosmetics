@@ -1,7 +1,7 @@
 "use client";
 
-import type { PaginationMeta } from "@hoodie/types";
-import { Button, cn, Skeleton } from "@hoodie/ui";
+import type { PaginationMeta } from "@store/types";
+import { Button, cn, Skeleton } from "@store/ui";
 import type { HTMLAttributes, ReactNode, TdHTMLAttributes, ThHTMLAttributes } from "react";
 
 /** Scrollable table wrapper: wide tables scroll inside the card on small screens. */

@@ -1,7 +1,7 @@
 "use client";
 
-import type { CouponDTO, DiscountType } from "@hoodie/types";
-import { Button, Dialog, Field, Input } from "@hoodie/ui";
+import type { CouponDTO, DiscountType } from "@store/types";
+import { Button, Dialog, Field, Input } from "@store/ui";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

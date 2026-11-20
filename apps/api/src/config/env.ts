@@ -41,13 +41,13 @@ const envSchema = z
     // Hosting (Vercel)
     /** Vercel sends it with scheduled (cron) requests; enables GET /api/v1/cron/daily. */
     CRON_SECRET: z.string().min(16, "CRON_SECRET must be at least 16 characters").optional(),
-    /** Set by Vercel: the project's production domain, e.g. urbanstore-api.vercel.app. */
+    /** Set by Vercel: the project's production domain, e.g. amazon-group.vercel.app. */
     VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
 
     // Email is set up in the admin (Store settings → Email). RESEND_API_KEY here is
     // an optional server-side fallback. Until one of them is set, no email is sent.
     RESEND_API_KEY: z.string().optional(),
-    EMAIL_FROM: z.string().default("Urban Store <orders@urbanstore.pk>"),
+    EMAIL_FROM: z.string().default("Amazon Group <orders@amazongroup.pk>"),
 
     // Uploads (signed direct-to-Cloudinary uploads)
     CLOUDINARY_CLOUD_NAME: z.string().optional(),

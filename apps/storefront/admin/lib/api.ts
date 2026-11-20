@@ -1,4 +1,4 @@
-import type { ApiErrorBody } from "@hoodie/types";
+import type { ApiErrorBody } from "@store/types";
 import { adminConfig } from "./config";
 
 /** Error thrown for any non-2xx API response, carrying the API's error code. */

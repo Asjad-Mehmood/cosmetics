@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApiResponse, CartDTO } from "@hoodie/types";
+import type { ApiResponse, CartDTO } from "@store/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useMe } from "./use-auth";

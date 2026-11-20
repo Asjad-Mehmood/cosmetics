@@ -1,6 +1,6 @@
-import type { AuthUser } from "@hoodie/types";
-import type { LoginInput, RegisterInput, ResetPasswordInput } from "@hoodie/validation";
-import { ErrorCode } from "@hoodie/types";
+import type { AuthUser } from "@store/types";
+import type { LoginInput, RegisterInput, ResetPasswordInput } from "@store/validation";
+import { ErrorCode } from "@store/types";
 import type { AuthTokenType, User } from "@prisma/client";
 import { hash, verify } from "argon2";
 import { env } from "../../config/env";

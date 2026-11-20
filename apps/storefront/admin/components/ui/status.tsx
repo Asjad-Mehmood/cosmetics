@@ -1,13 +1,13 @@
-import type { BadgeProps } from "@hoodie/ui";
-import { Badge } from "@hoodie/ui";
+import type { BadgeProps } from "@store/ui";
+import { Badge } from "@store/ui";
 import type {
   CouponDTO,
   MessageStatus,
   OrderStatus,
   PaymentStatus,
   ProductStatus,
-} from "@hoodie/types";
-import { ORDER_STATUS_LABEL } from "@hoodie/types";
+} from "@store/types";
+import { ORDER_STATUS_LABEL } from "@store/types";
 
 type Tone = NonNullable<BadgeProps["tone"]>;
 

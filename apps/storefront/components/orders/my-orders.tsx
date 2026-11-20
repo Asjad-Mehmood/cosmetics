@@ -1,8 +1,8 @@
 "use client";
 
-import type { OrderListItemDTO, PaginatedResponse } from "@hoodie/types";
-import { formatMoney } from "@hoodie/types";
-import { Skeleton } from "@hoodie/ui";
+import type { OrderListItemDTO, PaginatedResponse } from "@store/types";
+import { formatMoney } from "@store/types";
+import { Skeleton } from "@store/ui";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";

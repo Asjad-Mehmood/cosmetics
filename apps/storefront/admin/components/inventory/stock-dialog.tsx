@@ -1,8 +1,8 @@
 "use client";
 
-import type { AdminVariantDTO, ApiResponse, StockAdjustmentDTO } from "@hoodie/types";
-import { STOCK_ADJUSTMENT_REASONS } from "@hoodie/validation";
-import { Button, Dialog, Field, Input } from "@hoodie/ui";
+import type { AdminVariantDTO, ApiResponse, StockAdjustmentDTO } from "@store/types";
+import { STOCK_ADJUSTMENT_REASONS } from "@store/validation";
+import { Button, Dialog, Field, Input } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, AuthProvidersDTO, AuthUser } from "@hoodie/types";
-import type { LoginInput, RegisterInput } from "@hoodie/validation";
+import type { ApiResponse, AuthProvidersDTO, AuthUser } from "@store/types";
+import type { LoginInput, RegisterInput } from "@store/validation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
 

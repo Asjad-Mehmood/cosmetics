@@ -1,4 +1,4 @@
-import { ORDER_STATUSES } from "@hoodie/types";
+import { ORDER_STATUSES } from "@store/types";
 import { z } from "zod";
 import { addressSchema } from "./address";
 import { emailSchema, phoneSchema } from "./common";

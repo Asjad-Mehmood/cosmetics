@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Container } from "@hoodie/ui";
+import { Button, Container } from "@store/ui";
 import Link from "next/link";
 import { useEffect } from "react";
 

@@ -1,9 +1,9 @@
-import type { Role } from "@hoodie/types";
+import type { Role } from "@store/types";
 import { errors, jwtVerify, SignJWT } from "jose";
 import { env } from "../config/env";
 
 const secret = new TextEncoder().encode(env.JWT_ACCESS_SECRET);
-const ISSUER = "hoodie-api";
+const ISSUER = "amazon-group-api";
 
 export interface AccessTokenPayload {
   sub: string;

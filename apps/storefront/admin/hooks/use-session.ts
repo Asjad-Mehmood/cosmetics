@@ -1,8 +1,8 @@
 "use client";
 
-import type { ApiResponse, AuthUser, Role } from "@hoodie/types";
-import { hasRole, isAdminRole } from "@hoodie/types";
-import type { LoginInput } from "@hoodie/validation";
+import type { ApiResponse, AuthUser, Role } from "@store/types";
+import { hasRole, isAdminRole } from "@store/types";
+import type { LoginInput } from "@store/validation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/admin/lib/api";
 

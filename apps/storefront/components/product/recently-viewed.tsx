@@ -1,6 +1,6 @@
 "use client";
 
-import type { PaginatedResponse, ProductCardDTO } from "@hoodie/types";
+import type { PaginatedResponse, ProductCardDTO } from "@store/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";

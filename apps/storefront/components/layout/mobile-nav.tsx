@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog } from "@hoodie/ui";
+import { Dialog } from "@store/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -37,7 +37,7 @@ export function MobileNav({ categories, collections }: NavData) {
       <nav aria-label="Mobile" className="space-y-6">
         <div>
           <Link href="/shop" className={linkClass}>
-            All hoodies
+            All products
           </Link>
           {categories.map((c) => (
             <Link key={c.id} href={`/categories/${c.slug}`} className={linkClass}>
@@ -58,9 +58,6 @@ export function MobileNav({ categories, collections }: NavData) {
         <div className="border-line border-t pt-4">
           <Link href={me.data ? "/account" : "/login"} className={linkClass}>
             {me.data ? "My account" : "Sign in / Create account"}
-          </Link>
-          <Link href="/size-guide" className={linkClass}>
-            Size guide
           </Link>
           <Link href="/faq" className={linkClass}>
             Help & FAQ

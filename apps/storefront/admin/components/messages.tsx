@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, ContactMessageDTO, PaginatedResponse } from "@hoodie/types";
-import { Button, cn } from "@hoodie/ui";
+import type { ApiResponse, ContactMessageDTO, PaginatedResponse } from "@store/types";
+import { Button, cn } from "@store/ui";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";

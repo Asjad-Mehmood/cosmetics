@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@hoodie/ui";
+import { cn } from "@store/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -67,7 +67,7 @@ export function MegaMenu({ categories, collections }: NavData) {
                   href="/shop"
                   className="hover:bg-surface block rounded-lg px-2 py-1.5 text-sm font-semibold"
                 >
-                  All hoodies
+                  All products
                 </Link>
               </li>
               {categories.map((c) => (

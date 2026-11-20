@@ -11,17 +11,16 @@ type Card = {
   colors: { name: string }[];
   sizesInStock: string[];
   inStock: boolean;
-  fit: string;
 };
 
 describe("GET /products", () => {
   it("returns paginated published products with card fields", async () => {
     // Scoped to a seeded category: other test files create products concurrently.
-    const res = await get("/products?category=pullover&limit=3");
+    const res = await get("/products?category=skincare&limit=2");
     expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(3);
-    expect(res.body.meta).toMatchObject({ page: 1, limit: 3 });
-    expect(res.body.meta.totalPages).toBe(Math.ceil(res.body.meta.total / 3));
+    expect(res.body.data).toHaveLength(2);
+    expect(res.body.meta).toMatchObject({ page: 1, limit: 2 });
+    expect(res.body.meta.totalPages).toBe(Math.ceil(res.body.meta.total / 2));
 
     const card = res.body.data[0];
     expect(card).toEqual(
@@ -41,26 +40,31 @@ describe("GET /products", () => {
     const draft = await createTestProduct({ status: "DRAFT" });
     const res = await get(`/products?q=${draft.title}`);
     expect(res.body.data).toHaveLength(0);
-    // the seeded draft hoodie too
+    // the seeded draft product too
     const all = await get("/products?limit=100");
-    expect(all.body.data.map((p: Card) => p.slug)).not.toContain("varsity-letter-hoodie");
+    expect(all.body.data.map((p: Card) => p.slug)).not.toContain("daily-multivitamin-tablets");
   });
 
   it("filters by category (including the seeded catalogue)", async () => {
-    const res = await get("/products?category=zip-up&limit=50");
+    const res = await get("/products?category=skincare&limit=50");
     const slugs = res.body.data.map((p: Card) => p.slug).sort();
-    expect(slugs).toEqual(["sherpa-zip-hoodie", "zip-up-fleece-hoodie"]);
+    expect(slugs).toEqual([
+      "daily-sunscreen-spf-50",
+      "hyaluronic-hydrating-serum",
+      "vitamin-c-brightening-serum",
+    ]);
   });
 
-  it("filters by collection and fit", async () => {
-    const res = await get("/products?collection=new-arrivals&fit=OVERSIZED&limit=50");
-    expect(res.body.data.length).toBeGreaterThan(0);
-    for (const p of res.body.data as Card[]) expect(p.fit).toBe("OVERSIZED");
+  it("filters by collection and category together", async () => {
+    const res = await get("/products?collection=new-arrivals&category=skincare&limit=50");
+    expect(res.body.data.map((p: Card) => p.slug)).toEqual(["hyaluronic-hydrating-serum"]);
   });
 
-  it("filters by size and colour on the same variant", async () => {
-    const res = await get("/products?size=XS&color=Blush%20Pink&limit=50");
-    expect(res.body.data.map((p: Card) => p.slug)).toEqual(["pastel-relaxed-hoodie"]);
+  it("filters by pack size and shade on the same variant", async () => {
+    const res = await get("/products?size=3.5%20g&color=Nude%20Rose&limit=50");
+    expect(res.body.data.map((p: Card) => p.slug)).toEqual(["velvet-matte-lipstick"]);
+    const sizes = await get("/products?size=100%20ml&category=skincare&limit=50");
+    expect(sizes.body.data.map((p: Card) => p.slug)).toEqual(["daily-sunscreen-spf-50"]);
   });
 
   it("filters by price range (minor units)", async () => {
@@ -95,41 +99,53 @@ describe("GET /products", () => {
   });
 
   it("searches title and description case-insensitively", async () => {
-    const res = await get("/products?q=SHERPA");
-    expect(res.body.data.map((p: Card) => p.slug)).toContain("sherpa-zip-hoodie");
+    const res = await get("/products?q=SUNSCREEN");
+    expect(res.body.data.map((p: Card) => p.slug)).toContain("daily-sunscreen-spf-50");
+    // "ferulic" only appears in the serum's description
+    const desc = await get("/products?q=Ferulic");
+    expect(desc.body.data.map((p: Card) => p.slug)).toContain("vitamin-c-brightening-serum");
   });
 
   it.each([
     ["price_asc", (a: number, b: number) => a <= b],
     ["price_desc", (a: number, b: number) => a >= b],
   ])("sorts by %s", async (sort, inOrder) => {
-    const res = await get(`/products?category=pullover&sort=${sort}&limit=50`);
+    const res = await get(`/products?category=skincare&sort=${sort}&limit=50`);
     const prices = res.body.data.map((p: Card) => p.price);
     for (let i = 1; i < prices.length; i++) expect(inOrder(prices[i - 1], prices[i])).toBe(true);
   });
 
   it("rejects invalid filters with 422", async () => {
-    expect((await get("/products?size=HUGE")).status).toBe(422);
+    expect((await get(`/products?size=${"x".repeat(41)}`)).status).toBe(422);
+    expect((await get("/products?sort=cheapest")).status).toBe(422);
     expect((await get("/products?limit=1000")).status).toBe(422);
   });
 });
 
 describe("GET /products/:slug", () => {
   it("returns details with sorted variants, images and taxonomy", async () => {
-    const res = await get("/products/urban-essential-pullover-hoodie");
+    const res = await get("/products/vitamin-c-brightening-serum");
     expect(res.status).toBe(200);
     const p = res.body.data;
-    expect(p.sizes).toEqual(["XS", "S", "M", "L", "XL", "XXL"]);
-    expect(p.colors.map((c: { name: string }) => c.name)).toEqual([
-      "Jet Black",
-      "Heather Grey",
-      "White",
-      "Navy",
+    expect(p.sizes).toEqual(["15 ml", "30 ml"]);
+    expect(p.colors.map((c: { name: string }) => c.name)).toEqual(["Standard"]);
+    expect(p.variants.map((v: { size: string; price: number }) => [v.size, v.price])).toEqual([
+      ["15 ml", 249900],
+      ["30 ml", 399900],
     ]);
-    expect(p.variants).toHaveLength(24);
-    expect(p.variants.slice(0, 6).map((v: { size: string }) => v.size)).toEqual(p.sizes);
-    expect(p.categories).toEqual([expect.objectContaining({ slug: "pullover" })]);
+    expect(p).toMatchObject({ price: 249900, hasPriceRange: true });
+    expect(p.ingredients).toContain("Ascorbic Acid");
+    expect(p.howToUse).toEqual(expect.any(String));
+    expect(p.warnings).toContain("Patch test");
+    expect(p.categories).toEqual([expect.objectContaining({ slug: "skincare" })]);
     expect(p.images.length).toBeGreaterThan(0);
+
+    const lipstick = (await get("/products/velvet-matte-lipstick")).body.data;
+    expect(lipstick.colors.map((c: { name: string }) => c.name)).toEqual([
+      "Nude Rose",
+      "Classic Red",
+      "Berry Wine",
+    ]);
   });
 
   it("only exposes a count when stock is low", async () => {
@@ -172,15 +188,15 @@ describe("GET /products/:slug", () => {
   });
 
   it("returns 404 for drafts and unknown slugs", async () => {
-    expect((await get("/products/varsity-letter-hoodie")).status).toBe(404);
+    expect((await get("/products/daily-multivitamin-tablets")).status).toBe(404);
     expect((await get("/products/does-not-exist")).status).toBe(404);
   });
 
   it("lists related products without the product itself", async () => {
-    const res = await get("/products/urban-essential-pullover-hoodie/related");
+    const res = await get("/products/vitamin-c-brightening-serum/related");
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThan(0);
-    expect(res.body.data.map((p: Card) => p.slug)).not.toContain("urban-essential-pullover-hoodie");
+    expect(res.body.data.map((p: Card) => p.slug)).not.toContain("vitamin-c-brightening-serum");
   });
 });
 
@@ -189,20 +205,20 @@ describe("categories, collections and filters", () => {
     const res = await get("/categories");
     // Other test files add products concurrently, so compare with the database
     // rather than hard-coded numbers. Only ACTIVE products count (the seeded
-    // "custom" category also holds a DRAFT hoodie).
-    for (const slug of ["zip-up", "custom"]) {
+    // "health-wellness" category also holds a DRAFT product).
+    for (const slug of ["skincare", "health-wellness"]) {
       const node = res.body.data.find((c: { slug: string }) => c.slug === slug);
       const [active, all] = await Promise.all([
         prisma.product.count({ where: { status: "ACTIVE", categories: { some: { slug } } } }),
         prisma.product.count({ where: { categories: { some: { slug } } } }),
       ]);
       expect(node.productCount).toBe(active);
-      if (slug === "custom") expect(all).toBeGreaterThan(active);
+      if (slug === "health-wellness") expect(all).toBeGreaterThan(active);
     }
   });
 
   it("gets a single category and collection", async () => {
-    expect((await get("/categories/oversized")).body.data.slug).toBe("oversized");
+    expect((await get("/categories/makeup")).body.data.slug).toBe("makeup");
     expect((await get("/collections/new-arrivals")).body.data.productCount).toBeGreaterThan(0);
     expect((await get("/categories/nope")).status).toBe(404);
   });
@@ -210,20 +226,21 @@ describe("categories, collections and filters", () => {
   it("lists only featured collections when asked", async () => {
     const res = await get("/collections?featured=true");
     expect(res.body.data.every((c: { isFeatured: boolean }) => c.isFeatured)).toBe(true);
-    expect(res.body.data.map((c: { slug: string }) => c.slug)).not.toContain("winter-essentials");
+    expect(res.body.data.map((c: { slug: string }) => c.slug)).not.toContain("daily-essentials");
   });
 
   it("returns filter options scoped to a category", async () => {
-    const res = await get("/filters?category=zip-up");
-    expect(res.body.data).toMatchObject({
-      sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      fits: ["REGULAR"],
-      price: { min: 379900, max: 549900 },
+    const res = await get("/filters?category=skincare");
+    expect(res.body.data).toEqual({
+      sizes: ["15 ml", "30 ml", "50 ml", "100 ml"],
+      colors: [{ name: "Standard", hex: "#E5E7EB" }],
+      price: { min: 149900, max: 249900 },
     });
-    expect(res.body.data.colors).toEqual(
+    const makeup = await get("/filters?category=makeup");
+    expect(makeup.body.data.colors).toEqual(
       expect.arrayContaining([
-        { name: "Maroon", hex: "#6D1F2A" },
-        { name: "Cream", hex: "#EFE6D2" },
+        { name: "Nude Rose", hex: "#C98B83" },
+        { name: "Classic Red", hex: "#B3262E" },
       ]),
     );
   });

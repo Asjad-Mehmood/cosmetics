@@ -1,4 +1,4 @@
-import type { HomeContentDTO } from "@hoodie/types";
+import type { HomeContentDTO } from "@store/types";
 import type { ReactNode } from "react";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { Footer } from "@/components/layout/footer";

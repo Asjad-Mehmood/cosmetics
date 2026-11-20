@@ -47,9 +47,10 @@ export const moderateReviewSchema = z
 // ───────────── Returns ─────────────
 
 export const RETURN_REASONS = [
-  "wrong_size",
+  "wrong_shade",
   "not_as_described",
   "damaged",
+  "expired",
   "wrong_item",
   "changed_mind",
   "other",

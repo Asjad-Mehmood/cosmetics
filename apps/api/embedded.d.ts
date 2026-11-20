@@ -1,4 +1,4 @@
-// Types for "@hoodie/api/embedded" (built to dist/embedded.js by tsup), so the
+// Types for "@store/api/embedded" (built to dist/embedded.js by tsup), so the
 // storefront can use it without compiling the API.
 
 /** Runs a /api/v1 request through the API and returns its response. */

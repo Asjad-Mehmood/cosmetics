@@ -8,7 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name}: Streetwear Hoodies in Pakistan`,
+    default: `${siteConfig.name}: Beauty & Pharmacy Store in Pakistan`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { themeColor: "#111111" };
+export const viewport: Viewport = { themeColor: "#0f5e63" };
 
 /**
  * One site, two areas: the shop (app/(shop), with its header and footer) and

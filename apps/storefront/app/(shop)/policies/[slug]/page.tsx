@@ -1,5 +1,5 @@
-import type { PageDTO } from "@hoodie/types";
-import { Container } from "@hoodie/ui";
+import type { PageDTO } from "@store/types";
+import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getData } from "@/lib/server-api";

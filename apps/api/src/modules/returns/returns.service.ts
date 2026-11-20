@@ -1,6 +1,6 @@
-import type { AdminReturnDTO, AdminReturnListItemDTO, OrderAddressDTO } from "@hoodie/types";
-import { ErrorCode, formatMoney, RETURN_REASON_LABEL } from "@hoodie/types";
-import type { ReturnRequestInput } from "@hoodie/validation";
+import type { AdminReturnDTO, AdminReturnListItemDTO, OrderAddressDTO } from "@store/types";
+import { ErrorCode, formatMoney, RETURN_REASON_LABEL } from "@store/types";
+import type { ReturnRequestInput } from "@store/validation";
 import type { Prisma, ReturnStatus } from "@prisma/client";
 import { paginated, skipTake } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";

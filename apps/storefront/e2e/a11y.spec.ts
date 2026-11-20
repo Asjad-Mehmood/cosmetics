@@ -5,8 +5,8 @@ import { expect, test } from "@playwright/test";
 const PAGES = [
   ["home", "/"],
   ["shop", "/shop"],
-  ["category", "/categories/oversized"],
-  ["product", "/products/urban-essential-pullover-hoodie"],
+  ["category", "/categories/makeup"],
+  ["product", "/products/velvet-matte-lipstick"],
   ["cart", "/cart"],
   ["checkout", "/checkout"],
   ["login", "/login"],
@@ -15,8 +15,7 @@ const PAGES = [
   ["faq", "/faq"],
   ["contact", "/contact"],
   ["policy", "/policies/shipping"],
-  ["size guide", "/size-guide"],
-  ["search", "/search?q=hoodie"],
+  ["search", "/search?q=serum"],
 ] as const;
 
 for (const [name, path] of PAGES) {

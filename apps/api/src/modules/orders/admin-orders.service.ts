@@ -3,8 +3,8 @@ import type {
   AdminOrderListItemDTO,
   OrderAddressDTO,
   OrderStatus,
-} from "@hoodie/types";
-import type { AdminOrderListQuery, UpdateAdminOrderInput } from "@hoodie/validation";
+} from "@store/types";
+import type { AdminOrderListQuery, UpdateAdminOrderInput } from "@store/validation";
 import type { Prisma } from "@prisma/client";
 import { dayRange } from "../../lib/dates";
 import { paginated, skipTake } from "../../lib/http";

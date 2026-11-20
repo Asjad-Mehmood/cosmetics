@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse } from "@hoodie/types";
+import type { ApiResponse, PaginatedResponse } from "@store/types";
 import { unstable_cache } from "next/cache";
 import { connection } from "next/server";
 
@@ -9,7 +9,7 @@ interface FetchOptions {
 
 /** Reads from the API in this process (no HTTP round trip). 404 → null. */
 async function load(path: string): Promise<string | null> {
-  const { request } = await import("@hoodie/api/embedded");
+  const { request } = await import("@store/api/embedded");
   const res = await request(path);
   if (res.status === 404) return null;
   if (res.status >= 400) throw new Error(`API ${res.status} for GET ${path}`);

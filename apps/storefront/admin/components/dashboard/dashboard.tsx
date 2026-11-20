@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiResponse, DashboardDTO, KpiDTO } from "@hoodie/types";
-import { Card, cn, Skeleton } from "@hoodie/ui";
+import type { ApiResponse, DashboardDTO, KpiDTO } from "@store/types";
+import { Card, cn, Skeleton } from "@store/ui";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "@/admin/lib/link";
 import { useState } from "react";

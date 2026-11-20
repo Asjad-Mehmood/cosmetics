@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AddressDTO } from "@hoodie/types";
-import { addressSchema } from "@hoodie/validation";
-import { Badge, Button, Card, Dialog, Field, Input, Skeleton } from "@hoodie/ui";
+import type { AddressDTO } from "@store/types";
+import { addressSchema } from "@store/validation";
+import { Badge, Button, Card, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

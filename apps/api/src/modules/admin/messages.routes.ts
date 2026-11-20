@@ -1,9 +1,5 @@
-import type { ContactMessageDTO } from "@hoodie/types";
-import {
-  messageListQuerySchema,
-  replyMessageSchema,
-  updateMessageSchema,
-} from "@hoodie/validation";
+import type { ContactMessageDTO } from "@store/types";
+import { messageListQuerySchema, replyMessageSchema, updateMessageSchema } from "@store/validation";
 import type { ContactMessage, Prisma } from "@prisma/client";
 import { isTest } from "../../config/env";
 import { audit } from "../../lib/audit";

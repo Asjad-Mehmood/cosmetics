@@ -15,7 +15,7 @@ export interface JobData {
 }
 export type JobName = keyof JobData;
 
-export const QUEUE_NAME = "hoodie";
+export const QUEUE_NAME = "amazon-group";
 
 /** BullMQ needs its own connections with no per-command retry limit. */
 export const bullConnection = () =>

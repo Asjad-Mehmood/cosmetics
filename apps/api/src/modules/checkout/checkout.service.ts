@@ -5,8 +5,8 @@ import {
   type PaymentOptionDTO,
   type QuoteDTO,
   type ShippingMethodId,
-} from "@hoodie/types";
-import type { CheckoutInput, QuoteInput } from "@hoodie/validation";
+} from "@store/types";
+import type { CheckoutInput, QuoteInput } from "@store/validation";
 import { Prisma } from "@prisma/client";
 import { env } from "../../config/env";
 import { logger } from "../../lib/logger";
@@ -41,7 +41,7 @@ const STORE_DEFAULTS = {
   "tax.inclusive": true,
   "payments.cod.enabled": true,
   "payments.card.enabled": false,
-  "orders.numberPrefix": "US-",
+  "orders.numberPrefix": "AG-",
 };
 
 interface Customer {

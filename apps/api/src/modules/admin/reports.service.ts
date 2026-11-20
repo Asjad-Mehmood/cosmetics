@@ -5,7 +5,7 @@ import type {
   ProductReportRowDTO,
   SalesReportDTO,
   SalesReportRowDTO,
-} from "@hoodie/types";
+} from "@store/types";
 import { Prisma } from "@prisma/client";
 import { dayRange } from "../../lib/dates";
 import { prisma } from "../../lib/prisma";

@@ -1,19 +1,17 @@
 "use client";
 
-import type { ProductDetailDTO, VariantDTO } from "@hoodie/types";
-import { MAX_QTY_PER_ITEM } from "@hoodie/validation";
-import { Badge, Button, cn } from "@hoodie/ui";
+import type { ProductDetailDTO, VariantDTO } from "@store/types";
+import { MAX_QTY_PER_ITEM } from "@store/validation";
+import { Badge, Button, cn } from "@store/ui";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";
-import { FIT_LABEL } from "@/lib/size-guide";
 import { useUi } from "@/store/ui";
 import { NotifyMe } from "./notify-me";
 import { Price } from "./price";
 import { QuantityStepper } from "./quantity-stepper";
-import { SizeGuideDialog } from "./size-guide";
 import { Stars } from "./stars";
 import { WishlistButton } from "./wishlist-button";
 
@@ -121,13 +119,12 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
       <Gallery key={color} images={images} title={product.title} />
 
       <div>
-        <div className="flex flex-wrap gap-2">
-          <Badge>{FIT_LABEL[product.fit]}</Badge>
-          {product.discountPercent > 0 && (
-            <Badge tone="danger">Save {product.discountPercent}%</Badge>
-          )}
-        </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">{product.title}</h1>
+        {product.discountPercent > 0 && (
+          <Badge tone="danger" className="mb-3">
+            Save {product.discountPercent}%
+          </Badge>
+        )}
+        <h1 className="text-3xl font-bold tracking-tight">{product.title}</h1>
         {product.reviewCount > 0 && (
           <a
             href="#reviews"
@@ -147,10 +144,10 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
           className="mt-3 text-xl"
         />
 
-        {/* Colour */}
-        <fieldset className="mt-8">
+        {/* Shade (hidden when the product comes in one shade only) */}
+        <fieldset className={cn("mt-8", product.colors.length < 2 && "hidden")}>
           <legend className="text-sm font-semibold">
-            Colour: <span className="text-muted font-normal">{color}</span>
+            Shade: <span className="text-muted font-normal">{color}</span>
           </legend>
           <div className="mt-3 flex flex-wrap gap-2">
             {product.colors.map((c) => {
@@ -188,19 +185,10 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
 
         {/* Size */}
         <fieldset className="mt-6" aria-describedby={sizeError ? "size-error" : undefined}>
-          <div className="flex items-center justify-between">
-            <legend className="text-sm font-semibold">
-              Size{size && <span className="text-muted font-normal">: {size}</span>}
-            </legend>
-            <SizeGuideDialog
-              fit={product.fit}
-              available={colorVariants
-                .filter((v) => v.stockStatus !== "out_of_stock")
-                .map((v) => v.size)}
-              onPick={selectSize}
-            />
-          </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+          <legend className="text-sm font-semibold">
+            Size{size && <span className="text-muted font-normal">: {size}</span>}
+          </legend>
+          <div className="mt-3 flex flex-wrap gap-2">
             {product.sizes.map((s) => {
               const v = colorVariants.find((x) => x.size === s);
               const unavailable = !v || v.stockStatus === "out_of_stock";
@@ -213,7 +201,7 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
                   aria-pressed={s === size}
                   aria-label={`Size ${s}${unavailable ? ", sold out" : ""}`}
                   className={cn(
-                    "h-11 rounded-lg border text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-30",
+                    "h-11 min-w-16 rounded-lg border px-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-30",
                     s === size ? "border-ink bg-ink text-white" : "border-line hover:border-ink",
                     unavailable && s !== size && "text-muted line-through",
                   )}
@@ -276,7 +264,7 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
         </div>
 
         <ul className="text-muted mt-6 space-y-1 text-sm">
-          <li>✓ Free exchanges within 14 days</li>
+          <li>✓ 100% genuine, checked for expiry</li>
           <li>✓ Cash on Delivery available</li>
         </ul>
       </div>
