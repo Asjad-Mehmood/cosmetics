@@ -8,11 +8,12 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMe } from "@/hooks/use-auth";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { applyApiError } from "@/lib/forms";
 import { type PreparedFile, prepareFile, toBase64 } from "@/lib/prescription-files";
 import { FormMessage } from "../auth/auth-card";
 import { DrawnCheck } from "../motion";
+import { useSite } from "../site-context";
 import { FileIcon, UploadIcon, XIcon } from "../icons";
 
 const detailsSchema = prescriptionSchema.omit({ files: true });
@@ -23,6 +24,7 @@ const mb = (bytes: number) =>
 
 export function PrescriptionForm() {
   const { data: me } = useMe();
+  const { contact } = useSite();
   const inputId = useId();
   const input = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<PreparedFile[]>([]);
@@ -110,7 +112,15 @@ export function PrescriptionForm() {
       setDone(res.data);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setFormError(applyApiError(err, setError));
+      // Our side failed (or the connection dropped): say so, and offer another way.
+      const ours = !(err instanceof ApiError) || err.status >= 500;
+      setFormError(
+        ours
+          ? `We couldn’t send your prescription just now. Please try again in a minute${
+              contact.phone ? `, or call or WhatsApp us on ${contact.phone}` : ""
+            }.`
+          : applyApiError(err, setError),
+      );
     }
   });
 
