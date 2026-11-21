@@ -336,6 +336,25 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 - **Phones:** a swipeable row.
 - **Without GSAP:** a grid of five cards.
 
+**Smooth scrolling with Lenis** (`components/smooth-scroll.tsx`)
+
+- With a mouse or trackpad, the page glides to a stop instead of jumping by notches. Lenis runs on GSAP's clock, so the pinned map, the sideways categories and the parallax all move in step with it.
+- It is off on touch screens (they keep native scrolling), on phones and slow devices, and with Reduce motion.
+- It never scrolls the page behind an open drawer or dialog. Scrollable areas inside the page still scroll on their own.
+- The page's real scroll position is used, so the keyboard, find in page, anchors and the scrollbar all work as normal.
+
+**Map calibration (delivery story)**
+
+- The border is Natural Earth's outline of Pakistan, including the Thar desert corner that was cut off before.
+- The projection is corrected for latitude: a degree of longitude is drawn 0.86 times as wide as a degree of latitude, so the country is no longer stretched sideways. Cities sit at their real coordinates.
+- The map has a dotted texture, a glow around the Lahore store and faint dashed roads under each route.
+- At the last step, a parcel rides along each route from Lahore, and each city lights up with a ring when its parcel arrives. Phones get the same as the map scrolls by.
+- The four steps snap exactly to step 1 to 4, and the last one is reached only when every route has been delivered.
+
+**Promises ticker:** has a pause button (WCAG 2.2.2, moving content must be pausable).
+
+**Phones and slow devices** (`lowPower()` in `lib/gsap.ts`): screens under 768 px, data saver, 2 or fewer CPU cores, or 2 GB or less memory get shorter, smaller entrances, no parallax, no scrubbed zooms, no hero scroll effect and half the confetti.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

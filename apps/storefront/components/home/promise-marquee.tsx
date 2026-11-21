@@ -2,7 +2,7 @@
 
 import { formatMoney } from "@store/types";
 import { cn } from "@store/ui";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loadGsap } from "@/lib/gsap";
 import { BadgeCheckIcon, CashIcon, ClockIcon, RefreshIcon, SparkleIcon, TruckIcon } from "../icons";
 import { freeDeliveryFrom, useSite } from "../site-context";
@@ -15,6 +15,11 @@ import { freeDeliveryFrom, useSite } from "../site-context";
 export function PromiseMarquee() {
   const free = freeDeliveryFrom(useSite().delivery);
   const track = useRef<HTMLDivElement>(null);
+  // Anything that moves on its own needs a pause button (WCAG 2.2.2).
+  const [running, setRunning] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const loopRef = useRef<{ pause: () => void; resume: () => void } | null>(null);
   const items = [
     { icon: BadgeCheckIcon, text: "100% genuine products" },
     { icon: CashIcon, text: "Cash on Delivery" },
@@ -38,9 +43,12 @@ export function PromiseMarquee() {
       // Two copies side by side: moving by one copy's width loops seamlessly.
       el.dataset.running = "";
       const loop = gsap.to(el, { xPercent: -50, ease: "none", duration: 28, repeat: -1 });
+      loopRef.current = loop;
+      setRunning(true);
       let direction = 1;
       const st = ScrollTrigger.create({
         onUpdate: (self) => {
+          if (pausedRef.current) return;
           direction = self.direction;
           const boost = Math.min(Math.abs(self.getVelocity()) / 250, 5);
           // Faster while scrolling, then easing back to the normal speed.
@@ -52,8 +60,10 @@ export function PromiseMarquee() {
           });
         },
       });
-      const slow = () => gsap.to(loop, { timeScale: 0.2 * direction, duration: 0.6 });
-      const resume = () => gsap.to(loop, { timeScale: direction, duration: 0.6 });
+      const slow = () =>
+        !pausedRef.current && gsap.to(loop, { timeScale: 0.2 * direction, duration: 0.6 });
+      const resume = () =>
+        !pausedRef.current && gsap.to(loop, { timeScale: direction, duration: 0.6 });
       el.parentElement?.addEventListener("pointerenter", slow);
       el.parentElement?.addEventListener("pointerleave", resume);
       revert = () => {
@@ -63,6 +73,8 @@ export function PromiseMarquee() {
         el.parentElement?.removeEventListener("pointerleave", resume);
         gsap.set(el, { clearProps: "transform" });
         delete el.dataset.running;
+        loopRef.current = null;
+        setRunning(false);
       };
     });
     return () => {
@@ -97,10 +109,18 @@ export function PromiseMarquee() {
     </ul>
   );
 
+  const togglePause = () => {
+    const next = !paused;
+    pausedRef.current = next;
+    setPaused(next);
+    if (next) loopRef.current?.pause();
+    else loopRef.current?.resume();
+  };
+
   return (
     <section
       aria-label="Our promises"
-      className="bg-brand-700 overflow-hidden px-4 py-4 has-[[data-running]]:px-0 has-[[data-running]]:[mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
+      className="bg-brand-700 relative overflow-hidden px-4 py-4 has-[[data-running]]:px-0 has-[[data-running]]:[mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
     >
       <div
         ref={track}
@@ -109,6 +129,24 @@ export function PromiseMarquee() {
         {row(0)}
         {row(1)}
       </div>
+      {running && (
+        <button
+          type="button"
+          onClick={togglePause}
+          aria-label={paused ? "Play the promises ticker" : "Pause the promises ticker"}
+          className="bg-brand-700 absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-white ring-1 ring-white/30 transition hover:bg-white/15 sm:right-4"
+        >
+          {paused ? (
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden fill="currentColor">
+              <path d="M3 1.5v9l7.5-4.5z" />
+            </svg>
+          ) : (
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden fill="currentColor">
+              <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" />
+            </svg>
+          )}
+        </button>
+      )}
     </section>
   );
 }
