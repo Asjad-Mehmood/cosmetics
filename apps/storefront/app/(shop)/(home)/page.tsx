@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { BuyAgain } from "@/components/home/buy-again";
+import { DeliveryStory } from "@/components/home/delivery-story";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { JustForYou } from "@/components/home/just-for-you";
 import { PromiseMarquee } from "@/components/home/promise-marquee";
@@ -207,6 +208,10 @@ export default async function HomePage() {
           </Reveal>
         </Container>
       </section>
+
+      <Container className="pt-14">
+        <DeliveryStory />
+      </Container>
 
       <Container className="pt-14">
         <ProductRail

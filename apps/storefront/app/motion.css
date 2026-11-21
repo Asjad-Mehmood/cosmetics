@@ -309,3 +309,130 @@ button[data-done]::after {
     display: none !important;
   }
 }
+
+/*
+ * Product photo carry-over (components/photo-transition.tsx): the product
+ * page's photo is the destination; the card's photo is named on click.
+ */
+[data-pdp-photo] {
+  view-transition-name: product-photo;
+}
+::view-transition-group(product-photo) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
+}
+::view-transition-old(product-photo),
+::view-transition-new(product-photo) {
+  /* Keep both pictures filling the box while it changes size (no stretching). */
+  height: 100%;
+  object-fit: cover;
+  overflow: clip;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+}
+
+/*
+ * Delivery story (components/home/delivery-story.tsx). Without GSAP every step
+ * is shown as done and the step cards are hidden. With GSAP on desktop
+ * ([data-live]), [data-step] (0–3) follows the scroll and the CSS below
+ * lights up the current step, ticks off earlier ones and shows its card.
+ */
+.delivery-story .story-dot {
+  border-color: var(--color-accent-500);
+  background: var(--color-accent-50);
+  color: var(--color-accent-700);
+}
+.delivery-story[data-live] .story-step .story-dot {
+  border-color: var(--color-line);
+  background: var(--color-canvas);
+  color: var(--color-muted);
+}
+.delivery-story[data-live] .story-step .story-title {
+  color: var(--color-muted);
+}
+/* Done: earlier steps. */
+.delivery-story[data-step="1"] [data-step-item="0"] .story-dot,
+.delivery-story[data-step="2"] :is([data-step-item="0"], [data-step-item="1"]) .story-dot,
+.delivery-story[data-step="3"]
+  :is([data-step-item="0"], [data-step-item="1"], [data-step-item="2"])
+  .story-dot {
+  border-color: var(--color-accent-500);
+  background: var(--color-accent-50);
+  color: var(--color-accent-700);
+}
+.delivery-story[data-step="1"] [data-step-item="0"] .story-title,
+.delivery-story[data-step="2"] :is([data-step-item="0"], [data-step-item="1"]) .story-title,
+.delivery-story[data-step="3"]
+  :is([data-step-item="0"], [data-step-item="1"], [data-step-item="2"])
+  .story-title {
+  color: var(--color-ink);
+}
+/* Current step. */
+.delivery-story[data-step="0"] [data-step-item="0"],
+.delivery-story[data-step="1"] [data-step-item="1"],
+.delivery-story[data-step="2"] [data-step-item="2"],
+.delivery-story[data-step="3"] [data-step-item="3"] {
+  & .story-dot {
+    border-color: var(--color-accent-500);
+    background: var(--color-accent-500);
+    color: var(--color-brand-700);
+    scale: 1.12;
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-accent-500) 22%, transparent);
+  }
+  & .story-title {
+    color: var(--color-brand-700);
+  }
+}
+
+.story-cards {
+  display: none;
+}
+.delivery-story[data-live] .story-cards {
+  display: block;
+}
+.story-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 0.7rem 1rem;
+  color: var(--color-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+  translate: 0 14px;
+  scale: 0.96;
+  transition:
+    opacity 350ms var(--ease-out),
+    translate 500ms var(--ease-out),
+    scale 500ms var(--ease-out);
+}
+.delivery-story[data-step="0"] [data-card="0"],
+.delivery-story[data-step="1"] [data-card="1"],
+.delivery-story[data-step="2"] [data-card="2"],
+.delivery-story[data-step="3"] [data-card="3"] {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+.story-tick {
+  scale: 0;
+  transition: scale 450ms var(--ease-spring) calc(200ms + var(--d, 0ms));
+}
+.delivery-story[data-step="1"] [data-card="1"] .story-tick {
+  scale: 1;
+}
+.story-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

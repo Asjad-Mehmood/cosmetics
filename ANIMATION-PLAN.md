@@ -303,6 +303,24 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 - axe passes with GSAP running on the home, shop, category and product pages (after scrolling through every scene).
 - Full-motion tests cover GSAP loading, scroll-triggered entrances and the ticker.
 
+## Home page additions
+
+**Photo carry-over** (`components/photo-transition.tsx`)
+
+- Clicking a product card makes its photo grow into the big photo on the product page, using the browser's View Transitions.
+- The card photo is captured first, then the navigation starts. The transition waits up to 0.9 s for the new page's photo, polling with a timer because frames are paused during a view transition.
+- Browsers without View Transitions (and visitors with Reduce motion) get the normal page switch.
+
+**Delivery story** (`components/home/delivery-story.tsx`)
+
+- "How your order reaches you" shows four steps beside a map of Pakistan.
+- **Desktop with GSAP** (1024 px wide and at least 740 px tall): the section stays on screen while you scroll through it. Each step lights up in turn, and a card with its picture appears on the map. At the last step, delivery routes draw out from Lahore to seven cities and each city lights up.
+- **Smaller screens:** the routes draw as the map scrolls by.
+- **Without GSAP:** everything is shown, with the routes drawn.
+- The delivery times come from the store's shipping settings.
+
+**Keyboard fix in the scroll scenes:** elements waiting to animate in are hidden with opacity only, not visibility, so keyboard users can still tab to them. axe passes at several points while scrolling through the story.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

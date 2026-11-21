@@ -39,7 +39,10 @@ export function ProductCard({
     >
       <WishlistButton productId={product.id} title={product.title} className="right-4 top-4" />
       <Link href={`/products/${product.slug}`} className="block flex-1">
-        <div className="bg-surface relative aspect-square overflow-hidden rounded-xl">
+        <div
+          data-card-photo
+          className="bg-surface relative aspect-square overflow-hidden rounded-xl"
+        >
           {image && (
             <Image
               src={image.url}
