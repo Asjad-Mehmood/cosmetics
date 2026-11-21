@@ -539,8 +539,8 @@ export function CheckoutForm() {
           )}
           <ul className="text-muted space-y-1.5 text-xs">
             <li className="flex items-center gap-2">
-              <BadgeCheckIcon width={16} height={16} className="text-brand-700" /> 100% genuine
-              products, checked for expiry
+              <BadgeCheckIcon width={16} height={16} className="text-brand-700" /> Trusted brands,
+              checked for expiry
             </li>
             <li className="flex items-center gap-2">
               <CashIcon width={16} height={16} className="text-brand-700" /> Pay in cash when your

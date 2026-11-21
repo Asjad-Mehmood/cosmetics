@@ -62,7 +62,7 @@ All upgrades keep what already works: server rendering, the in-process API, acce
   - quantity, **Add to cart** and **Buy now** (adds, then goes straight to checkout);
   - wishlist.
 - **Delivery box:** estimated days and charge for each zone, the free-delivery threshold, and Cash on Delivery.
-- **Trust row:** 100% genuine · Checked for expiry · Easy returns.
+- **Trust row:** Trusted brands · Checked for expiry · Easy returns.
 - **Details:** tabs on desktop (Description, Ingredients, How to use, Warnings, Delivery & returns); an accordion on mobile.
 - Reviews with a rating summary and bars.
 - A "You may also like" rail and recently viewed.

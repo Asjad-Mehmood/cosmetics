@@ -204,7 +204,7 @@ function DeliveryInfo() {
 }
 
 const PROMISES = [
-  { icon: BadgeCheckIcon, label: "100% genuine" },
+  { icon: BadgeCheckIcon, label: "Trusted brands" },
   { icon: ClockIcon, label: "Checked for expiry" },
   { icon: RefreshIcon, label: "Easy returns" },
 ];

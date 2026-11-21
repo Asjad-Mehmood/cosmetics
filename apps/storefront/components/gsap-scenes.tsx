@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { loadGsap } from "@/lib/gsap";
+import { loadGsap, lowPower } from "@/lib/gsap";
 
 type Lib = NonNullable<Awaited<ReturnType<typeof loadGsap>>>;
 
@@ -83,6 +83,8 @@ function fresh(selector: string) {
 }
 
 function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
+  // Phones and slow devices: smaller, shorter moves, and no scrubbed effects.
+  const light = lowPower();
   // Pointer listeners to remove when the page changes (GSAP reverts the rest).
   const offs: (() => void)[] = [];
   const on = (
@@ -132,7 +134,7 @@ function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
     const marked = group.querySelectorAll<HTMLElement>(".reveal-item");
     const items = [...(marked.length ? marked : group.children)].filter(belowFold);
     if (!items.length) continue;
-    gsap.set(items, { opacity: 0, y: 60, rotate: 1.5 });
+    gsap.set(items, { opacity: 0, y: light ? 24 : 60, rotate: light ? 0 : 1.5 });
     ScrollTrigger.batch(items, {
       start: "top 92%",
       once: true,
@@ -141,8 +143,8 @@ function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
           opacity: 1,
           y: 0,
           rotate: 0,
-          duration: 0.95,
-          stagger: { each: 0.08, from: "start" },
+          duration: light ? 0.6 : 0.95,
+          stagger: { each: light ? 0.05 : 0.08, from: "start" },
           overwrite: true,
           clearProps: "transform",
         }),
@@ -151,6 +153,7 @@ function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
 
   // Panels: grow into place as they come up the screen (tied to the scroll).
   for (const el of fresh('[data-gsap="zoom"]')) {
+    if (light) continue;
     gsap.fromTo(
       el,
       { scale: 0.92, borderRadius: "3rem" },
@@ -166,7 +169,7 @@ function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
   // Photos that move slower than the page.
   for (const frame of fresh('[data-gsap="parallax"]')) {
     const img = frame.querySelector("img");
-    if (!img) continue;
+    if (!img || light) continue;
     gsap.fromTo(
       img,
       { yPercent: -9, scale: 1.18 },

@@ -259,3 +259,19 @@ test("categories move sideways while the page scrolls down (desktop)", async ({ 
   expect(box.y).toBeGreaterThan(60);
   expect(box.y).toBeLessThan(200);
 });
+
+test("the promises ticker can be paused and played", async ({ page }) => {
+  await page.goto("/");
+  const ticker = page.locator("section[aria-label='Our promises']");
+  const track = ticker.locator("[data-running]");
+  await expect(track).toHaveCount(1);
+  const x = () => track.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+
+  await ticker.getByRole("button", { name: "Pause the promises ticker" }).click();
+  const stopped = await x();
+  await page.waitForTimeout(500);
+  expect(await x()).toBe(stopped);
+
+  await ticker.getByRole("button", { name: "Play the promises ticker" }).click();
+  await expect.poll(x).not.toBe(stopped);
+});

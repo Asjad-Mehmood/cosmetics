@@ -61,3 +61,21 @@ export async function gsapNow(): Promise<Plugins | null> {
   loaded = await p;
   return loaded;
 }
+
+/**
+ * Phones, slow devices and data saver: keep the cheap effects (fades, small
+ * moves) and skip the costly ones (parallax, scrubbed zooms, 3D, big confetti).
+ */
+export function lowPower(): boolean {
+  if (typeof window === "undefined") return false;
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean };
+    deviceMemory?: number;
+  };
+  return (
+    window.matchMedia("(max-width: 767px)").matches ||
+    !!nav.connection?.saveData ||
+    (nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 2) ||
+    (nav.deviceMemory !== undefined && nav.deviceMemory <= 2)
+  );
+}

@@ -5,7 +5,8 @@ import { cn } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { loadGsap } from "@/lib/gsap";
+import { loadGsap, lowPower } from "@/lib/gsap";
+import { whenShown } from "@/lib/preloader";
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 
 const INTERVAL = 6000;
@@ -52,6 +53,8 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
       // One scrubbed value (0 → 1 as the hero leaves the screen) that the CSS
       // turns into the text lifting away and the photo moving slower.
       const ctx = gsap.context(() => {
+        // A scrubbed effect on every scroll frame: skipped on phones and slow devices.
+        if (lowPower()) return;
         gsap.fromTo(
           el,
           { "--hero-lift": 0 },
@@ -83,7 +86,8 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
     );
     if (!ready || !title) return;
     let revert: (() => void) | undefined;
-    void ready.then(({ gsap, SplitText }) => {
+    // Behind the preloader, wait until the page is revealed.
+    void Promise.all([ready, whenShown()]).then(([{ gsap, SplitText }]) => {
       const split = SplitText.create(title, { type: "chars,words", mask: "words" });
       const tween = gsap.from(split.chars, {
         yPercent: 120,

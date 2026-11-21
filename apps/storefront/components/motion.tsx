@@ -3,7 +3,7 @@
 import { formatMoney } from "@store/types";
 import { cn } from "@store/ui";
 import { type CSSProperties, useEffect, useRef } from "react";
-import { loadGsap } from "@/lib/gsap";
+import { loadGsap, lowPower } from "@/lib/gsap";
 import { usePrevious, useTweenedNumber } from "@/lib/motion";
 
 /**
@@ -100,7 +100,7 @@ export function Confetti({ pieces = 90 }: { pieces?: number }) {
     if (!ready || !box) return;
     let kill: (() => void) | undefined;
     void ready.then(({ gsap }) => {
-      const bits = Array.from({ length: pieces }, (_, i) => {
+      const bits = Array.from({ length: lowPower() ? Math.round(pieces / 2) : pieces }, (_, i) => {
         const bit = document.createElement("i");
         const round = i % 4 === 0;
         Object.assign(bit.style, {

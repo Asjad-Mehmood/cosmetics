@@ -1,5 +1,6 @@
 "use client";
 
+import type { gsap } from "gsap";
 import { type CSSProperties, useEffect, useRef } from "react";
 import { loadGsap } from "@/lib/gsap";
 import { BadgeCheckIcon, CashIcon, CheckIcon, ClockIcon, TruckIcon } from "../icons";
@@ -15,56 +16,73 @@ import { useSite } from "../site-context";
  * Without GSAP (or with Reduce motion): everything is shown, routes drawn.
  */
 
-// A simplified outline of Pakistan (longitude, latitude), and the main cities.
+// Pakistan's border (longitude, latitude; Natural Earth, simplified) and the main cities.
 const OUTLINE: [number, number][] = [
-  [61.6, 25.2],
-  [61.8, 26.2],
-  [63.2, 26.6],
-  [63.3, 27.2],
-  [62.8, 27.3],
-  [62.8, 28.3],
-  [61.5, 29.0],
-  [60.9, 29.8],
-  [62.5, 29.4],
-  [64.3, 29.5],
-  [66.3, 29.9],
-  [66.5, 30.9],
-  [67.7, 31.4],
-  [68.8, 31.6],
-  [69.3, 31.9],
-  [69.5, 33.0],
-  [70.3, 33.4],
-  [69.9, 34.0],
-  [71.1, 34.4],
-  [71.5, 35.0],
-  [71.3, 36.0],
-  [72.5, 36.8],
-  [74.0, 37.0],
-  [75.5, 36.9],
-  [77.8, 35.5],
-  [76.5, 34.8],
-  [75.8, 34.5],
-  [74.3, 33.8],
-  [74.6, 32.8],
-  [75.3, 32.3],
-  [74.6, 31.9],
-  [74.5, 31.1],
-  [73.9, 30.4],
-  [73.4, 29.9],
-  [72.9, 29.0],
-  [71.9, 28.0],
-  [70.7, 27.7],
-  [69.6, 27.2],
-  [70.1, 26.5],
-  [70.2, 25.7],
-  [69.5, 25.0],
-  [68.8, 24.3],
-  [68.2, 23.7],
-  [67.4, 24.8],
-  [66.6, 25.4],
-  [65.0, 25.3],
-  [64.0, 25.3],
-  [62.5, 25.1],
+  [77.84, 35.49],
+  [76.87, 34.65],
+  [75.76, 34.5],
+  [74.24, 34.75],
+  [73.75, 34.32],
+  [74.1, 33.44],
+  [74.45, 32.76],
+  [75.26, 32.27],
+  [74.41, 31.69],
+  [74.42, 30.98],
+  [73.45, 29.98],
+  [72.82, 28.96],
+  [71.78, 27.91],
+  [70.62, 27.99],
+  [69.51, 26.94],
+  [70.17, 26.49],
+  [70.28, 25.72],
+  [70.84, 25.22],
+  [71.04, 24.36],
+  [68.84, 24.36],
+  [68.18, 23.69],
+  [67.44, 23.94],
+  [67.15, 24.66],
+  [66.37, 25.43],
+  [64.53, 25.24],
+  [62.91, 25.22],
+  [61.5, 25.08],
+  [61.87, 26.24],
+  [63.32, 26.76],
+  [63.23, 27.22],
+  [62.76, 27.38],
+  [62.73, 28.26],
+  [61.77, 28.7],
+  [61.37, 29.3],
+  [60.87, 29.83],
+  [62.55, 29.32],
+  [63.55, 29.47],
+  [64.15, 29.34],
+  [64.35, 29.56],
+  [65.05, 29.47],
+  [66.35, 29.89],
+  [66.38, 30.74],
+  [66.94, 31.3],
+  [67.68, 31.3],
+  [67.79, 31.58],
+  [68.56, 31.71],
+  [68.93, 31.62],
+  [69.32, 31.9],
+  [69.26, 32.5],
+  [69.69, 33.11],
+  [70.32, 33.36],
+  [69.93, 34.02],
+  [70.88, 33.99],
+  [71.16, 34.35],
+  [71.12, 34.73],
+  [71.61, 35.15],
+  [71.5, 35.65],
+  [71.26, 36.07],
+  [71.85, 36.51],
+  [72.92, 36.72],
+  [74.07, 36.84],
+  [74.58, 37.02],
+  [75.16, 37.13],
+  [75.9, 36.67],
+  [76.19, 35.9],
 ];
 const HUB = { name: "Lahore", lon: 74.34, lat: 31.55 };
 // `left`: the label goes on the left of the dot (so labels don't overlap).
@@ -77,21 +95,25 @@ const CITIES = [
   { name: "Hyderabad", lon: 68.37, lat: 25.4, left: false },
   { name: "Karachi", lon: 67.0, lat: 24.86, left: true },
 ];
-const px = (lon: number) => (lon - 60.3) * 20;
-const py = (lat: number) => (37.4 - lat) * 20;
+// Equirectangular projection centred on 30.5°N: a degree of longitude is
+// cos(30.5°) ≈ 0.86 of a degree of latitude, so the country isn't stretched.
+const SCALE = 20;
+const px = (lon: number) => (lon - 59.6) * SCALE * 0.86;
+const py = (lat: number) => (38 - lat) * SCALE;
+const VIEW = `0 0 ${Math.ceil(px(78.6))} ${Math.ceil(py(23))}`;
 const OUTLINE_PATH = `M${OUTLINE.map(([lon, lat]) => `${px(lon).toFixed(1)},${py(lat).toFixed(1)}`).join("L")}Z`;
-/** A gently curved route from the hub to a city. */
+/** A gently curved route from the hub to a city (bending more for longer trips). */
 const route = (c: { lon: number; lat: number }) => {
   const [x1, y1, x2, y2] = [px(HUB.lon), py(HUB.lat), px(c.lon), py(c.lat)];
-  const mx = (x1 + x2) / 2 + (y2 - y1) * 0.18;
-  const my = (y1 + y2) / 2 - (x2 - x1) * 0.18;
+  const mx = (x1 + x2) / 2 + (y2 - y1) * 0.2;
+  const my = (y1 + y2) / 2 - (x2 - x1) * 0.2;
   return `M${x1.toFixed(1)},${y1.toFixed(1)}Q${mx.toFixed(1)},${my.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
 };
 
 const STEPS = [
   {
     icon: BadgeCheckIcon,
-    title: "100% genuine stock",
+    title: "Sourced from trusted brands",
     body: "Every product comes from the brand or an authorised distributor, never the grey market.",
   },
   {
@@ -127,23 +149,61 @@ export function DeliveryStory() {
       const routes = el.querySelectorAll<SVGPathElement>("[data-route]");
       const cities = el.querySelectorAll<SVGGElement>("[data-city]");
 
-      // Desktop: pinned, scroll-scrubbed story.
+      const parcels = el.querySelectorAll<SVGGElement>("[data-parcel]");
+      const rings = el.querySelectorAll<SVGCircleElement>("[data-ring]");
+      /** Route i draws out from Lahore, a parcel rides along it, and the city lights up. */
+      const deliver = (tl: gsap.core.Timeline, i: number, at: number, length: number) => {
+        const path = routes[i]!;
+        tl.to(path, { strokeDashoffset: 0, duration: length }, at)
+          .set(parcels[i]!, { autoAlpha: 1 }, at)
+          .to(
+            parcels[i]!,
+            {
+              motionPath: { path, align: path, alignOrigin: [0.5, 0.5], autoRotate: true },
+              duration: length,
+            },
+            at,
+          )
+          .to(parcels[i]!, { autoAlpha: 0, duration: length * 0.15 }, at + length * 0.9)
+          .to(cities[i]!, { autoAlpha: 1, scale: 1, duration: length * 0.3 }, at + length * 0.85)
+          .fromTo(
+            rings[i]!,
+            { scale: 0.4, autoAlpha: 0.9 },
+            { scale: 3, autoAlpha: 0, duration: length * 0.6, immediateRender: false },
+            at + length * 0.85,
+          );
+      };
+      const start = () => {
+        gsap.set(routes, { strokeDashoffset: 1 });
+        gsap.set(parcels, { autoAlpha: 0 });
+        gsap.set(rings, { autoAlpha: 0, transformOrigin: "center" });
+        gsap.set(cities, { autoAlpha: 0.35 });
+        // Each city grows from its own dot (not the middle of dot + label).
+        cities.forEach((c) => gsap.set(c, { scale: 0.6, svgOrigin: c.dataset.origin }));
+      };
+
+      // Desktop: pinned, scroll-scrubbed story. Each step snaps into place, the
+      // last one being "delivered", when every route has reached its city.
       mm.add("(min-width: 1024px) and (min-height: 740px)", () => {
         el.dataset.live = "";
         el.dataset.step = "0";
-        gsap.set(routes, { strokeDashoffset: 1 });
-        gsap.set(cities, { autoAlpha: 0.35, scale: 0.6, transformOrigin: "center" });
+        start();
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: el,
             start: "top top+=128",
-            end: "+=2600",
+            end: "+=1800",
             pin: true,
             scrub: 0.6,
-            snap: { snapTo: [0, 0.25, 0.5, 0.75, 1], duration: 0.5, ease: "power1.inOut" },
+            snap: {
+              snapTo: [0, 1 / 3, 2 / 3, 1],
+              duration: 0.6,
+              delay: 0.05,
+              ease: "power2.inOut",
+            },
             onUpdate: (self) => {
-              el.dataset.step = String(Math.min(3, Math.floor(self.progress * 4.0001)));
+              el.dataset.step = String(Math.round(self.progress * 3));
             },
           },
         });
@@ -153,30 +213,27 @@ export function DeliveryStory() {
           { scaleY: 1, duration: 1 },
           0,
         );
-        // The last quarter: routes draw out one after another, each city lights up.
-        routes.forEach((r, i) => {
-          tl.to(r, { strokeDashoffset: 0, duration: 0.1 }, 0.72 + i * 0.035);
-          tl.to(cities[i]!, { autoAlpha: 1, scale: 1, duration: 0.04 }, 0.8 + i * 0.035);
-        });
+        // From "packed" to "delivered": parcels leave one after another.
+        routes.forEach((_, i) => deliver(tl, i, 0.6 + i * 0.045, 0.12));
         return () => {
           delete el.dataset.live;
           delete el.dataset.step;
         };
       });
 
-      // Phones and tablets: the routes draw as the map scrolls by.
+      // Phones and tablets: the parcels travel as the map scrolls by.
       mm.add("(max-width: 1023px), (max-height: 739px)", () => {
-        gsap.set(routes, { strokeDashoffset: 1 });
-        gsap.set(cities, { autoAlpha: 0.35 });
-        const map = el.querySelector("[data-map]");
+        start();
         const tl = gsap.timeline({
           defaults: { ease: "none" },
-          scrollTrigger: { trigger: map, start: "top 80%", end: "bottom 45%", scrub: 0.6 },
+          scrollTrigger: {
+            trigger: el.querySelector("[data-map]"),
+            start: "top 80%",
+            end: "bottom 45%",
+            scrub: 0.6,
+          },
         });
-        routes.forEach((r, i) => {
-          tl.to(r, { strokeDashoffset: 0, duration: 0.3 }, i * 0.12);
-          tl.to(cities[i]!, { autoAlpha: 1, duration: 0.1 }, i * 0.12 + 0.25);
-        });
+        routes.forEach((_, i) => deliver(tl, i, i * 0.12, 0.3));
       });
 
       revert = () => mm.revert();
@@ -241,43 +298,102 @@ export function DeliveryStory() {
           className="bg-brand-700 shadow-(--shadow-pop) relative overflow-hidden rounded-3xl p-4 text-white sm:p-6"
         >
           <svg
-            viewBox="0 0 360 290"
-            className="h-auto w-full"
+            viewBox={VIEW}
+            className="mx-auto h-auto w-full max-w-[34rem]"
             role="img"
             aria-label="Map of Pakistan with delivery routes from our Lahore store to cities across the country"
           >
+            <defs>
+              <pattern id="story-dots" width="9" height="9" patternUnits="userSpaceOnUse">
+                <circle cx="1.5" cy="1.5" r="0.9" fill="#ffffff" />
+              </pattern>
+              <radialGradient id="story-glow">
+                <stop offset="0" stopColor="var(--color-accent-500)" stopOpacity="0.45" />
+                <stop offset="1" stopColor="var(--color-accent-500)" stopOpacity="0" />
+              </radialGradient>
+              <clipPath id="story-land">
+                <path d={OUTLINE_PATH} />
+              </clipPath>
+            </defs>
+            {/* The country: a soft fill with a dotted texture, and its border. */}
+            <path d={OUTLINE_PATH} fill="rgb(255 255 255 / 0.07)" />
+            <rect
+              width="100%"
+              height="100%"
+              fill="url(#story-dots)"
+              opacity="0.16"
+              clipPath="url(#story-land)"
+            />
             <path
               d={OUTLINE_PATH}
-              fill="rgb(255 255 255 / 0.06)"
-              stroke="rgb(255 255 255 / 0.25)"
-              strokeWidth="1.2"
+              fill="none"
+              stroke="rgb(255 255 255 / 0.35)"
+              strokeWidth="1.1"
               strokeLinejoin="round"
             />
+            <circle cx={px(HUB.lon)} cy={py(HUB.lat)} r="70" fill="url(#story-glow)" />
             {CITIES.map((c) => (
-              <path
-                key={c.name}
-                data-route
-                d={route(c)}
-                pathLength={1}
-                fill="none"
-                stroke="var(--color-accent-500)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeDasharray="1"
-                strokeDashoffset="0"
-              />
+              <g key={c.name}>
+                {/* The road, faint, then the route drawn over it. */}
+                <path
+                  d={route(c)}
+                  fill="none"
+                  stroke="rgb(255 255 255 / 0.16)"
+                  strokeWidth="1"
+                  strokeDasharray="2 3"
+                />
+                <path
+                  data-route
+                  d={route(c)}
+                  pathLength={1}
+                  fill="none"
+                  stroke="var(--color-accent-500)"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeDasharray="1"
+                  strokeDashoffset="0"
+                />
+              </g>
             ))}
             {CITIES.map((c) => (
-              <g key={c.name} data-city>
-                <circle cx={px(c.lon)} cy={py(c.lat)} r="3.6" fill="#ffffff" />
-                <text
-                  x={px(c.lon) + (c.left ? -7 : 7)}
-                  y={py(c.lat) + 3.5}
-                  textAnchor={c.left ? "end" : "start"}
-                  className="fill-white text-[10px] font-semibold"
-                >
-                  {c.name}
-                </text>
+              <g key={c.name}>
+                <circle
+                  data-ring
+                  cx={px(c.lon)}
+                  cy={py(c.lat)}
+                  r="4"
+                  fill="none"
+                  stroke="var(--color-accent-500)"
+                  strokeWidth="1.2"
+                  opacity="0"
+                />
+                <g data-city data-origin={`${px(c.lon)} ${py(c.lat)}`}>
+                  <circle cx={px(c.lon)} cy={py(c.lat)} r="3.4" fill="#ffffff" />
+                  <text
+                    x={px(c.lon) + (c.left ? -7 : 7)}
+                    y={py(c.lat) + 3.5}
+                    textAnchor={c.left ? "end" : "start"}
+                    className="fill-white text-[10px] font-semibold"
+                  >
+                    {c.name}
+                  </text>
+                </g>
+              </g>
+            ))}
+            {/* Parcels, one per route (only seen while travelling). */}
+            {CITIES.map((c) => (
+              <g key={c.name} data-parcel opacity="0">
+                <rect
+                  x="-5"
+                  y="-4"
+                  width="10"
+                  height="8"
+                  rx="1.5"
+                  fill="var(--color-accent-500)"
+                  stroke="#fff"
+                  strokeWidth="1.2"
+                />
+                <path d="M-5 -1h10" stroke="#fff" strokeWidth="0.8" />
               </g>
             ))}
             {/* Our store */}
@@ -287,7 +403,7 @@ export function DeliveryStory() {
                 cy={py(HUB.lat)}
                 r="12"
                 fill="var(--color-accent-500)"
-                opacity="0.25"
+                opacity="0.3"
                 className="story-ping"
               />
               <circle
@@ -300,10 +416,17 @@ export function DeliveryStory() {
               />
               <text
                 x={px(HUB.lon) + 10}
-                y={py(HUB.lat) + 14}
+                y={py(HUB.lat) + 15}
                 className="fill-white text-[11px] font-bold"
               >
                 Lahore
+              </text>
+              <text
+                x={px(HUB.lon) + 10}
+                y={py(HUB.lat) + 26}
+                className="fill-white/70 text-[8px] font-semibold uppercase tracking-wider"
+              >
+                Our store
               </text>
             </g>
           </svg>

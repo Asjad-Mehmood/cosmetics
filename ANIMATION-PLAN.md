@@ -336,6 +336,33 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 - **Phones:** a swipeable row.
 - **Without GSAP:** a grid of five cards.
 
+**Preloader** (`components/preloader.tsx`, `lib/preloader.ts`)
+
+- A white cover with the logo and a thin orange bar shows from the first paint. It lifts (slides up) once everything the first screen needs is ready: GSAP and its plugins, every scroll scene set up, the delivery map, the fonts and the photos on screen. Then the hero text and the page's entrance animations play.
+- While it shows, the page's CSS animations wait, so they play as the page is revealed, not behind the cover.
+- It shows for at least 0.45 s (so a fast load doesn't flash) and at most 5 s (slow connections still see the shop). If the app fails to start, it lifts itself after 6 s.
+- It is skipped with Reduce motion and without JavaScript, and it only runs on a full page load, not when moving between pages.
+- The delivery story now sits near the end of the home page, just above the newsletter, and its pinned scroll is shorter (1,800 px).
+
+**Smooth scrolling with Lenis** (`components/smooth-scroll.tsx`)
+
+- With a mouse or trackpad, the page glides to a stop instead of jumping by notches. Lenis runs on GSAP's clock, so the pinned map, the sideways categories and the parallax all move in step with it.
+- It is off on touch screens (they keep native scrolling), on phones and slow devices, and with Reduce motion.
+- It never scrolls the page behind an open drawer or dialog. Scrollable areas inside the page still scroll on their own.
+- The page's real scroll position is used, so the keyboard, find in page, anchors and the scrollbar all work as normal.
+
+**Map calibration (delivery story)**
+
+- The border is Natural Earth's outline of Pakistan, including the Thar desert corner that was cut off before.
+- The projection is corrected for latitude: a degree of longitude is drawn 0.86 times as wide as a degree of latitude, so the country is no longer stretched sideways. Cities sit at their real coordinates.
+- The map has a dotted texture, a glow around the Lahore store and faint dashed roads under each route.
+- At the last step, a parcel rides along each route from Lahore, and each city lights up with a ring when its parcel arrives. Phones get the same as the map scrolls by.
+- The four steps snap exactly to step 1 to 4, and the last one is reached only when every route has been delivered.
+
+**Promises ticker:** has a pause button (WCAG 2.2.2, moving content must be pausable).
+
+**Phones and slow devices** (`lowPower()` in `lib/gsap.ts`): screens under 768 px, data saver, 2 or fewer CPU cores, or 2 GB or less memory get shorter, smaller entrances, no parallax, no scrubbed zooms, no hero scroll effect and half the confetti.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

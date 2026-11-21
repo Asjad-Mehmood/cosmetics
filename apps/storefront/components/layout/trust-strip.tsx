@@ -4,7 +4,7 @@ import { BadgeCheckIcon, CashIcon, RefreshIcon, TruckIcon } from "../icons";
 export const TRUST_POINTS = [
   {
     icon: BadgeCheckIcon,
-    title: "100% genuine",
+    title: "Trusted brands",
     body: "From brands and authorised distributors only",
   },
   { icon: CashIcon, title: "Cash on Delivery", body: "Pay when your parcel arrives" },
