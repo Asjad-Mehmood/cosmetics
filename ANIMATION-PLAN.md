@@ -321,6 +321,21 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 
 **Keyboard fix in the scroll scenes:** elements waiting to animate in are hidden with opacity only, not visibility, so keyboard users can still tab to them. axe passes at several points while scrolling through the story.
 
+**Flash sale** (`components/home/flash-sale.tsx`, admin: Content → Flash sale)
+
+- Staff set a title, an optional subtitle and an end time, and switch it on. The setting is stored under `flashSale` in `Setting`, and `/cms/home` includes it while it is running.
+- The home page then shows a navy panel with a flip-digit countdown (days, hours, minutes and seconds) and a bar that drains over the last 24 hours, above the products that are on sale. The normal "Offers" row is replaced while the sale runs.
+- At zero, it turns back into the "Offers" row without a reload.
+- The countdown is worked out in the browser, after the page loads, and is a `role="timer"` labelled with the end time.
+- There is deliberately no "% claimed" stock bar: the store never reveals stock levels.
+
+**Sideways categories** (`components/home/category-showcase.tsx`)
+
+- "Shop by category" is now a row of tall photo cards.
+- **Desktop with GSAP:** the section stays on screen and scrolling down moves the cards sideways, each leaning slightly in 3D in the direction of travel. Tabbing to a card that is off to the side scrolls the page to it.
+- **Phones:** a swipeable row.
+- **Without GSAP:** a grid of five cards.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

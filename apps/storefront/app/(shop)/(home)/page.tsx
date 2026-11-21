@@ -5,6 +5,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { BuyAgain } from "@/components/home/buy-again";
 import { DeliveryStory } from "@/components/home/delivery-story";
+import { CategoryShowcase } from "@/components/home/category-showcase";
+import { FlashSale } from "@/components/home/flash-sale";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { JustForYou } from "@/components/home/just-for-you";
 import { PromiseMarquee } from "@/components/home/promise-marquee";
@@ -110,60 +112,16 @@ export default async function HomePage() {
         <VoucherStrip title="Collect vouchers" />
       </Container>
 
+      {home?.flashSale && offers.data.length > 0 && (
+        <Container className="pt-10">
+          <FlashSale sale={home.flashSale} products={offers.data} />
+        </Container>
+      )}
+
       {categories && categories.length > 0 && (
-        <section aria-labelledby="categories-heading">
-          <Container className="pt-12">
-            <div className="mb-6 flex items-end justify-between">
-              <h2
-                id="categories-heading"
-                data-gsap="split"
-                className="text-2xl font-bold tracking-tight"
-              >
-                Shop by category
-              </h2>
-              <Link href="/shop" className="text-brand-700 text-sm font-semibold hover:underline">
-                All products
-              </Link>
-            </div>
-            <Reveal
-              as="ul"
-              stagger
-              className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-6 sm:px-0"
-            >
-              {categories.map((c, i) => (
-                <li
-                  key={c.id}
-                  style={{ "--i": i } as CSSProperties}
-                  className="reveal-item w-24 shrink-0 sm:w-auto"
-                >
-                  <Link
-                    href={`/categories/${c.slug}`}
-                    className="group block text-center transition-transform active:scale-95"
-                  >
-                    <span className="bg-blush ring-line group-hover:ring-brand-600 group-hover:shadow-(--shadow-card) relative mx-auto block aspect-square w-full overflow-hidden rounded-full ring-1 transition duration-300 group-hover:-translate-y-1 group-hover:ring-2 sm:w-36">
-                      {c.imageUrl && (
-                        <Image
-                          src={c.imageUrl}
-                          alt=""
-                          fill
-                          sizes="(min-width: 640px) 144px, 96px"
-                          priority={i < 3}
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      )}
-                    </span>
-                    <span className="mt-3 block text-sm font-semibold group-hover:underline">
-                      {c.name}
-                    </span>
-                    <span className="text-muted block text-xs">
-                      {c.productCount} {c.productCount === 1 ? "product" : "products"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </Reveal>
-          </Container>
-        </section>
+        <Container className="pt-12">
+          <CategoryShowcase categories={categories} />
+        </Container>
       )}
 
       <Container>
@@ -285,7 +243,7 @@ export default async function HomePage() {
         </Container>
       )}
 
-      {offers.data.length > 0 && (
+      {offers.data.length > 0 && !home?.flashSale && (
         <Container className="pt-14">
           <ProductRail
             title="Offers"

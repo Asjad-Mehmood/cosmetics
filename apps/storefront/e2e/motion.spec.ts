@@ -239,3 +239,23 @@ test("the delivery story stays on screen and lights up each step as you scroll",
     .evaluateAll((paths) => paths.map((p) => parseFloat(getComputedStyle(p).strokeDashoffset)));
   expect(drawn.every((o) => o < 0.05)).toBe(true);
 });
+
+test("categories move sideways while the page scrolls down (desktop)", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  const showcase = page.locator(".category-showcase");
+  await expect(showcase).toHaveAttribute("data-live", "");
+  const row = showcase.locator("[data-track] > ul");
+  const x = () => row.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+  const top = await showcase.evaluate((el) => el.getBoundingClientRect().top + scrollY - 128);
+  await page.evaluate((y) => scrollTo(0, y), top);
+  await page.waitForTimeout(700);
+  const start = await x();
+  await page.evaluate((y) => scrollTo(0, y), top + 600);
+  await expect.poll(x, { timeout: 4000 }).toBeLessThan(start - 200);
+  // The section stayed on screen meanwhile.
+  const box = (await showcase.boundingBox())!;
+  expect(box.y).toBeGreaterThan(60);
+  expect(box.y).toBeLessThan(200);
+});
