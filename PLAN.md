@@ -612,3 +612,11 @@ Each phase is one pull request (or two for the large ones), merged only with CI 
 - **Privacy:** files are stored in their own table, never public. Only staff can open them, they are never cached, and every view is in the audit log. The file type is checked from its bytes (photos and PDFs only), up to 2 MB each and 3 MB together.
 - **API:** `POST /prescriptions` (guests and customers, rate-limited), `GET /prescriptions` (mine), `GET|PATCH|DELETE /admin/prescriptions…`. Migration `20261121120000_prescriptions` only adds two tables.
 - **Next step (not built yet):** marking products as "prescription required" and asking for the prescription at checkout for those products.
+
+## Detailed order tracking
+
+- Orders now go through: Confirmed → Being prepared → **Packed** → Shipped → **In transit** → **Out for delivery** → Delivered. Migration `20261121130000_order_tracking_statuses` only adds the three new values; existing orders are unchanged.
+- Staff can skip steps the courier didn't report: being prepared can go straight to shipped, and shipped or in transit straight to delivered. Packed orders can still be cancelled (stock goes back); once shipped they can't.
+- The customer's tracker (order page and Track order) shows six steps with the date and time of each, vertical on phones and horizontal on wider screens. "In transit" shows on the Shipped step.
+- When an order goes out for delivery, the customer is emailed that it arrives today and, for Cash on Delivery, how much cash to keep ready.
+- Admin: the usual next step is the main button and the others are secondary. "To fulfil" includes packed orders, and the "With courier" filter shows shipped, in-transit and out-for-delivery orders.

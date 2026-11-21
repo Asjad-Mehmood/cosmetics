@@ -29,7 +29,9 @@ export async function sendDailyDigest(now = new Date()): Promise<number> {
   const [totals, top, toFulfil, returns, reviews, messages, low] = await Promise.all([
     totalsBetween(start, end, zone),
     productReport({ from: yesterday, to: yesterday }, 3),
-    prisma.order.count({ where: { status: { in: ["CONFIRMED", "PAID", "PROCESSING"] } } }),
+    prisma.order.count({
+      where: { status: { in: ["CONFIRMED", "PAID", "PROCESSING", "PACKED"] } },
+    }),
     prisma.returnRequest.count({ where: { status: "REQUESTED" } }),
     prisma.review.count({ where: { isApproved: false } }),
     prisma.contactMessage.count({ where: { status: "NEW" } }),

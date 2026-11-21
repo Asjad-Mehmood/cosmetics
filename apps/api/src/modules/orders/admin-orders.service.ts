@@ -16,7 +16,7 @@ import { CANCELLABLE, NEXT } from "./lifecycle";
 import { orderInclude, toOrderDTO } from "./order.mapper";
 
 /** Statuses where the items have left (or are about to leave) the shelf as a sale. */
-export const UNSHIPPED_SALE: OrderStatus[] = ["CONFIRMED", "PAID", "PROCESSING"];
+export const UNSHIPPED_SALE: OrderStatus[] = ["CONFIRMED", "PAID", "PROCESSING", "PACKED"];
 
 const listInclude = {
   items: { select: { quantity: true } },

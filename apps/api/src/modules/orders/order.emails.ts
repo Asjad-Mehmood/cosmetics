@@ -70,6 +70,22 @@ export function shippedEmail(o: FullOrder): Mail {
   };
 }
 
+export function outForDeliveryEmail(o: FullOrder): Mail {
+  const url = orderLink(o.orderNumber, o.id);
+  const cod = o.paymentMethod === "COD";
+  const due = cod ? `Please keep ${formatMoney(o.grandTotal)} in cash ready for the rider.` : "";
+  return {
+    to: o.email,
+    subject: `Order ${o.orderNumber} is out for delivery`,
+    text: `Order ${o.orderNumber} is out for delivery and should reach you today.\n${due}\n\nTrack it: ${url}\n`,
+    html: emailLayout(
+      "Arriving today",
+      `<p>Order <strong>${esc(o.orderNumber)}</strong> is out for delivery and should reach you today.</p>${due ? `<p><strong>${esc(due)}</strong></p>` : ""}`,
+      { label: "Track your order", url },
+    ),
+  };
+}
+
 export function deliveredEmail(o: FullOrder): Mail {
   const url = orderLink(o.orderNumber, o.id);
   return {

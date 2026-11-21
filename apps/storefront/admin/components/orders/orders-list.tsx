@@ -26,9 +26,9 @@ import { formatDateTime, formatMoney } from "@/admin/lib/format";
 
 const STATUS_TABS = [
   { value: "", label: "All" },
-  { value: "CONFIRMED,PAID,PROCESSING", label: "To fulfil" },
+  { value: "CONFIRMED,PAID,PROCESSING,PACKED", label: "To fulfil" },
   { value: "PENDING_PAYMENT", label: "Awaiting payment" },
-  { value: "SHIPPED", label: "Shipped" },
+  { value: "SHIPPED,IN_TRANSIT,OUT_FOR_DELIVERY", label: "With courier" },
   { value: "DELIVERED", label: "Delivered" },
   { value: "CANCELLED", label: "Cancelled" },
   { value: "REFUNDED", label: "Refunded" },

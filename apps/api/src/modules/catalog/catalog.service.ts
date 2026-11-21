@@ -147,7 +147,7 @@ export async function relatedProducts(slug: string, limit = 8) {
     JOIN "Order" o ON o.id = mine."orderId"
     JOIN "Product" p ON p.id = other."productId" AND p.status = 'ACTIVE'
     WHERE mine."productId" = ${product.id}
-      AND o.status IN ('CONFIRMED','PAID','PROCESSING','SHIPPED','DELIVERED')
+      AND o.status IN ('CONFIRMED','PAID','PROCESSING','PACKED','SHIPPED','IN_TRANSIT','OUT_FOR_DELIVERY','DELIVERED')
     GROUP BY other."productId"
     ORDER BY count(DISTINCT o.id) DESC
     LIMIT ${limit}`;

@@ -15,6 +15,9 @@ test("fulfils a Cash on Delivery order and records a cash refund", async ({ page
   await page.getByRole("button", { name: "Start preparing" }).click();
   await expect(page.getByRole("heading", { name: /Order .* Being prepared/ })).toBeVisible();
 
+  await page.getByRole("button", { name: "Mark as packed" }).click();
+  await expect(page.getByRole("heading", { name: /Order .* Packed/ })).toBeVisible();
+
   await page.getByRole("button", { name: "Mark as shipped" }).click();
   const ship = page.getByRole("dialog", { name: `Ship order ${order.number}` });
   await ship.getByLabel("Courier").fill("TCS");
@@ -23,6 +26,9 @@ test("fulfils a Cash on Delivery order and records a cash refund", async ({ page
   await expect(ship).toBeHidden();
   await expect(page.getByRole("heading", { name: /Shipped/ })).toBeVisible();
   await expect(page.getByText("TCS-778899")).toBeVisible();
+
+  await page.getByRole("button", { name: "Out for delivery" }).click();
+  await expect(page.getByRole("heading", { name: /Out for delivery/ })).toBeVisible();
 
   await page.getByRole("button", { name: "Mark as delivered" }).click();
   await expect(page.getByRole("heading", { name: /Delivered/ })).toBeVisible();

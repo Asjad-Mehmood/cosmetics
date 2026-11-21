@@ -131,7 +131,7 @@ export function Dashboard() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <Link
-              href="/orders?status=CONFIRMED,PAID,PROCESSING"
+              href="/orders?status=CONFIRMED,PAID,PROCESSING,PACKED"
               className="border-line bg-canvas hover:border-ink rounded-(--radius-card) border p-4"
             >
               <p className="text-muted text-sm">To fulfil</p>

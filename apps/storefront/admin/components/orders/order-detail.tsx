@@ -36,7 +36,10 @@ function useOrderMutation<T>(number: string, fn: (body: T) => Promise<Order>) {
 
 const STEP_LABEL: Partial<Record<OrderStatus, string>> = {
   PROCESSING: "Start preparing",
+  PACKED: "Mark as packed",
   SHIPPED: "Mark as shipped",
+  IN_TRANSIT: "Mark in transit",
+  OUT_FOR_DELIVERY: "Out for delivery",
   DELIVERED: "Mark as delivered",
 };
 
@@ -87,9 +90,11 @@ function FulfilmentCard({ order }: { order: Order }) {
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {nextStatuses.map((status) => (
+          {nextStatuses.map((status, i) => (
             <Button
               key={status}
+              // The usual next step stands out; skipping ahead is still possible.
+              variant={i === 0 ? "primary" : "outline"}
               loading={move.isPending && move.variables?.status === status}
               disabled={move.isPending}
               onClick={() => (status === "SHIPPED" ? setShipOpen(true) : go(status))}

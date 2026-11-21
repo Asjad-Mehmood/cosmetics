@@ -118,6 +118,45 @@ describe("order detail, notes and fulfilment", () => {
     expect(log?.diff).toMatchObject({ number: cod.number, from: "PROCESSING", to: "SHIPPED" });
   });
 
+  it("tracks packed, in transit and out for delivery, and emails when it's out for delivery", async () => {
+    const { agent } = await signedInAgent("SUPPORT");
+    const cod = await placeCodOrder();
+    const move = (status: string) =>
+      agent.patch(`/api/v1/admin/orders/${cod.number}/status`).send({ status });
+
+    expect((await move("PROCESSING")).status).toBe(200);
+    const packed = await move("PACKED");
+    expect(packed.body.data.status).toBe("PACKED");
+    expect(packed.body.data.actions.nextStatuses).toEqual(["SHIPPED"]);
+    expect(packed.body.data.actions.canCancel).toBe(true);
+    // Packed orders can't jump straight to delivered.
+    expect((await move("DELIVERED")).status).toBe(409);
+
+    expect((await move("SHIPPED")).status).toBe(200);
+    const transit = await move("IN_TRANSIT");
+    expect(transit.body.data.actions.nextStatuses).toEqual(["OUT_FOR_DELIVERY", "DELIVERED"]);
+    expect(transit.body.data.actions.canCancel).toBe(false);
+
+    testOutbox.length = 0;
+    expect((await move("OUT_FOR_DELIVERY")).status).toBe(200);
+    await new Promise((r) => setTimeout(r, 50));
+    const mail = testOutbox.find((m) => m.to === cod.email);
+    expect(mail?.subject).toContain("out for delivery");
+    expect(mail?.text).toContain("in cash ready");
+
+    const delivered = await move("DELIVERED");
+    expect(delivered.body.data.status).toBe("DELIVERED");
+    expect(delivered.body.data.timeline.map((e: { status: string }) => e.status)).toEqual([
+      "CONFIRMED",
+      "PROCESSING",
+      "PACKED",
+      "SHIPPED",
+      "IN_TRANSIT",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+    ]);
+  });
+
   it("serves invoice and packing slip PDFs", async () => {
     const { agent } = await signedInAgent("SUPPORT");
     const cod = await placeCodOrder();
