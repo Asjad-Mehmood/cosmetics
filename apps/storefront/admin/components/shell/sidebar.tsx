@@ -9,6 +9,7 @@ import { activeItem, BUILT_PHASE, navForRole, type NavItem } from "@/admin/lib/n
 const BADGE_SR: Record<NonNullable<NavItem["badge"]>, string> = {
   toFulfil: " to fulfil)",
   newMessages: " new)",
+  newPrescriptions: " waiting for the pharmacist)",
   lowStock: " low on stock)",
   pendingReturns: " waiting for a decision)",
   pendingReviews: " to moderate)",

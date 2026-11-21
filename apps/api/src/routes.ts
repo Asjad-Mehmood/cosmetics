@@ -13,6 +13,10 @@ import {
 import { adminCouponsRouter, adminShippingRouter } from "./modules/admin/marketing.routes";
 import { adminMessagesRouter } from "./modules/admin/messages.routes";
 import {
+  adminPrescriptionsRouter,
+  prescriptionsRouter,
+} from "./modules/prescriptions/prescriptions.routes";
+import {
   adminAuditRouter,
   adminSettingsRouter,
   adminStaffRouter,
@@ -64,6 +68,7 @@ apiRouter.use("/me/wishlist", wishlistRouter);
 apiRouter.use("/email-preferences", emailPreferencesRouter);
 apiRouter.use("/payments", paymentsRouter);
 apiRouter.use("/cms", cmsRouter);
+apiRouter.use("/prescriptions", prescriptionsRouter);
 apiRouter.use(formsRouter);
 
 apiRouter.use("/admin/products", adminProductsRouter);
@@ -78,6 +83,7 @@ apiRouter.use("/admin/customers", adminCustomersRouter);
 apiRouter.use("/admin/coupons", adminCouponsRouter);
 apiRouter.use("/admin/shipping-zones", adminShippingRouter);
 apiRouter.use("/admin/messages", adminMessagesRouter);
+apiRouter.use("/admin/prescriptions", adminPrescriptionsRouter);
 apiRouter.use("/admin/staff", adminStaffRouter);
 apiRouter.use("/admin/settings", adminSettingsRouter);
 apiRouter.use("/admin/audit-log", adminAuditRouter);

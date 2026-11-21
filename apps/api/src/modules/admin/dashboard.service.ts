@@ -105,21 +105,24 @@ export async function getDashboard(days: number, now = new Date()): Promise<Dash
 
 /** Small summary the admin top bar polls for its badges and new-order alerts. */
 export async function getNotifications(): Promise<AdminNotificationsDTO> {
-  const [toFulfil, newMessages, low, latest, pendingReturns, pendingReviews] = await Promise.all([
-    prisma.order.count({ where: { status: { in: [...TO_FULFIL] } } }),
-    prisma.contactMessage.count({ where: { status: "NEW" } }),
-    lowStockCount(),
-    prisma.order.findFirst({
-      where: { status: { notIn: ["PENDING_PAYMENT", "CANCELLED"] } },
-      orderBy: { placedAt: "desc" },
-      select: { orderNumber: true, placedAt: true, grandTotal: true },
-    }),
-    prisma.returnRequest.count({ where: { status: "REQUESTED" } }),
-    prisma.review.count({ where: { isApproved: false } }),
-  ]);
+  const [toFulfil, newMessages, low, latest, pendingReturns, pendingReviews, newPrescriptions] =
+    await Promise.all([
+      prisma.order.count({ where: { status: { in: [...TO_FULFIL] } } }),
+      prisma.contactMessage.count({ where: { status: "NEW" } }),
+      lowStockCount(),
+      prisma.order.findFirst({
+        where: { status: { notIn: ["PENDING_PAYMENT", "CANCELLED"] } },
+        orderBy: { placedAt: "desc" },
+        select: { orderNumber: true, placedAt: true, grandTotal: true },
+      }),
+      prisma.returnRequest.count({ where: { status: "REQUESTED" } }),
+      prisma.review.count({ where: { isApproved: false } }),
+      prisma.prescription.count({ where: { status: { in: ["PENDING", "IN_REVIEW"] } } }),
+    ]);
   return {
     toFulfil,
     newMessages,
+    newPrescriptions,
     lowStock: low,
     pendingReturns,
     pendingReviews,

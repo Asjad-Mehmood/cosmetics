@@ -45,6 +45,8 @@ export function createApp({ extend, rateLimit }: CreateAppOptions = {}): Express
   app.use(helmet());
   app.use(cors({ origin: env.CORS_ORIGINS, credentials: true }));
   app.use(compression());
+  // Prescription uploads carry up to 3 MB of photos (base64): a larger limit for that route only.
+  app.use("/api/v1/prescriptions", express.json({ limit: "4.5mb" }));
   app.use(
     express.json({
       limit: "1mb",

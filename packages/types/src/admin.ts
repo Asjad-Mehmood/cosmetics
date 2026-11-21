@@ -124,6 +124,8 @@ export interface DashboardDTO {
 export interface AdminNotificationsDTO {
   toFulfil: number;
   newMessages: number;
+  /** Prescriptions waiting for the pharmacist. */
+  newPrescriptions: number;
   lowStock: number;
   /** Return requests waiting for a decision. */
   pendingReturns: number;

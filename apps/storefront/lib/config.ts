@@ -16,6 +16,7 @@ export const footerNav = {
     { label: "Best sellers", href: "/collections/best-sellers" },
   ],
   Help: [
+    { label: "Upload a prescription", href: "/prescription" },
     { label: "Track your order", href: "/track-order" },
     { label: "FAQ", href: "/faq" },
     { label: "Shipping", href: "/policies/shipping" },
