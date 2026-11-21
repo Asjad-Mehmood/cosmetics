@@ -285,6 +285,11 @@ export function Settings() {
                 </Link>
               </li>
               <li>
+                <Link href="/settings/tcs" className="underline">
+                  TCS courier (bookings, airway bills and tracking)
+                </Link>
+              </li>
+              <li>
                 <Link href="/staff" className="underline">
                   Staff accounts
                 </Link>

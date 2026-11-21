@@ -1,3 +1,4 @@
+import { refreshTcsQuietly } from "../couriers/tcs.service";
 import type { OrderDTO, PaymentSessionDTO } from "@store/types";
 import type { ReturnRequestInput } from "@store/validation";
 import { paginated, skipTake } from "../../lib/http";
@@ -40,7 +41,13 @@ export async function findViewableOrder(number: string, viewer: Viewer): Promise
 }
 
 export async function getOrder(number: string, viewer: Viewer): Promise<OrderDTO> {
-  return toOrderDTO(await findViewableOrder(number, viewer), await returnWindowDays());
+  let order = await findViewableOrder(number, viewer);
+  // Parcels with TCS: pick up the latest tracking first (at most every 30 minutes).
+  if (order.courier === "TCS") {
+    await refreshTcsQuietly(order.id, order.courier, order.status);
+    order = await findViewableOrder(number, viewer);
+  }
+  return toOrderDTO(order, await returnWindowDays());
 }
 
 /** Customer return request (owner or order-link holder). */
@@ -76,6 +83,14 @@ export async function trackOrder(number: string, email: string) {
   });
   if (!order || order.email.toLowerCase() !== email) {
     throw AppError.notFound("We couldn't find an order with that number and email");
+  }
+  if (order.courier === "TCS") {
+    await refreshTcsQuietly(order.id, order.courier, order.status);
+    const fresh = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: orderInclude,
+    });
+    return toTracking(fresh);
   }
   return toTracking(order);
 }

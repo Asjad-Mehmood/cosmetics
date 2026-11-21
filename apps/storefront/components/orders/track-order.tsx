@@ -77,6 +77,9 @@ export function TrackOrder() {
             <p className="text-sm">
               {result.courier ?? "Courier"} tracking number:{" "}
               <strong className="font-mono">{result.trackingNumber}</strong>
+              {result.courierStatus && (
+                <span className="text-muted block">Latest update: {result.courierStatus}</span>
+              )}
             </p>
           )}
           <ul className="text-muted text-sm">

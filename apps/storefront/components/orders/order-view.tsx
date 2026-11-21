@@ -167,6 +167,9 @@ export function OrderView({ number }: { number: string }) {
           <p className="mt-4 text-sm">
             {o.courier ?? "Courier"} tracking number:{" "}
             <strong className="font-mono">{o.trackingNumber}</strong>
+            {o.courierStatus && (
+              <span className="text-muted block">Latest update: {o.courierStatus}</span>
+            )}
           </p>
         )}
       </div>

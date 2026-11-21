@@ -12,6 +12,7 @@ import {
 } from "./modules/admin/insights.routes";
 import { adminCouponsRouter, adminShippingRouter } from "./modules/admin/marketing.routes";
 import { adminMessagesRouter } from "./modules/admin/messages.routes";
+import { adminOrderTcsRouter, adminTcsSettingsRouter } from "./modules/couriers/tcs.routes";
 import {
   adminPrescriptionsRouter,
   prescriptionsRouter,
@@ -77,6 +78,8 @@ apiRouter.use("/admin/categories", adminCategoriesRouter);
 apiRouter.use("/admin/collections", adminCollectionsRouter);
 apiRouter.use("/admin/uploads", adminUploadsRouter);
 apiRouter.use("/admin/orders", adminOrdersRouter);
+apiRouter.use("/admin/orders", adminOrderTcsRouter);
+apiRouter.use("/admin/couriers/tcs", adminTcsSettingsRouter);
 apiRouter.use("/admin/reports", adminReportsRouter);
 apiRouter.use("/admin/inventory", adminInventoryRouter);
 apiRouter.use("/admin/customers", adminCustomersRouter);

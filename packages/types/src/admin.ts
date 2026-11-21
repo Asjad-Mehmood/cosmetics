@@ -81,6 +81,10 @@ export interface AdminOrderDTO extends Omit<OrderDTO, "timeline"> {
   userId: string | null;
   customer: { id: string; name: string; email: string; orderCount: number } | null;
   adminNotes: string | null;
+  /** Booked through the TCS API (so it can be cancelled and its label printed). */
+  courierBookedAt: string | null;
+  /** When TCS tracking was last fetched. */
+  courierSyncedAt: string | null;
   timeline: AdminOrderEventDTO[];
   payments: AdminPaymentDTO[];
   refunds: AdminRefundDTO[];

@@ -8,6 +8,7 @@ import Link from "@/admin/lib/link";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { ReturnBadge } from "@/admin/components/returns/returns";
+import { TcsCard } from "./tcs-card";
 import { Checkbox, Textarea } from "@/admin/components/ui/controls";
 import { DetailList, ErrorState, PageHeader, Section } from "@/admin/components/ui/page";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/admin/components/ui/status";
@@ -575,8 +576,9 @@ export function OrderDetail({ number }: { number: string }) {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {/* On phones the actions come first; on desktop they sit in the side column. */}
-          <div className="lg:hidden">
+          <div className="space-y-6 lg:hidden">
             <FulfilmentCard order={order} />
+            <TcsCard order={order} />
           </div>
           <Section title={`Items (${order.items.reduce((n, i) => n + i.quantity, 0)})`}>
             <ul className="divide-line divide-y">
@@ -730,8 +732,9 @@ export function OrderDetail({ number }: { number: string }) {
         </div>
 
         <div className="space-y-6">
-          <div className="hidden lg:block">
+          <div className="hidden space-y-6 lg:block">
             <FulfilmentCard order={order} />
+            <TcsCard order={order} />
           </div>
           <Section title="Customer">
             <DetailList
