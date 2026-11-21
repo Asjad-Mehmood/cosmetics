@@ -1,4 +1,10 @@
-import type { BannerDTO, FaqDTO, HomeContentDTO, PageDTO } from "@store/types";
+import type {
+  BannerDTO,
+  FaqDTO,
+  FlashSaleSettingsDTO,
+  HomeContentDTO,
+  PageDTO,
+} from "@store/types";
 import { contactMessageSchema, newsletterSchema, stockAlertSchema } from "@store/validation";
 import { ok } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";
@@ -23,7 +29,7 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
     access: "public",
     handler: async () => {
       const now = new Date();
-      const [banners, enabled, text, store, zones, coupons] = await Promise.all([
+      const [banners, enabled, text, store, zones, coupons, sale] = await Promise.all([
         prisma.banner.findMany({
           where: {
             isActive: true,
@@ -50,7 +56,14 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           orderBy: { createdAt: "asc" },
           take: 12,
         }),
+        getSetting<FlashSaleSettingsDTO>("flashSale"),
       ]);
+      const saleLive = !!(
+        sale?.enabled &&
+        sale.title &&
+        sale.endsAt &&
+        new Date(sale.endsAt) > now
+      );
       return ok<HomeContentDTO>({
         announcement: enabled && text ? text : null,
         vouchers: coupons
@@ -79,6 +92,9 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           freeOverAmount: z.freeOverAmount,
           codFee: z.codEnabled ? z.codFee : 0,
         })),
+        flashSale: saleLive
+          ? { title: sale!.title, subtitle: sale!.subtitle || null, endsAt: sale!.endsAt! }
+          : null,
       });
     },
   }),

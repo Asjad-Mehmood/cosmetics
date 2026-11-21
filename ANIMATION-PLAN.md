@@ -303,6 +303,39 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 - axe passes with GSAP running on the home, shop, category and product pages (after scrolling through every scene).
 - Full-motion tests cover GSAP loading, scroll-triggered entrances and the ticker.
 
+## Home page additions
+
+**Photo carry-over** (`components/photo-transition.tsx`)
+
+- Clicking a product card makes its photo grow into the big photo on the product page, using the browser's View Transitions.
+- The card photo is captured first, then the navigation starts. The transition waits up to 0.9 s for the new page's photo, polling with a timer because frames are paused during a view transition.
+- Browsers without View Transitions (and visitors with Reduce motion) get the normal page switch.
+
+**Delivery story** (`components/home/delivery-story.tsx`)
+
+- "How your order reaches you" shows four steps beside a map of Pakistan.
+- **Desktop with GSAP** (1024 px wide and at least 740 px tall): the section stays on screen while you scroll through it. Each step lights up in turn, and a card with its picture appears on the map. At the last step, delivery routes draw out from Lahore to seven cities and each city lights up.
+- **Smaller screens:** the routes draw as the map scrolls by.
+- **Without GSAP:** everything is shown, with the routes drawn.
+- The delivery times come from the store's shipping settings.
+
+**Keyboard fix in the scroll scenes:** elements waiting to animate in are hidden with opacity only, not visibility, so keyboard users can still tab to them. axe passes at several points while scrolling through the story.
+
+**Flash sale** (`components/home/flash-sale.tsx`, admin: Content → Flash sale)
+
+- Staff set a title, an optional subtitle and an end time, and switch it on. The setting is stored under `flashSale` in `Setting`, and `/cms/home` includes it while it is running.
+- The home page then shows a navy panel with a flip-digit countdown (days, hours, minutes and seconds) and a bar that drains over the last 24 hours, above the products that are on sale. The normal "Offers" row is replaced while the sale runs.
+- At zero, it turns back into the "Offers" row without a reload.
+- The countdown is worked out in the browser, after the page loads, and is a `role="timer"` labelled with the end time.
+- There is deliberately no "% claimed" stock bar: the store never reveals stock levels.
+
+**Sideways categories** (`components/home/category-showcase.tsx`)
+
+- "Shop by category" is now a row of tall photo cards.
+- **Desktop with GSAP:** the section stays on screen and scrolling down moves the cards sideways, each leaning slightly in 3D in the direction of travel. Tabbing to a card that is off to the side scrolls the page to it.
+- **Phones:** a swipeable row.
+- **Without GSAP:** a grid of five cards.
+
 ## Testing and quality checks (every phase)
 
 - **Playwright:**

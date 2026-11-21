@@ -117,25 +117,28 @@ function setup({ gsap, ScrollTrigger, SplitText }: Lib, pointerFine: boolean) {
     if (!belowFold(el)) continue;
     gsap.from(el, {
       y: 70,
-      autoAlpha: 0,
+      opacity: 0,
       scale: 0.98,
       duration: 1.1,
       scrollTrigger: { trigger: el, start: "top 90%", once: true },
     });
   }
 
+  // Hidden with opacity only (not visibility), so keyboard users can still tab
+  // to them; focusing one scrolls it into view, which plays its entrance.
+
   // Groups: children come in one after another, in batches as they scroll in.
   for (const group of fresh('[data-gsap="stagger"]')) {
     const marked = group.querySelectorAll<HTMLElement>(".reveal-item");
     const items = [...(marked.length ? marked : group.children)].filter(belowFold);
     if (!items.length) continue;
-    gsap.set(items, { autoAlpha: 0, y: 60, rotate: 1.5 });
+    gsap.set(items, { opacity: 0, y: 60, rotate: 1.5 });
     ScrollTrigger.batch(items, {
       start: "top 92%",
       once: true,
       onEnter: (batch) =>
         gsap.to(batch, {
-          autoAlpha: 1,
+          opacity: 1,
           y: 0,
           rotate: 0,
           duration: 0.95,

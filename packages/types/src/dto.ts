@@ -255,6 +255,8 @@ export interface HomeContentDTO {
   contact: { phone: string | null; email: string | null };
   /** Active delivery zones in display order, for delivery estimates. */
   delivery: DeliveryZoneDTO[];
+  /** A running flash sale (switched on in the admin and not yet ended), or null. */
+  flashSale: { title: string; subtitle: string | null; endsAt: string } | null;
 }
 
 export interface PageDTO {

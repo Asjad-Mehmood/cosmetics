@@ -297,6 +297,14 @@ export const announcementSchema = z.object({
   text: z.string().trim().max(160),
 });
 
+/** The home page flash sale: a countdown over the products currently on sale. */
+export const flashSaleSchema = z.object({
+  enabled: z.boolean(),
+  title: z.string().trim().max(60),
+  subtitle: z.string().trim().max(140),
+  endsAt: z.iso.datetime({ offset: true }).nullable(),
+});
+
 // ───────────── Messages ─────────────
 
 export const messageListQuerySchema = paginationSchema.extend({

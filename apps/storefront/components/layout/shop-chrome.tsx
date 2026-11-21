@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { GsapScenes } from "@/components/gsap-scenes";
+import { PhotoTransition } from "@/components/photo-transition";
 import { Footer } from "@/components/layout/footer";
 import { Header, TopBar } from "@/components/layout/header";
 import { NavigationFeedback, RouteView } from "@/components/layout/navigation-feedback";
@@ -38,6 +39,7 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           </a>
           <NavigationFeedback />
           <GsapScenes />
+          <PhotoTransition />
           <TopBar text={home?.announcement ?? null} phone={contact.phone} />
           <Header categories={categories} collections={collections} />
           <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">

@@ -46,6 +46,7 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
         <ul
           ref={strip}
           data-fly-source
+          data-pdp-photo
           onScroll={onScroll}
           className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto"
           aria-label="Product images"
@@ -116,6 +117,7 @@ function Gallery({ images, title }: { images: ProductDetailDTO["images"]; title:
         )}
         <div
           data-fly-source
+          data-pdp-photo
           className="bg-surface relative aspect-square flex-1 cursor-zoom-in overflow-hidden rounded-3xl"
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();

@@ -260,6 +260,15 @@ export interface AnnouncementDTO {
   text: string;
 }
 
+/** Flash sale settings, as edited in the admin. */
+export interface FlashSaleSettingsDTO {
+  enabled: boolean;
+  title: string;
+  subtitle: string;
+  /** When the countdown ends (ISO). */
+  endsAt: string | null;
+}
+
 export interface ContactMessageDTO {
   id: string;
   name: string;

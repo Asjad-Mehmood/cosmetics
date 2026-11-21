@@ -1,6 +1,13 @@
-import type { AdminBannerDTO, AdminFaqDTO, AdminPageDTO, AnnouncementDTO } from "@store/types";
+import type {
+  AdminBannerDTO,
+  AdminFaqDTO,
+  AdminPageDTO,
+  AnnouncementDTO,
+  FlashSaleSettingsDTO,
+} from "@store/types";
 import {
   announcementSchema,
+  flashSaleSchema,
   createBannerSchema,
   createFaqSchema,
   createPageSchema,
@@ -263,4 +270,46 @@ export const adminContentRouter = defineRoutes("/admin", "Admin: Content", [
       return ok<AnnouncementDTO>(body);
     },
   }),
+
+  // Flash sale (home page countdown over the products on sale)
+  route({
+    method: "get",
+    path: "/flash-sale",
+    summary: "The home page flash sale countdown",
+    access: "MANAGER",
+    handler: async () => {
+      const s = await getSettings({ flashSale: FLASH_SALE_OFF });
+      return ok<FlashSaleSettingsDTO>({ ...FLASH_SALE_OFF, ...s.flashSale });
+    },
+  }),
+  route({
+    method: "put",
+    path: "/flash-sale",
+    summary: "Update the flash sale",
+    description:
+      "When enabled, the home page shows a countdown to `endsAt` above the products that are on sale (compare-at price higher than the price). It hides itself once the time is up.",
+    access: "MANAGER",
+    body: flashSaleSchema,
+    handler: async ({ req, body }) => {
+      if (body.enabled) {
+        if (!body.title) throw AppError.badRequest("Give the flash sale a title");
+        if (!body.endsAt || new Date(body.endsAt) <= new Date())
+          throw AppError.badRequest("Choose an end time in the future");
+      }
+      await prisma.setting.upsert({
+        where: { key: "flashSale" },
+        create: { key: "flashSale", value: body },
+        update: { value: body },
+      });
+      await audit(req, "flashSale.update", "Setting", "flashSale", body);
+      return ok<FlashSaleSettingsDTO>(body);
+    },
+  }),
 ]);
+
+const FLASH_SALE_OFF: FlashSaleSettingsDTO = {
+  enabled: false,
+  title: "",
+  subtitle: "",
+  endsAt: null,
+};

@@ -6,6 +6,7 @@ import type {
   AdminPageDTO,
   AnnouncementDTO,
   ApiResponse,
+  FlashSaleSettingsDTO,
 } from "@store/types";
 import { Badge, Button, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -115,6 +116,96 @@ function Announcement() {
       )}
       <Button disabled={!dirty} loading={save.isPending} onClick={() => save.mutate()}>
         Save announcement
+      </Button>
+    </Section>
+  );
+}
+
+// ───────────── Flash sale ─────────────
+
+function FlashSale() {
+  const qc = useQueryClient();
+  const query = useQuery({
+    queryKey: ["admin", "flash-sale"],
+    queryFn: async () => (await api<ApiResponse<FlashSaleSettingsDTO>>("/admin/flash-sale")).data,
+  });
+  const [form, setForm] = useState({ enabled: false, title: "", subtitle: "", endsAt: "" });
+  useEffect(() => {
+    if (query.data)
+      setForm({
+        enabled: query.data.enabled,
+        title: query.data.title,
+        subtitle: query.data.subtitle,
+        endsAt: toLocalInput(query.data.endsAt),
+      });
+  }, [query.data]);
+  const save = useMutation({
+    mutationFn: () =>
+      api<ApiResponse<FlashSaleSettingsDTO>>("/admin/flash-sale", {
+        method: "PUT",
+        body: {
+          enabled: form.enabled,
+          title: form.title.trim(),
+          subtitle: form.subtitle.trim(),
+          endsAt: fromLocalInput(form.endsAt),
+        },
+      }),
+    onSuccess: (res) => {
+      qc.setQueryData(["admin", "flash-sale"], res.data);
+      toast.success("Flash sale saved. The store shows it within a few minutes.");
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  if (!query.data) return <Skeleton className="h-48" />;
+  const ended = !!query.data.endsAt && new Date(query.data.endsAt) <= new Date();
+
+  return (
+    <Section
+      title="Flash sale"
+      description="A countdown on the home page above the products that are on sale (a compare-at price higher than the price). It hides itself when the time is up."
+    >
+      <Switch
+        label="Show the flash sale"
+        checked={form.enabled}
+        onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
+      />
+      {query.data.enabled && ended && (
+        <p className="text-muted text-sm">The last flash sale has ended and is no longer shown.</p>
+      )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Title" htmlFor="flash-title" hint={`${form.title.length}/60`}>
+          <Input
+            id="flash-title"
+            value={form.title}
+            maxLength={60}
+            placeholder="11.11 mega sale"
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+          />
+        </Field>
+        <Field label="Ends at" htmlFor="flash-ends" hint="Your local time">
+          <Input
+            id="flash-ends"
+            type="datetime-local"
+            value={form.endsAt}
+            onChange={(e) => setForm((f) => ({ ...f, endsAt: e.target.value }))}
+          />
+        </Field>
+      </div>
+      <Field
+        label="Subtitle (optional)"
+        htmlFor="flash-subtitle"
+        hint={`${form.subtitle.length}/140`}
+      >
+        <Input
+          id="flash-subtitle"
+          value={form.subtitle}
+          maxLength={140}
+          placeholder="Up to 30% off skincare and makeup"
+          onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
+        />
+      </Field>
+      <Button loading={save.isPending} onClick={() => save.mutate()}>
+        Save flash sale
       </Button>
     </Section>
   );
@@ -653,6 +744,7 @@ export function Content() {
       {tab === "" && (
         <div className="space-y-6">
           <Announcement />
+          <FlashSale />
           <Banners />
         </div>
       )}

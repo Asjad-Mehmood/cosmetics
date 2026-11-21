@@ -188,3 +188,74 @@ test("a wrong discount code shakes the field and shows the error", async ({ page
   // The shake moves the row without re-creating it, so what was typed stays.
   await expect(page.getByLabel("Discount code")).toHaveValue("NOPE123");
 });
+
+test("a product card's photo carries over into the product page (view transition)", async ({
+  page,
+}) => {
+  await page.goto("/shop");
+  await page.waitForLoadState("networkidle");
+  await page.evaluate(() => {
+    const w = window as unknown as { __vt: string[] };
+    w.__vt = [];
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = ((cb: () => Promise<void>) => {
+      const t = start(cb);
+      t.ready.then(
+        () => w.__vt.push("ready"),
+        (e: Error) => w.__vt.push(`error: ${e.message}`),
+      );
+      return t;
+    }) as typeof document.startViewTransition;
+  });
+  await page.locator("main article [data-card-photo]").first().click();
+  await page.waitForURL("**/products/**");
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { __vt: string[] }).__vt))
+    .toEqual(["ready"]);
+  await expect(page.getByRole("button", { name: "Add to cart", exact: true })).toBeVisible();
+});
+
+test("the delivery story stays on screen and lights up each step as you scroll", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  const story = page.locator(".delivery-story");
+  await expect(story).toHaveAttribute("data-live", "");
+  const top = await story.evaluate((el) => el.getBoundingClientRect().top + scrollY - 128);
+  const stepAt = async (offset: number) => {
+    await page.evaluate((y) => scrollTo(0, y), top + offset);
+    await expect.poll(() => story.getAttribute("data-step"), { timeout: 4000 }).not.toBeNull();
+    await page.waitForTimeout(900);
+    return story.getAttribute("data-step");
+  };
+  expect(await stepAt(0)).toBe("0");
+  expect(await stepAt(1350)).toBe("2");
+  expect(await stepAt(2600)).toBe("3");
+  // Routes have been drawn to every city.
+  const drawn = await story
+    .locator("[data-route]")
+    .evaluateAll((paths) => paths.map((p) => parseFloat(getComputedStyle(p).strokeDashoffset)));
+  expect(drawn.every((o) => o < 0.05)).toBe(true);
+});
+
+test("categories move sideways while the page scrolls down (desktop)", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  const showcase = page.locator(".category-showcase");
+  await expect(showcase).toHaveAttribute("data-live", "");
+  const row = showcase.locator("[data-track] > ul");
+  const x = () => row.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
+  const top = await showcase.evaluate((el) => el.getBoundingClientRect().top + scrollY - 128);
+  await page.evaluate((y) => scrollTo(0, y), top);
+  await page.waitForTimeout(700);
+  const start = await x();
+  await page.evaluate((y) => scrollTo(0, y), top + 600);
+  await expect.poll(x, { timeout: 4000 }).toBeLessThan(start - 200);
+  // The section stayed on screen meanwhile.
+  const box = (await showcase.boundingBox())!;
+  expect(box.y).toBeGreaterThan(60);
+  expect(box.y).toBeLessThan(200);
+});

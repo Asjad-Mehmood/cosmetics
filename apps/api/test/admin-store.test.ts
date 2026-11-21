@@ -203,6 +203,37 @@ describe("content", () => {
     const saved = await agent.put("/api/v1/admin/announcement").send(original);
     expect(saved.body.data).toEqual(original);
   });
+
+  it("runs a flash sale that the home page shows until it ends", async () => {
+    const { agent } = await signedInAgent("MANAGER");
+    const original = (await agent.get("/api/v1/admin/flash-sale")).body.data;
+    const past = new Date(Date.now() - 60_000).toISOString();
+    const future = new Date(Date.now() + 3_600_000).toISOString();
+    const sale = { enabled: true, title: "11.11 sale", subtitle: "Up to 30% off", endsAt: future };
+
+    // A title and a future end time are required to switch it on.
+    expect((await agent.put("/api/v1/admin/flash-sale").send({ ...sale, title: "" })).status).toBe(
+      400,
+    );
+    expect(
+      (await agent.put("/api/v1/admin/flash-sale").send({ ...sale, endsAt: past })).status,
+    ).toBe(400);
+    expect((await agent.put("/api/v1/admin/flash-sale").send(sale)).status).toBe(200);
+    expect((await request(app).get("/api/v1/cms/home")).body.data.flashSale).toEqual({
+      title: "11.11 sale",
+      subtitle: "Up to 30% off",
+      endsAt: future,
+    });
+
+    // Switched off: gone from the home page.
+    await agent.put("/api/v1/admin/flash-sale").send({ ...sale, enabled: false });
+    expect((await request(app).get("/api/v1/cms/home")).body.data.flashSale).toBeNull();
+    // Customers cannot change it.
+    const customer = await signedInAgent("CUSTOMER");
+    expect((await customer.agent.put("/api/v1/admin/flash-sale").send(sale)).status).toBe(403);
+
+    await agent.put("/api/v1/admin/flash-sale").send(original);
+  });
 });
 
 describe("messages", () => {
