@@ -26,6 +26,16 @@ export function AccountShell({ children }: { children: ReactNode }) {
   // "guests must sign in" redirect below instead of going home.
   const signingOut = useRef(false);
 
+  // Phones: bring the current tab into view in the sideways-scrolling row.
+  const nav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const row = nav.current?.querySelector("ul");
+    const tab = nav.current?.querySelector<HTMLElement>("[aria-current=page]");
+    if (row && tab && row.scrollWidth > row.clientWidth) {
+      row.scrollLeft = tab.offsetLeft - (row.clientWidth - tab.offsetWidth) / 2;
+    }
+  }, [pathname, me.data]);
+
   useEffect(() => {
     if (me.isFetched && !me.data && !signingOut.current)
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
@@ -43,11 +53,12 @@ export function AccountShell({ children }: { children: ReactNode }) {
   return (
     <Container className="py-10 sm:py-14">
       <h1 className="text-3xl font-extrabold tracking-tight">My account</h1>
-      <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr]">
-        <nav aria-label="Account">
-          <ul className="flex gap-1 overflow-x-auto lg:flex-col">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[220px_1fr]">
+        {/* min-w-0: on phones the tabs scroll sideways instead of widening the page. */}
+        <nav ref={nav} aria-label="Account" className="min-w-0">
+          <ul className="no-scrollbar relative -mx-4 flex snap-x gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:flex-col">
             {NAV.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className="snap-start">
                 <Link
                   href={item.href}
                   aria-current={pathname === item.href ? "page" : undefined}
