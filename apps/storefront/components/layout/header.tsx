@@ -2,7 +2,7 @@ import type { CategoryDTO, CollectionDTO } from "@store/types";
 import { Container, Logo } from "@store/ui";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
-import { PhoneIcon } from "../icons";
+import { PhoneIcon, PillIcon } from "../icons";
 import { HeaderActions } from "./header-actions";
 import { MegaMenu } from "./mega-menu";
 import { MobileNav, MobileNavButton } from "./mobile-nav";
@@ -49,6 +49,10 @@ export function Header({ categories, collections }: NavData) {
             </ul>
           </nav>
           <div className="flex shrink-0 items-center gap-1">
+            <Link href="/prescription" className={`${barLink} inline-flex items-center gap-1.5`}>
+              <PillIcon width={16} height={16} className="text-accent-700" />
+              Prescription
+            </Link>
             <Link href="/offers" className={`${barLink} text-accent-700`}>
               Offers
             </Link>

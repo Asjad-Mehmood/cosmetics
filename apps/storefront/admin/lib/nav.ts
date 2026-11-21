@@ -8,7 +8,13 @@ export interface NavItem {
   /** Roadmap phase that builds this module. Items after BUILT_PHASE render as "Soon". */
   phase: number;
   /** Key of the notification count shown next to the item. */
-  badge?: "toFulfil" | "newMessages" | "lowStock" | "pendingReturns" | "pendingReviews";
+  badge?:
+    | "toFulfil"
+    | "newMessages"
+    | "newPrescriptions"
+    | "lowStock"
+    | "pendingReturns"
+    | "pendingReviews";
 }
 
 export interface NavSection {
@@ -34,6 +40,13 @@ export const adminNav: NavSection[] = [
     title: "Sales",
     items: [
       { label: "Orders", href: "/orders", minRole: SUPPORT, phase: 4, badge: "toFulfil" },
+      {
+        label: "Prescriptions",
+        href: "/prescriptions",
+        minRole: SUPPORT,
+        phase: 4,
+        badge: "newPrescriptions",
+      },
       { label: "Returns", href: "/returns", minRole: SUPPORT, phase: 5, badge: "pendingReturns" },
       { label: "Customers", href: "/customers", minRole: SUPPORT, phase: 4 },
       { label: "Messages", href: "/messages", minRole: SUPPORT, phase: 4, badge: "newMessages" },

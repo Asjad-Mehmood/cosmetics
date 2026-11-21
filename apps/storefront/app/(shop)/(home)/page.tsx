@@ -272,25 +272,25 @@ export default async function HomePage() {
           </span>
           <div>
             <h2 id="pharmacy-heading" data-gsap="split" className="text-2xl font-bold">
-              Prescription medicines are coming soon
+              Order medicines with your prescription
             </h2>
             <p className="mt-2 max-w-2xl text-white/85">
-              Upload your prescription at checkout and our registered pharmacist will check it
-              before your order is sent. Until then, shop vitamins, supplements and health devices.
+              Upload a photo of your prescription. Our pharmacist checks it and calls you to confirm
+              your medicines and the total, then we deliver to your door. Pay in cash on delivery.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/categories/health-wellness"
+              href="/prescription"
               className="text-ink inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold hover:bg-white/90"
             >
-              Shop health
+              Upload prescription
             </Link>
             <Link
-              href="/faq"
+              href="/categories/health-wellness"
               className="inline-flex h-11 items-center rounded-full border border-white/40 px-5 text-sm font-semibold hover:bg-white/10"
             >
-              How it will work
+              Shop health
             </Link>
           </div>
         </section>

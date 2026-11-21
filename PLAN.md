@@ -604,3 +604,11 @@ Each phase is one pull request (or two for the large ones), merged only with CI 
 - **Card payments** (Stripe is already built in and just needs keys) or local wallets (JazzCash/Easypaisa).
 - **Doctor e-consultation** partner link; **lab test booking**.
 - **Mobile app** (the API is ready for it).
+
+## Prescriptions (upload and pharmacist review)
+
+- **Customers** (`/prescription`, linked from the header, mobile menu, footer and home page): upload up to 3 photos or PDFs of a prescription with the patient's name, phone, city, optional address, email and note, and whether an equivalent brand is allowed. Photos are resized to 2,000 px and re-saved as JPEG in the browser (smaller uploads on mobile data, and the photo's hidden location details are dropped). Guests can upload; signed-in customers see theirs, with the pharmacist's note and order number, under **Account → Prescriptions**.
+- **Pharmacist** (admin **Sales → Prescriptions**, with a badge for new ones): views the files privately, calls or WhatsApps the customer, then marks it **In review**, **Confirmed** (with a note and the order number), **Not accepted** or **Delivered**. The customer is emailed at each status change when they gave an email. Managers can delete a prescription and its files for good (privacy requests).
+- **Privacy:** files are stored in their own table, never public. Only staff can open them, they are never cached, and every view is in the audit log. The file type is checked from its bytes (photos and PDFs only), up to 2 MB each and 3 MB together.
+- **API:** `POST /prescriptions` (guests and customers, rate-limited), `GET /prescriptions` (mine), `GET|PATCH|DELETE /admin/prescriptions…`. Migration `20261121120000_prescriptions` only adds two tables.
+- **Next step (not built yet):** marking products as "prescription required" and asking for the prescription at checkout for those products.

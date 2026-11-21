@@ -118,6 +118,12 @@ export async function downloadFile(path: string, mode: "download" | "open" = "do
   }
 }
 
+/** A private file (such as a prescription photo) as an object URL, fetched with the admin's session. */
+export async function fetchObjectUrl(path: string): Promise<string> {
+  const res = await request(path, { headers: { Accept: "*/*" } }, false);
+  return URL.createObjectURL(await res.blob());
+}
+
 /** A message to show for any error thrown by `api()`. */
 export const errorMessage = (err: unknown) =>
   err instanceof ApiError

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useMe } from "@/hooks/use-auth";
 import { useUi } from "@/store/ui";
-import { ChevronRightIcon, MenuIcon, PhoneIcon } from "../icons";
+import { ChevronRightIcon, MenuIcon, PhoneIcon, PillIcon } from "../icons";
 import { useSite } from "../site-context";
 import type { NavData } from "./header";
 
@@ -39,6 +39,19 @@ export function MobileNav({ categories, collections }: NavData) {
   return (
     <Dialog open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu" variant="left">
       <nav aria-label="Mobile" className="space-y-6">
+        <Link
+          href="/prescription"
+          className="bg-brand-700 flex items-center gap-3 rounded-2xl p-3 text-white"
+        >
+          <span className="grid size-9 place-items-center rounded-full bg-white/15">
+            <PillIcon width={18} height={18} />
+          </span>
+          <span className="flex-1">
+            <span className="block text-sm font-semibold">Upload a prescription</span>
+            <span className="block text-xs text-white/75">Our pharmacist will call you</span>
+          </span>
+          <ChevronRightIcon />
+        </Link>
         <div>
           <p className="text-muted px-3 pb-2 text-xs font-semibold uppercase tracking-wider">
             Categories

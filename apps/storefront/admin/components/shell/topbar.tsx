@@ -88,6 +88,7 @@ export function Topbar({
   const total =
     (counts?.toFulfil ?? 0) +
     (counts?.newMessages ?? 0) +
+    (counts?.newPrescriptions ?? 0) +
     (counts?.pendingReturns ?? 0) +
     (counts?.pendingReviews ?? 0) +
     (isManagerRole ? (counts?.lowStock ?? 0) : 0);
@@ -98,6 +99,12 @@ export function Topbar({
       n: counts?.toFulfil ?? 0,
       text: "orders to fulfil",
       href: "/orders?status=CONFIRMED,PAID,PROCESSING",
+      show: true,
+    },
+    {
+      n: counts?.newPrescriptions ?? 0,
+      text: "prescriptions to check",
+      href: "/prescriptions",
       show: true,
     },
     { n: counts?.newMessages ?? 0, text: "new messages", href: "/messages?status=NEW", show: true },

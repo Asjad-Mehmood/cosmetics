@@ -121,3 +121,22 @@ export const MessageStatus = {
 } as const;
 export type MessageStatus = (typeof MessageStatus)[keyof typeof MessageStatus];
 export const MESSAGE_STATUSES = values(MessageStatus);
+
+export const PrescriptionStatus = {
+  PENDING: "PENDING",
+  IN_REVIEW: "IN_REVIEW",
+  CONFIRMED: "CONFIRMED",
+  REJECTED: "REJECTED",
+  COMPLETED: "COMPLETED",
+} as const;
+export type PrescriptionStatus = (typeof PrescriptionStatus)[keyof typeof PrescriptionStatus];
+export const PRESCRIPTION_STATUSES = values(PrescriptionStatus);
+
+/** What each prescription status means to the customer. */
+export const PRESCRIPTION_STATUS_LABELS: Record<PrescriptionStatus, string> = {
+  PENDING: "Received",
+  IN_REVIEW: "Pharmacist reviewing",
+  CONFIRMED: "Confirmed",
+  REJECTED: "Not accepted",
+  COMPLETED: "Delivered",
+};

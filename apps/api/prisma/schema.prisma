@@ -108,6 +108,7 @@ model User {
   refreshTokens RefreshToken[]
   authTokens    AuthToken[]
   auditLogs     AuditLog[]
+  prescriptions Prescription[]
 
   @@index([role])
   @@index([createdAt])
@@ -685,4 +686,67 @@ model Setting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+enum PrescriptionStatus {
+  /// Just uploaded, waiting for the pharmacist.
+  PENDING
+  /// The pharmacist is checking it / calling the customer.
+  IN_REVIEW
+  /// Accepted: medicines and price agreed, order arranged.
+  CONFIRMED
+  /// Not accepted (unreadable, expired, not a valid prescription...).
+  REJECTED
+  /// Medicines delivered.
+  COMPLETED
+}
+
+/// A prescription a customer uploaded so the pharmacy can prepare their medicines.
+/// Medical data: files are never public (served only to staff), and staff can delete it.
+model Prescription {
+  id               String             @id @default(cuid())
+  /// Shown to the customer, e.g. RX-7K2M9Q.
+  reference        String             @unique
+  userId           String?
+  name             String
+  phone            String
+  email            String?
+  city             String
+  address          String?
+  /// The customer's note (which medicines, how many days...).
+  notes            String?
+  /// May the pharmacist offer an equivalent brand if one is out of stock?
+  allowSubstitutes Boolean            @default(true)
+  status           PrescriptionStatus @default(PENDING)
+  /// Message from the pharmacist, shown to the customer.
+  pharmacistNote   String?
+  /// Internal notes, staff only.
+  staffNotes       String?
+  /// The order placed for it, once arranged.
+  orderNumber      String?
+  reviewedById     String?
+  reviewedAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user  User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  files PrescriptionFile[]
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([phone])
+}
+
+/// A photo or PDF of a prescription (private; deleted with it).
+model PrescriptionFile {
+  id             String   @id @default(cuid())
+  prescriptionId String
+  contentType    String
+  bytes          Bytes
+  size           Int
+  createdAt      DateTime @default(now())
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([prescriptionId])
 }

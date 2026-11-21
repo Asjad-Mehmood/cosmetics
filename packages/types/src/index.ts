@@ -5,3 +5,4 @@ export * from "./catalog";
 export * from "./dto";
 export * from "./enums";
 export * from "./money";
+export * from "./prescription";
