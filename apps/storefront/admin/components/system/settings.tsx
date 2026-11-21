@@ -281,7 +281,7 @@ export function Settings() {
               </li>
               <li>
                 <Link href="/settings/email" className="underline">
-                  Email (SMTP or Resend)
+                  Email (login set in Vercel)
                 </Link>
               </li>
               <li>

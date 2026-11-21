@@ -77,13 +77,26 @@ Check `https://<your-site>/api/v1/health` shows `"status":"ok"`.
    `SEED_ADMIN_PASSWORD`.
 2. **Inventory:** every pack size starts with 20 in stock. Set your real stock.
 3. **Store settings:** check the store name, phone, address and return window.
-4. **Store settings → Email:** until this is set up the shop sends no email at
-   all. Orders still work, and customers see their order on screen. When you're
-   ready:
-   - Gmail: turn on 2-Step Verification, create an **App password** (Google
-     Account → Security → App passwords), choose **SMTP → Gmail** and paste it.
-   - Or use Resend with an API key from resend.com.
-   - Press **Send test email** to check.
+4. **Email:** until this is set up the shop sends no email at all. Orders still
+   work, and customers see their order on screen. For security the email login
+   is kept only in Vercel, never in the admin. When you're ready, add these in
+   **Settings → Environment Variables** (Production) and redeploy:
+
+   | Name            | Value                                                                                                          |
+   | --------------- | -------------------------------------------------------------------------------------------------------------- |
+   | `SMTP_HOST`     | e.g. `smtp.gmail.com`                                                                                          |
+   | `SMTP_PORT`     | `465` (with `SMTP_SECURE=true`) or `587`                                                                       |
+   | `SMTP_SECURE`   | `true` for port 465, otherwise leave it out                                                                    |
+   | `SMTP_USER`     | the email account, e.g. `orders@yourdomain.com`                                                                |
+   | `SMTP_PASSWORD` | its password. For Gmail, an **App password** (Google Account → Security → 2-Step Verification → App passwords) |
+   | `EMAIL_FROM`    | sender, e.g. `Amazon Group <orders@yourdomain.com>`                                                            |
+
+   Or use Resend instead: `RESEND_API_KEY` (from resend.com) and `EMAIL_FROM`.
+   Then in the admin, **Settings → Email** shows where email is sent from; press
+   **Send test** to check. If email was set up in the admin before this
+   change, it keeps working until you add these, and that page then offers to
+   delete the saved copy.
+
 5. **Staff:** invite your team. While email is off you get a link to send them
    yourself.
 

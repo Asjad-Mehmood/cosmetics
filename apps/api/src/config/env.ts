@@ -53,6 +53,14 @@ const envSchema = z
     // an optional server-side fallback. Until one of them is set, no email is sent.
     RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().default("Amazon Group <orders@amazongroup.pk>"),
+    // Or send through any SMTP server (e.g. Gmail with an app password). The
+    // email login lives only here, in the hosting environment, never in the admin.
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+    /** true for port 465 (TLS from the start); false for 587 (STARTTLS). */
+    SMTP_SECURE: bool(false),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASSWORD: z.string().optional(),
 
     // Uploads (signed direct-to-Cloudinary uploads)
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
