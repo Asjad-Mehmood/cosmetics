@@ -396,12 +396,17 @@ export interface UploadConfigDTO {
 }
 
 export interface EmailSettingsDTO {
-  provider: "none" | "smtp" | "resend";
-  from: string;
-  smtp: { host: string; port: number; secure: boolean; user: string; hasPassword: boolean };
-  hasResendKey: boolean;
   /** True when emails are actually being sent. */
   configured: boolean;
-  /** "environment" when only RESEND_API_KEY on the server is configuring email. */
-  source: "settings" | "environment" | null;
+  /**
+   * Where the email login comes from: the server's environment variables, or
+   * (older setups) a login saved in the admin before it moved to the environment.
+   */
+  source: "environment" | "admin" | null;
+  provider: "smtp" | "resend" | null;
+  from: string;
+  /** SMTP server details (never the password). */
+  smtp: { host: string; port: number; secure: boolean; user: string } | null;
+  /** A login saved in the admin earlier is still stored and can be deleted. */
+  hasSavedLogin: boolean;
 }

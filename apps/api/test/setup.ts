@@ -12,3 +12,5 @@ process.env.CRON_SECRET = "test-cron-secret-0123456789";
 delete process.env.PROXY_SECRET;
 delete process.env.CLOUDINARY_CLOUD_NAME;
 delete process.env.RESEND_API_KEY;
+delete process.env.SMTP_HOST;
+delete process.env.SMTP_PASSWORD;

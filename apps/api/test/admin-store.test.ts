@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { env } from "../src/config/env";
+import { clearEmailConfigCache } from "../src/lib/email-config";
+import { encryptSecret } from "../src/lib/secrets";
 import { testOutbox } from "../src/lib/mailer";
 import { prisma } from "../src/lib/prisma";
 import {
@@ -414,42 +417,48 @@ describe("image uploads (stored in the database)", () => {
 });
 
 describe("email settings", () => {
-  it("stores SMTP details encrypted, never returns secrets, and can be turned off", async () => {
+  const smtpEnv = {
+    SMTP_HOST: "127.0.0.1",
+    SMTP_PORT: 1, // nothing listens here, so the test email fails quickly
+    SMTP_USER: "orders@amazongroup.pk",
+    SMTP_PASSWORD: "app-password-123",
+  };
+  const setEnv = (vars: Partial<typeof smtpEnv> | null) => {
+    const e = env as Record<string, unknown>;
+    e.SMTP_HOST = vars?.SMTP_HOST;
+    e.SMTP_PORT = vars?.SMTP_PORT ?? 587;
+    e.SMTP_USER = vars?.SMTP_USER;
+    e.SMTP_PASSWORD = vars?.SMTP_PASSWORD;
+    clearEmailConfigCache();
+  };
+  afterEach(() => setEnv(null));
+
+  it("takes the email login from the environment, never from the admin", async () => {
     await prisma.setting.deleteMany({ where: { key: { startsWith: "email." } } });
     const { agent } = await signedInAgent("SUPER_ADMIN");
-    const smtp = {
-      provider: "smtp",
-      from: "Amazon Group <orders@amazongroup.pk>",
-      host: "127.0.0.1",
-      port: 1, // nothing listens here, so the test email fails quickly
-      secure: false,
-      user: "orders@amazongroup.pk",
-    };
 
-    const missing = await agent.put("/api/v1/admin/settings/email").send(smtp);
-    expect(missing.status).toBe(422);
-    expect(missing.body.error.details.fieldErrors.password).toBeDefined();
+    // Nothing set up: no email.
+    const none = await agent.get("/api/v1/admin/settings/email");
+    expect(none.body.data).toMatchObject({ configured: false, source: null, hasSavedLogin: false });
+    expect((await request(app).get("/api/v1/auth/providers")).body.data.email).toBe(false);
 
-    const saved = await agent
+    // The admin can't save an email login any more.
+    const put = await agent
       .put("/api/v1/admin/settings/email")
-      .send({ ...smtp, password: "app-password-123" });
-    expect(saved.status).toBe(200);
-    expect(saved.body.data).toMatchObject({
-      provider: "smtp",
-      configured: true,
-      source: "settings",
-      smtp: { host: "127.0.0.1", port: 1, hasPassword: true },
-    });
-    expect(JSON.stringify(saved.body)).not.toContain("app-password-123");
-    const stored = await prisma.setting.findUniqueOrThrow({
-      where: { key: "email.smtp.password" },
-    });
-    expect(String(stored.value)).toMatch(/^enc:v1:/);
-    expect(JSON.stringify(stored.value)).not.toContain("app-password-123");
+      .send({ provider: "smtp", host: "smtp.evil.test", password: "x" });
+    expect(put.status).toBe(404);
+    expect(await prisma.setting.count({ where: { key: { startsWith: "email." } } })).toBe(0);
 
-    // Saving again without a password keeps the old one.
-    const kept = await agent.put("/api/v1/admin/settings/email").send({ ...smtp, user: "other" });
-    expect(kept.body.data.smtp).toMatchObject({ user: "other", hasPassword: true });
+    // From the environment: used, and the password is never returned.
+    setEnv(smtpEnv);
+    const res = await agent.get("/api/v1/admin/settings/email");
+    expect(res.body.data).toMatchObject({
+      configured: true,
+      source: "environment",
+      provider: "smtp",
+      smtp: { host: "127.0.0.1", port: 1, user: "orders@amazongroup.pk" },
+    });
+    expect(JSON.stringify(res.body)).not.toContain("app-password-123");
 
     const test = await agent
       .post("/api/v1/admin/settings/email/test")
@@ -457,17 +466,47 @@ describe("email settings", () => {
     expect(test.status).toBe(502);
     expect(test.body.error.message).toMatch(/could not be sent/);
 
-    const off = await agent.put("/api/v1/admin/settings/email").send({ provider: "none" });
-    expect(off.body.data).toMatchObject({ provider: "none", configured: false });
-    expect((await request(app).get("/api/v1/auth/providers")).body.data.email).toBe(false);
-
     const { agent: manager } = await signedInAgent("MANAGER");
     expect((await manager.get("/api/v1/admin/settings/email")).status).toBe(403);
   });
 
-  it("shows the invitation link when email isn't set up", async () => {
+  it("keeps a login saved in the admin earlier working until it's deleted", async () => {
+    await prisma.setting.deleteMany({ where: { key: { startsWith: "email." } } });
+    await prisma.setting.createMany({
+      data: [
+        { key: "email.provider", value: "smtp" },
+        { key: "email.smtp.host", value: "127.0.0.1" },
+        { key: "email.smtp.port", value: 1 },
+        { key: "email.smtp.password", value: encryptSecret("old-saved-password") },
+      ],
+    });
+    clearEmailConfigCache();
     const { agent } = await signedInAgent("SUPER_ADMIN");
-    await agent.put("/api/v1/admin/settings/email").send({ provider: "none" });
+    const before = await agent.get("/api/v1/admin/settings/email");
+    expect(before.body.data).toMatchObject({
+      configured: true,
+      source: "admin",
+      hasSavedLogin: true,
+    });
+    expect(JSON.stringify(before.body)).not.toContain("old-saved-password");
+
+    // Once the environment is set it takes over; the saved copy can then be deleted.
+    setEnv(smtpEnv);
+    const both = await agent.get("/api/v1/admin/settings/email");
+    expect(both.body.data).toMatchObject({ source: "environment", hasSavedLogin: true });
+    const deleted = await agent.delete("/api/v1/admin/settings/email");
+    expect(deleted.body.data).toMatchObject({
+      configured: true,
+      source: "environment",
+      hasSavedLogin: false,
+    });
+    expect(await prisma.setting.count({ where: { key: { startsWith: "email." } } })).toBe(0);
+  });
+
+  it("shows the invitation link when email isn't set up", async () => {
+    await prisma.setting.deleteMany({ where: { key: { startsWith: "email." } } });
+    clearEmailConfigCache();
+    const { agent } = await signedInAgent("SUPER_ADMIN");
     const res = await agent
       .post("/api/v1/admin/staff")
       .send({ email: uniqueEmail("staff"), name: "No Email Yet", role: "SUPPORT" });

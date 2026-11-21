@@ -8,7 +8,6 @@ import type {
 import { ADMIN_ROLES, ErrorCode } from "@store/types";
 import {
   auditLogQuerySchema,
-  emailSettingsSchema,
   testEmailSchema,
   inviteStaffSchema,
   updateStaffSchema,
@@ -23,11 +22,12 @@ import {
   clearEmailConfigCache,
   emailEnabled,
   loadEmailConfig,
+  EMAIL_KEYS,
   readEmailSettings,
-  toEmailConfig,
+  resolveEmailConfig,
 } from "../../lib/email-config";
 import { sendMail, sendWith } from "../../lib/mailer";
-import { decryptSecret, encryptSecret } from "../../lib/secrets";
+import { decryptSecret } from "../../lib/secrets";
 import { prisma } from "../../lib/prisma";
 import { defineRoutes, route } from "../../lib/route";
 import { getSettings, storeTimeZone } from "../../lib/settings";
@@ -197,25 +197,27 @@ const SETTINGS_DEFAULTS: StoreSettingsDTO = {
 };
 
 async function emailSettingsResponse(): Promise<EmailSettingsDTO> {
-  const s = await readEmailSettings();
-  const config = toEmailConfig(s);
-  const provider =
-    s["email.provider"] === "smtp" || s["email.provider"] === "resend"
-      ? s["email.provider"]
-      : "none";
+  const [{ config, source }, saved] = await Promise.all([
+    resolveEmailConfig(),
+    readEmailSettings(),
+  ]);
   return {
-    provider,
-    from: typeof s["email.from"] === "string" ? s["email.from"] : env.EMAIL_FROM,
-    smtp: {
-      host: typeof s["email.smtp.host"] === "string" ? s["email.smtp.host"] : "",
-      port: Number(s["email.smtp.port"]) || 587,
-      secure: s["email.smtp.secure"] === true,
-      user: typeof s["email.smtp.user"] === "string" ? s["email.smtp.user"] : "",
-      hasPassword: decryptSecret(s["email.smtp.password"]) !== null,
-    },
-    hasResendKey: decryptSecret(s["email.resend.apiKey"]) !== null,
     configured: config !== null,
-    source: config ? (s["email.provider"] === undefined ? "environment" : "settings") : null,
+    source,
+    provider: config?.provider ?? null,
+    from: config?.from ?? env.EMAIL_FROM,
+    smtp:
+      config?.provider === "smtp"
+        ? {
+            host: config.smtp.host,
+            port: config.smtp.port,
+            secure: config.smtp.secure,
+            user: config.smtp.user,
+          }
+        : null,
+    hasSavedLogin:
+      decryptSecret(saved["email.smtp.password"]) !== null ||
+      decryptSecret(saved["email.resend.apiKey"]) !== null,
   };
 }
 
@@ -307,77 +309,40 @@ export const adminSettingsRouter = defineRoutes("/admin/settings", "Admin: Staff
   route({
     method: "get",
     path: "/email",
-    summary: "How emails are sent (passwords and API keys are never returned)",
+    summary: "How emails are sent, and where the login comes from (secrets are never returned)",
     access: "SUPER_ADMIN",
     handler: async () => ok(await emailSettingsResponse()),
   }),
   route({
-    method: "put",
+    method: "delete",
     path: "/email",
-    summary: "Set up email: SMTP (e.g. Gmail) or Resend, or turn it off",
+    summary: "Delete the email login saved in the admin (it belongs in the environment variables)",
     description:
-      "Until this is set up, the store sends no email at all. Leave `password` / `apiKey` out to keep the saved one. Secrets are stored encrypted.",
+      "Before the email login moved to environment variables, it could be saved in the admin. This removes that saved copy. If the environment variables aren't set yet, email stops until they are.",
     access: "SUPER_ADMIN",
-    body: emailSettingsSchema,
-    handler: async ({ req, body }) => {
-      const current = await readEmailSettings();
-      const values: Record<string, Prisma.InputJsonValue> = { "email.provider": body.provider };
-      if (body.provider === "smtp") {
-        if (!body.password && decryptSecret(current["email.smtp.password"]) === null) {
-          throw new AppError(ErrorCode.VALIDATION_ERROR, "Enter the SMTP password", {
-            fieldErrors: { password: ["Enter the SMTP password"] },
-          });
-        }
-        Object.assign(values, {
-          "email.from": body.from,
-          "email.smtp.host": body.host,
-          "email.smtp.port": body.port,
-          "email.smtp.secure": body.secure,
-          "email.smtp.user": body.user,
-          ...(body.password ? { "email.smtp.password": encryptSecret(body.password) } : {}),
-        });
-      } else if (body.provider === "resend") {
-        if (!body.apiKey && decryptSecret(current["email.resend.apiKey"]) === null) {
-          throw new AppError(ErrorCode.VALIDATION_ERROR, "Enter the Resend API key", {
-            fieldErrors: { apiKey: ["Enter the Resend API key"] },
-          });
-        }
-        Object.assign(values, {
-          "email.from": body.from,
-          ...(body.apiKey ? { "email.resend.apiKey": encryptSecret(body.apiKey) } : {}),
-        });
-      }
-      await prisma.$transaction(
-        Object.entries(values).map(([key, value]) =>
-          prisma.setting.upsert({
-            where: { key },
-            create: { key, value },
-            update: { value },
-          }),
-        ),
-      );
-      clearEmailConfigCache();
-      await audit(req, "settings.email", "Setting", "email", {
-        provider: body.provider,
-        ...(body.provider === "smtp"
-          ? { host: body.host, port: body.port, user: body.user, passwordChanged: !!body.password }
-          : body.provider === "resend"
-            ? { apiKeyChanged: !!body.apiKey }
-            : {}),
+    handler: async ({ req }) => {
+      const { count } = await prisma.setting.deleteMany({
+        where: { key: { in: [...EMAIL_KEYS] } },
       });
+      clearEmailConfigCache();
+      await audit(req, "settings.email-delete", "Setting", "email", { removed: count });
       return ok(await emailSettingsResponse());
     },
   }),
   route({
     method: "post",
     path: "/email/test",
-    summary: "Send a test email with the saved settings",
+    summary: "Send a test email with the current email setup",
     access: "SUPER_ADMIN",
     rateLimit: "forms",
     body: testEmailSchema,
     handler: async ({ body }) => {
-      const config = toEmailConfig(await readEmailSettings());
-      if (!config) throw AppError.conflict("Save your email settings first");
+      const { config } = await resolveEmailConfig();
+      if (!config) {
+        throw AppError.conflict(
+          "Email isn't set up yet. Add SMTP_HOST, SMTP_USER and SMTP_PASSWORD (or RESEND_API_KEY) in Vercel's environment variables, then redeploy.",
+        );
+      }
       try {
         await sendWith(config, {
           to: body.to,

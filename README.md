@@ -9,7 +9,7 @@
 >
 > - **Shopping:** customers browse a real catalogue (Rs 2,699–5,499) with typo-tolerant search and order by Cash on Delivery.
 > - **After buying:** they track and cancel orders, review what they bought, keep a wishlist and request returns.
-> - **Admin:** staff run everything from the admin panel. Email is set up there too, and nothing is sent until it is.
+> - **Admin:** staff run everything from the admin panel. Secrets (email login, payments, image uploads) live only in the hosting environment variables, and nothing is emailed until email is set up.
 > - **Images:** stored in the database, so no Cloudinary account is needed.
 
 ---
@@ -182,7 +182,7 @@ http://localhost:3000/admin (staff accounts only; customer accounts are refused)
 
 **Image uploads** need no account. The admin resizes each photo in the browser (longest side 1,600 px, WebP), and the API stores it in Postgres and serves it from `/api/v1/media/…` with year-long caching. If Cloudinary keys are set, uploads go straight to Cloudinary instead.
 
-**Email** is set up in **Store settings → Email**: SMTP (Gmail with an app password, Outlook, Zoho, your host) or Resend. Passwords and keys are stored encrypted, and you can send a test email from there. **Until email is set up, nothing is sent at all.** Orders still work: the confirmation page tells customers to bookmark their order link, and staff invitations show a link to pass on by hand.
+**Email** is set up with environment variables (in Vercel): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` for any SMTP server (Gmail with an app password, Outlook, Zoho, your host), or `RESEND_API_KEY`, plus `EMAIL_FROM`. The login is never stored in the database or shown in the admin. **Settings → Email** shows how email is sent and can send a test email. **Until email is set up, nothing is sent at all.** Orders still work: the confirmation page tells customers to bookmark their order link, and staff invitations show a link to pass on by hand.
 
 ## Background jobs and emails
 
