@@ -113,7 +113,7 @@ const route = (c: { lon: number; lat: number }) => {
 const STEPS = [
   {
     icon: BadgeCheckIcon,
-    title: "100% genuine stock",
+    title: "Sourced from trusted brands",
     body: "Every product comes from the brand or an authorised distributor, never the grey market.",
   },
   {
@@ -193,7 +193,7 @@ export function DeliveryStory() {
           scrollTrigger: {
             trigger: el,
             start: "top top+=128",
-            end: "+=2600",
+            end: "+=1800",
             pin: true,
             scrub: 0.6,
             snap: {

@@ -31,7 +31,7 @@ export const viewport: Viewport = { themeColor: "#0f1d38" };
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={brandFont.variable}>
+    <html lang="en" className={brandFont.variable} suppressHydrationWarning>
       <body>
         {children}
         {/* Cookie-free page-view analytics and Core Web Vitals (only active on Vercel). */}

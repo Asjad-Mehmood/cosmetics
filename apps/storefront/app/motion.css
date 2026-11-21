@@ -505,3 +505,79 @@ html.lenis body {
 .lenis.lenis-smooth iframe {
   pointer-events: none;
 }
+
+/*
+ * Preloader (components/preloader.tsx). Hidden unless the inline script has
+ * set html[data-preload] (so never without JavaScript, or with Reduce
+ * motion). While it shows, the page's CSS animations wait, so they play as
+ * the page is revealed rather than behind the cover.
+ */
+#preloader {
+  display: none;
+}
+html:is([data-preload], [data-preload-out]) #preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: var(--color-canvas);
+}
+html[data-preload] #main :is(*, *::before, *::after) {
+  animation-play-state: paused !important;
+}
+.preloader-inner {
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  animation: preloader-in 600ms var(--ease-out) both;
+}
+.preloader-track {
+  width: 10rem;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--color-line);
+}
+.preloader-bar {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-500);
+  transform-origin: left;
+  animation: preloader-bar 3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+/* Ready: the bar completes, the logo lifts away and the cover slides up. */
+html[data-preload-out] #preloader {
+  pointer-events: none;
+  animation: preloader-out 650ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+html[data-preload-out] .preloader-inner {
+  opacity: 0;
+  translate: 0 -16px;
+  transition:
+    opacity 250ms ease,
+    translate 400ms var(--ease-out);
+}
+html[data-preload-out] .preloader-bar {
+  animation: none;
+  transform: scaleX(1);
+}
+@keyframes preloader-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+@keyframes preloader-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.85);
+  }
+}
+@keyframes preloader-out {
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}

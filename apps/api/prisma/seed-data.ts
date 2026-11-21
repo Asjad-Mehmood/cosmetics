@@ -596,7 +596,8 @@ export const settings: Record<string, unknown> = {
   "returns.windowDays": 7,
   "reviews.autoApprove": false,
   "notifications.dailyDigest": true,
-  "announcement.text": "100% genuine products · Free delivery over Rs 3,000 in major cities",
+  "announcement.text":
+    "Cash on Delivery across Pakistan · Free delivery over Rs 3,000 in major cities",
   "announcement.enabled": true,
 };
 

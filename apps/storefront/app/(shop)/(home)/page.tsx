@@ -168,10 +168,6 @@ export default async function HomePage() {
       </section>
 
       <Container className="pt-14">
-        <DeliveryStory />
-      </Container>
-
-      <Container className="pt-14">
         <ProductRail
           title="New arrivals"
           subtitle="Fresh launches and restocks"
@@ -306,6 +302,10 @@ export default async function HomePage() {
 
       <Container className="pt-6">
         <RecentlyViewed />
+      </Container>
+
+      <Container className="pt-14">
+        <DeliveryStory />
       </Container>
 
       <div className="-mb-24 pt-14">

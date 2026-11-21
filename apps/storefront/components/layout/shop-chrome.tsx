@@ -1,15 +1,18 @@
 import type { CategoryDTO, CollectionDTO, HomeContentDTO } from "@store/types";
+import { Logo } from "@store/ui";
 import type { ReactNode } from "react";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { GsapScenes } from "@/components/gsap-scenes";
 import { PhotoTransition } from "@/components/photo-transition";
+import { Preloader } from "@/components/preloader";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Footer } from "@/components/layout/footer";
 import { Header, TopBar } from "@/components/layout/header";
 import { NavigationFeedback, RouteView } from "@/components/layout/navigation-feedback";
 import { Providers } from "@/components/providers";
 import { SiteProvider } from "@/components/site-context";
+import { PRELOAD_SCRIPT } from "@/lib/preloader";
 import { getDataSafe } from "@/lib/server-api";
 
 /** The shop's header, footer, cart and mobile tab bar around a page. */
@@ -23,6 +26,16 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0">
+      {/* The preloader: shown from the first paint until the page is ready. */}
+      <script dangerouslySetInnerHTML={{ __html: PRELOAD_SCRIPT }} />
+      <div id="preloader" aria-hidden="true">
+        <div className="preloader-inner">
+          <Logo imgClassName="h-10 sm:h-12" />
+          <span className="preloader-track">
+            <span className="preloader-bar" />
+          </span>
+        </div>
+      </div>
       <Providers>
         <SiteProvider
           value={{
@@ -50,6 +63,7 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           <Footer categories={categories} contact={contact} />
           <BottomNav />
           <CartDrawer />
+          <Preloader />
         </SiteProvider>
       </Providers>
     </div>

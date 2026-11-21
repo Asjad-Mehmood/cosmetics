@@ -21,7 +21,7 @@ export function PromiseMarquee() {
   const pausedRef = useRef(false);
   const loopRef = useRef<{ pause: () => void; resume: () => void } | null>(null);
   const items = [
-    { icon: BadgeCheckIcon, text: "100% genuine products" },
+    { icon: BadgeCheckIcon, text: "Trusted brands" },
     { icon: CashIcon, text: "Cash on Delivery" },
     {
       icon: TruckIcon,

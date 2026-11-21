@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadGsap, lowPower } from "@/lib/gsap";
+import { whenShown } from "@/lib/preloader";
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 
 const INTERVAL = 6000;
@@ -85,7 +86,8 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
     );
     if (!ready || !title) return;
     let revert: (() => void) | undefined;
-    void ready.then(({ gsap, SplitText }) => {
+    // Behind the preloader, wait until the page is revealed.
+    void Promise.all([ready, whenShown()]).then(([{ gsap, SplitText }]) => {
       const split = SplitText.create(title, { type: "chars,words", mask: "words" });
       const tween = gsap.from(split.chars, {
         yPercent: 120,

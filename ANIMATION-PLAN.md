@@ -336,6 +336,14 @@ Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, al
 - **Phones:** a swipeable row.
 - **Without GSAP:** a grid of five cards.
 
+**Preloader** (`components/preloader.tsx`, `lib/preloader.ts`)
+
+- A white cover with the logo and a thin orange bar shows from the first paint. It lifts (slides up) once everything the first screen needs is ready: GSAP and its plugins, every scroll scene set up, the delivery map, the fonts and the photos on screen. Then the hero text and the page's entrance animations play.
+- While it shows, the page's CSS animations wait, so they play as the page is revealed, not behind the cover.
+- It shows for at least 0.45 s (so a fast load doesn't flash) and at most 5 s (slow connections still see the shop). If the app fails to start, it lifts itself after 6 s.
+- It is skipped with Reduce motion and without JavaScript, and it only runs on a full page load, not when moving between pages.
+- The delivery story now sits near the end of the home page, just above the newsletter, and its pinned scroll is shorter (1,800 px).
+
 **Smooth scrolling with Lenis** (`components/smooth-scroll.tsx`)
 
 - With a mouse or trackpad, the page glides to a stop instead of jumping by notches. Lenis runs on GSAP's clock, so the pinned map, the sideways categories and the parallax all move in step with it.
