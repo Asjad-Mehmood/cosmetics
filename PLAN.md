@@ -625,7 +625,7 @@ Each phase is one pull request (or two for the large ones), merged only with CI 
 
 Built from TCS's API User Guide v1.0 (sandbox `devconnect.tcscourier.com`, production `ociconnect.tcscourier.com`).
 
-- **Setup** (admin **Settings → TCS courier**, Super Admin): turn TCS on, then enter the TCS account number, client ID and secret, API username and password, cost center code, service code (O = overnight) and the pickup details. The secret and password are stored encrypted and never shown again. **Test connection** checks the login and loads TCS's city list.
+- **Setup:** the TCS API login is kept **only in Vercel environment variables**: `TCS_ENV` (sandbox/production), `TCS_CLIENT_ID`, `TCS_CLIENT_SECRET`, `TCS_USERNAME`, `TCS_PASSWORD`, `TCS_ACCOUNT_NUMBER` and `TCS_COST_CENTER_CODE`. See DEPLOYMENT.md. It is never stored in the database, never sent to the browser, and can't be seen or changed in the admin, so a stolen admin login can't reveal it. In the admin, **Settings → TCS courier** (Super Admin) shows which of these are set or missing. It's also where you turn TCS on, set the service code and the pickup details, and press **Test connection**, which logs in to TCS and loads its city list.
 - **Booking** (order page → **TCS courier → Book with TCS**): the dialog suggests the TCS city matching the delivery address and the usual weight, and shows the cash the rider collects (the order total for unpaid Cash on Delivery, otherwise nothing). Booking saves the consignment number as the tracking number and marks the order **Packed**.
 - **Airway bill:** "Print airway bill" opens TCS's label PDF.
 - **Cancel:** a booking can be cancelled while the order is still Packed, before TCS collects it.
@@ -641,4 +641,4 @@ Built from TCS's API User Guide v1.0 (sandbox `devconnect.tcscourier.com`, produ
 - **To go live:**
   1. Get sandbox (UAT) credentials from TCS and book a test parcel.
   2. Ask TCS for production access; TCS says approval takes at least three working days.
-  3. Switch the environment to Production.
+  3. Set `TCS_ENV=production` and the production credentials in Vercel, then redeploy.

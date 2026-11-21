@@ -36,7 +36,7 @@ async function requireConfig(): Promise<
   if (!config.enabled || !config.configured || !config.credentials) {
     throw new AppError(
       ErrorCode.CONFLICT,
-      "TCS isn't set up yet. Fill in the TCS details in Store settings → TCS courier.",
+      "TCS isn't set up yet. Add the TCS login to the server's environment variables, then turn TCS on in Settings → TCS courier.",
       undefined,
       409,
     );

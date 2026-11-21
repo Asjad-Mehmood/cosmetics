@@ -127,7 +127,7 @@ async function login(c: TcsCredentials): Promise<Tokens> {
   const bearer = result.accessToken ?? result.accesstoken;
   if (!authRes.ok || !bearer) {
     throw new TcsError(
-      "TCS didn't accept the client ID and secret. Check them in Store settings → TCS.",
+      "TCS didn't accept the client ID and secret. Check TCS_CLIENT_ID and TCS_CLIENT_SECRET on the server.",
       401,
     );
   }
@@ -140,7 +140,7 @@ async function login(c: TcsCredentials): Promise<Tokens> {
   const access = (token.accesstoken ?? token.accessToken) as string | undefined;
   if (!tokenRes.ok || !access) {
     throw new TcsError(
-      "TCS didn't accept the username and password. Check them in Store settings → TCS.",
+      "TCS didn't accept the username and password. Check TCS_USERNAME and TCS_PASSWORD on the server.",
       401,
     );
   }
@@ -160,7 +160,8 @@ async function authed(
     tokens.delete(cacheKey(c));
     res = await call(await login(c));
   }
-  if (res.status === 401) throw new TcsError("TCS refused the login. Check the TCS settings.", 401);
+  if (res.status === 401)
+    throw new TcsError("TCS refused the login. Check the TCS_* environment variables.", 401);
   return res;
 }
 

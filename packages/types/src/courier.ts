@@ -1,15 +1,17 @@
-/** TCS courier settings as the admin sees them (secrets are never sent back). */
+/**
+ * TCS courier settings as the admin sees them. The TCS API login (client ID
+ * and secret, username, password, account and cost center) lives only in the
+ * server's environment variables, never in the database or the admin.
+ */
 export interface TcsSettingsDTO {
   enabled: boolean;
-  /** "sandbox" while testing with TCS's UAT credentials, then "production". */
+  /** From TCS_ENV on the server. */
   environment: "sandbox" | "production";
-  clientId: string;
-  hasClientSecret: boolean;
-  username: string;
-  hasPassword: boolean;
-  /** TCS account number (tcsaccount), e.g. 04011K1. */
+  /** Required environment variables that aren't set yet on the server. */
+  missingEnv: string[];
+  /** From TCS_ACCOUNT_NUMBER, shown so staff can see which account is used. */
   accountNumber: string;
-  /** Cost center code TCS set up for the store's pickup address. */
+  /** From TCS_COST_CENTER_CODE. */
   costCenterCode: string;
   /** TCS service, e.g. "O" (overnight). */
   serviceCode: string;
@@ -20,7 +22,7 @@ export interface TcsSettingsDTO {
   shipperMobile: string;
   /** Default parcel weight in kg when booking. */
   defaultWeightKg: number;
-  /** True when everything needed to book is filled in. */
+  /** True when everything needed to book is in place. */
   configured: boolean;
 }
 

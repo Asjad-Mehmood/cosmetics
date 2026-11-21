@@ -2,16 +2,12 @@ import { z } from "zod";
 
 const text = (max: number) => z.string().trim().max(max);
 
-/** Saving the TCS settings. Leave a secret out (or empty) to keep the stored one. */
+/**
+ * Saving the TCS settings in the admin. Only operational details: the TCS API
+ * login is set in the server's environment variables, not here.
+ */
 export const tcsSettingsSchema = z.object({
   enabled: z.boolean(),
-  environment: z.enum(["sandbox", "production"]),
-  clientId: text(50),
-  clientSecret: text(500).optional(),
-  username: text(100),
-  password: text(200).optional(),
-  accountNumber: text(12),
-  costCenterCode: text(20),
   serviceCode: text(6).min(1, "Enter the TCS service code, e.g. O"),
   shipperName: text(50),
   shipperAddress: text(120),

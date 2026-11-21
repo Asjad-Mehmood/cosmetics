@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { env } from "../src/config/env";
 import { prisma } from "../src/lib/prisma";
 import { setTcsFetchForTests } from "../src/modules/couriers/tcs.client";
 import { matchCity, statusForCheckpoint, tcsMobile } from "../src/modules/couriers/tcs.service";
@@ -74,15 +75,26 @@ function fakeTcs(input: string | URL | Request, init?: RequestInit): Promise<Res
   }
 }
 
+/** The TCS login, as it would be set in Vercel's environment variables. */
+const TCS_ENV = {
+  TCS_ENV: "sandbox",
+  TCS_CLIENT_ID: "205659575",
+  TCS_CLIENT_SECRET: "secret",
+  TCS_USERNAME: "store",
+  TCS_PASSWORD: "pass",
+  TCS_ACCOUNT_NUMBER: "04011K1",
+  TCS_COST_CENTER_CODE: "LHR-01",
+} as const;
+type TcsEnvKey = keyof typeof TCS_ENV;
+const setTcsEnv = (on: boolean) => {
+  for (const [k, v] of Object.entries(TCS_ENV)) {
+    (env as Record<string, unknown>)[k] = on ? v : k === "TCS_ENV" ? "sandbox" : undefined;
+  }
+};
+
+/** What the admin can edit: on/off and pickup details only. */
 const SETTINGS = {
   enabled: true,
-  environment: "sandbox",
-  clientId: "205659575",
-  clientSecret: "secret",
-  username: "store",
-  password: "pass",
-  accountNumber: "04011K1",
-  costCenterCode: "LHR-01",
   serviceCode: "O",
   shipperName: "Amazon Group",
   shipperAddress: "Main Boulevard, Gulberg III",
@@ -91,9 +103,13 @@ const SETTINGS = {
   defaultWeightKg: 0.5,
 };
 
+const saved = Object.fromEntries(
+  Object.keys(TCS_ENV).map((k) => [k, (env as Record<string, unknown>)[k as TcsEnvKey]]),
+);
 beforeAll(() => setTcsFetchForTests(fakeTcs as typeof fetch));
 afterAll(async () => {
   setTcsFetchForTests(null);
+  Object.assign(env, saved);
   await prisma.setting.deleteMany({ where: { key: { startsWith: "tcs." } } });
 });
 
@@ -115,36 +131,55 @@ describe("TCS courier", () => {
     expect(statusForCheckpoint("Booked")).toBeNull();
   });
 
-  it("can't book until TCS is set up; settings keep secrets hidden", async () => {
+  it("needs the TCS login in the environment; the admin can't see or set it", async () => {
     await prisma.setting.deleteMany({ where: { key: { startsWith: "tcs." } } });
+    setTcsEnv(false);
     const { agent: support } = await signedInAgent("SUPPORT");
+    const { agent: owner } = await signedInAgent("SUPER_ADMIN");
     const order = await placeCodOrder();
+
+    // Turned on in the admin, but no TCS login on the server: can't book.
+    await owner.put("/api/v1/admin/couriers/tcs").send(SETTINGS);
+    const status = await owner.get("/api/v1/admin/couriers/tcs");
+    expect(status.body.data.configured).toBe(false);
+    expect(status.body.data.missingEnv).toEqual([
+      "TCS_CLIENT_ID",
+      "TCS_CLIENT_SECRET",
+      "TCS_USERNAME",
+      "TCS_PASSWORD",
+      "TCS_ACCOUNT_NUMBER",
+      "TCS_COST_CENTER_CODE",
+    ]);
     const blocked = await support
       .post(`/api/v1/admin/orders/${order.number}/tcs`)
       .send({ cityName: "LAHORE", weightKg: 0.5, pieces: 1 });
     expect(blocked.status).toBe(409);
-    expect(blocked.body.error.message).toContain("TCS isn't set up");
+    expect(blocked.body.error.message).toContain("environment variables");
+    expect((await owner.post("/api/v1/admin/couriers/tcs/test")).status).toBe(400);
 
-    // Support staff can't see or change the TCS login.
+    // A login sent from the admin is ignored and never stored.
+    await owner
+      .put("/api/v1/admin/couriers/tcs")
+      .send({ ...SETTINGS, clientId: "x", clientSecret: "stolen?", password: "nope" });
+    const keys = (await prisma.setting.findMany({ where: { key: { startsWith: "tcs." } } })).map(
+      (r) => r.key,
+    );
+    expect(keys.some((k) => /secret|password|clientId|username/i.test(k))).toBe(false);
+
+    // Support staff can't see the TCS settings at all.
     expect((await support.get("/api/v1/admin/couriers/tcs")).status).toBe(403);
-    const { agent: owner } = await signedInAgent("SUPER_ADMIN");
-    const saved = await owner.put("/api/v1/admin/couriers/tcs").send(SETTINGS);
-    expect(saved.status).toBe(200);
-    expect(saved.body.data).toMatchObject({
+
+    // With the login in the environment, it's ready, and the secret is never sent to the browser.
+    setTcsEnv(true);
+    const ready = await owner.get("/api/v1/admin/couriers/tcs");
+    expect(ready.body.data).toMatchObject({
       configured: true,
-      hasClientSecret: true,
-      hasPassword: true,
+      missingEnv: [],
+      environment: "sandbox",
+      accountNumber: "04011K1",
       shipperMobile: "03001112223",
     });
-    expect(JSON.stringify(saved.body)).not.toContain('secret"');
-    const stored = await prisma.setting.findUnique({ where: { key: "tcs.password" } });
-    expect(String(stored?.value)).toMatch(/^enc:v1:/);
-
-    // Saving again without secrets keeps them.
-    const again = await owner
-      .put("/api/v1/admin/couriers/tcs")
-      .send({ ...SETTINGS, clientSecret: "", password: "" });
-    expect(again.body.data.hasPassword).toBe(true);
+    expect(JSON.stringify(ready.body)).not.toMatch(/"secret"|"pass"|205659575/);
     const test = await owner.post("/api/v1/admin/couriers/tcs/test");
     expect(test.status).toBe(200);
     expect(test.body.data.cities).toBe(3);

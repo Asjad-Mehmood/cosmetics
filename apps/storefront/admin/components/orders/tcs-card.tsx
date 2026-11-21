@@ -189,10 +189,10 @@ export function TcsCard({ order }: { order: AdminOrderDTO }) {
             TCS isn’t set up yet.{" "}
             {isOwner ? (
               <Link href="/settings/tcs" className="underline">
-                Enter your TCS account details
+                See what’s missing in Settings → TCS courier
               </Link>
             ) : (
-              "Ask the store owner to enter the TCS account details in Store settings."
+              "Ask the store owner to finish the TCS setup."
             )}
           </p>
         ) : (

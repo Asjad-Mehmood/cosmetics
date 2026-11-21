@@ -17,12 +17,12 @@ import {
 } from "./tcs.service";
 import { loadTcsConfig, saveTcsSettings, tcsSettingsDTO } from "./tcs.settings";
 
-/** Store settings → TCS courier (Super Admin: holds the TCS login). */
+/** Settings → TCS courier (Super Admin). The TCS login itself is in the server's environment. */
 export const adminTcsSettingsRouter = defineRoutes("/admin/couriers/tcs", "Admin: Couriers", [
   route({
     method: "get",
     path: "",
-    summary: "TCS courier settings (secrets are never returned)",
+    summary: "TCS courier settings, and which TCS environment variables are missing",
     access: "SUPER_ADMIN",
     handler: async () => ok(await tcsSettingsDTO()),
   }),
@@ -45,7 +45,7 @@ export const adminTcsSettingsRouter = defineRoutes("/admin/couriers/tcs", "Admin
   route({
     method: "post",
     path: "/test",
-    summary: "Check the saved TCS login works",
+    summary: "Check the TCS login in the environment variables works",
     access: "SUPER_ADMIN",
     handler: async () => {
       const config = await loadTcsConfig();

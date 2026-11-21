@@ -5,30 +5,29 @@ import { Badge, Button, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
-import { Select, Switch } from "@/admin/components/ui/controls";
+import { Switch } from "@/admin/components/ui/controls";
 import { ErrorState, PageHeader, Section } from "@/admin/components/ui/page";
 import { api, ApiError, errorMessage } from "@/admin/lib/api";
 
 const QUERY_KEY = ["admin", "settings", "tcs"];
 
-type Form = Omit<
+type Form = Pick<
   TcsSettingsDTO,
-  "hasClientSecret" | "hasPassword" | "configured" | "defaultWeightKg"
-> & {
-  clientSecret: string;
-  password: string;
-  defaultWeightKg: string;
-};
+  "enabled" | "serviceCode" | "shipperName" | "shipperAddress" | "shipperCity" | "shipperMobile"
+> & { defaultWeightKg: string };
+
+/** The TCS login, set in Vercel (never in the admin). */
+const ENV_VARS: [string, string][] = [
+  ["TCS_CLIENT_ID", "Client ID"],
+  ["TCS_CLIENT_SECRET", "Client secret"],
+  ["TCS_USERNAME", "API username"],
+  ["TCS_PASSWORD", "API password"],
+  ["TCS_ACCOUNT_NUMBER", "Account number"],
+  ["TCS_COST_CENTER_CODE", "Cost center code"],
+];
 
 const toForm = (s: TcsSettingsDTO): Form => ({
   enabled: s.enabled,
-  environment: s.environment,
-  clientId: s.clientId,
-  clientSecret: "",
-  username: s.username,
-  password: "",
-  accountNumber: s.accountNumber,
-  costCenterCode: s.costCenterCode,
   serviceCode: s.serviceCode,
   shipperName: s.shipperName,
   shipperAddress: s.shipperAddress,
@@ -132,15 +131,58 @@ export function TcsSettings() {
         description="Book parcels with TCS from an order, print the airway bill, and let TCS tracking update orders automatically."
         actions={
           <Badge tone={s.enabled && s.configured ? "success" : "warning"}>
-            {s.enabled && s.configured ? "Connected" : s.configured ? "Turned off" : "Not set up"}
+            {s.enabled && s.configured ? "Ready" : s.configured ? "Turned off" : "Not set up"}
           </Badge>
         }
       />
 
       <Section
-        title="TCS API account"
-        description="TCS gives these when you sign up for API access (start with the sandbox, then ask TCS for production access)."
+        title="TCS login"
+        description="For security, the TCS login is kept only on the server, in Vercel → Settings → Environment Variables. It can't be seen or changed here, so a stolen admin password can't reveal it."
       >
+        <ul className="grid gap-2 text-sm sm:grid-cols-2">
+          {ENV_VARS.map(([name, label]) => {
+            const missing = s.missingEnv.includes(name);
+            return (
+              <li
+                key={name}
+                className="border-line flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+              >
+                <span>
+                  <span className="block font-medium">{label}</span>
+                  <code className="text-muted text-xs">{name}</code>
+                </span>
+                <Badge tone={missing ? "warning" : "success"}>{missing ? "Missing" : "Set"}</Badge>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="text-muted mt-3 text-sm">
+          Environment:{" "}
+          <strong className="text-ink">
+            {s.environment === "production" ? "Production (real parcels)" : "Sandbox (testing)"}
+          </strong>{" "}
+          (<code>TCS_ENV</code>)
+          {s.accountNumber && (
+            <>
+              {" · "}Account <strong className="text-ink">{s.accountNumber}</strong>
+            </>
+          )}
+          {s.costCenterCode && (
+            <>
+              {" · "}Cost center <strong className="text-ink">{s.costCenterCode}</strong>
+            </>
+          )}
+        </p>
+        {s.missingEnv.length > 0 && (
+          <p className="bg-surface mt-3 rounded-lg p-3 text-sm">
+            Add the missing values in Vercel (Project → Settings → Environment Variables, for
+            Production), then redeploy. TCS gives them when you sign up for API access.
+          </p>
+        )}
+      </Section>
+
+      <Section title="Bookings">
         <div className="grid gap-4 sm:grid-cols-2">
           <Switch
             className="sm:col-span-2"
@@ -149,30 +191,6 @@ export function TcsSettings() {
             checked={form.enabled}
             onChange={(e) => set("enabled", e.target.checked)}
           />
-          <Field label="Environment" htmlFor={`${uid}-env`}>
-            <Select
-              id={`${uid}-env`}
-              value={form.environment}
-              onChange={(e) => set("environment", e.target.value as Form["environment"])}
-            >
-              <option value="sandbox">Sandbox (testing)</option>
-              <option value="production">Production (real parcels)</option>
-            </Select>
-          </Field>
-          {text("accountNumber", "TCS account number", { placeholder: "e.g. 04011K1" })}
-          {text("clientId", "Client ID")}
-          {text("clientSecret", "Client secret", {
-            type: "password",
-            placeholder: s.hasClientSecret ? "Saved. Leave empty to keep it" : "",
-          })}
-          {text("username", "API username")}
-          {text("password", "API password", {
-            type: "password",
-            placeholder: s.hasPassword ? "Saved. Leave empty to keep it" : "",
-          })}
-          {text("costCenterCode", "Cost center code", {
-            hint: "Set up by TCS for your pickup address.",
-          })}
           {text("serviceCode", "Service code", { hint: "O is overnight. Ask TCS for others." })}
         </div>
       </Section>
@@ -198,15 +216,12 @@ export function TcsSettings() {
           type="button"
           variant="outline"
           loading={test.isPending}
-          disabled={!s.hasClientSecret || !s.hasPassword}
+          disabled={s.missingEnv.length > 0}
           onClick={() => test.mutate()}
         >
           Test connection
         </Button>
       </div>
-      <p className="text-muted text-xs">
-        The client secret and password are stored encrypted and are never shown again.
-      </p>
     </form>
   );
 }
