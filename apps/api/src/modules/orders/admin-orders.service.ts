@@ -168,11 +168,18 @@ export async function toAdminOrderDTO(o: AdminFullOrder): Promise<AdminOrderDTO>
         }
       : null,
     adminNotes: o.adminNotes,
+    courierBookedAt: o.courierBookedAt?.toISOString() ?? null,
+    courierSyncedAt: o.courierSyncedAt?.toISOString() ?? null,
     timeline: o.history.map((h) => ({
       status: h.status,
       note: h.note,
       at: h.createdAt.toISOString(),
-      by: h.changedBy ? (names.get(h.changedBy) ?? "Staff") : null,
+      by:
+        h.changedBy === "courier:tcs"
+          ? "TCS tracking"
+          : h.changedBy
+            ? (names.get(h.changedBy) ?? "Staff")
+            : null,
     })),
     payments: o.payments.map((p) => ({
       id: p.id,

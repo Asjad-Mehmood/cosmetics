@@ -69,6 +69,17 @@ const envSchema = z
     /** Minutes an unpaid card order holds its stock. */
     PAYMENT_RESERVATION_MINUTES: z.coerce.number().int().min(5).max(120).default(15),
 
+    // TCS courier (optional). The TCS API login lives only here, in the hosting
+    // environment (Vercel → Settings → Environment Variables), never in the
+    // database or the admin. TCS_ENV is "sandbox" while testing, then "production".
+    TCS_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
+    TCS_CLIENT_ID: z.string().optional(),
+    TCS_CLIENT_SECRET: z.string().optional(),
+    TCS_USERNAME: z.string().optional(),
+    TCS_PASSWORD: z.string().optional(),
+    TCS_ACCOUNT_NUMBER: z.string().max(12).optional(),
+    TCS_COST_CENTER_CODE: z.string().max(20).optional(),
+
     // Google sign-in (optional). Both must be set to show "Continue with Google".
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),

@@ -386,6 +386,8 @@ export interface OrderDTO {
   paymentStatus: PaymentStatus | null;
   trackingNumber: string | null;
   courier: string | null;
+  /** The courier's latest tracking update, e.g. "Arrived at TCS Facility, LAHORE". */
+  courierStatus: string | null;
   customerNote: string | null;
   timeline: OrderEventDTO[];
   /** Unpaid card order: payment can still be completed until this time. */
@@ -418,6 +420,8 @@ export interface OrderTrackingDTO {
   city: string;
   trackingNumber: string | null;
   courier: string | null;
+  /** The courier's latest tracking update, e.g. "Arrived at TCS Facility, LAHORE". */
+  courierStatus: string | null;
   items: Pick<OrderItemDTO, "title" | "size" | "color" | "quantity">[];
   timeline: OrderEventDTO[];
 }

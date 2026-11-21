@@ -77,6 +77,7 @@ export const adminNav: NavSection[] = [
       { label: "Staff", href: "/staff", minRole: SUPER_ADMIN, phase: 4 },
       { label: "Store settings", href: "/settings", minRole: SUPER_ADMIN, phase: 4 },
       { label: "Email", href: "/settings/email", minRole: SUPER_ADMIN, phase: 5 },
+      { label: "TCS courier", href: "/settings/tcs", minRole: SUPER_ADMIN, phase: 5 },
       { label: "Activity log", href: "/audit-log", minRole: SUPER_ADMIN, phase: 4 },
     ],
   },

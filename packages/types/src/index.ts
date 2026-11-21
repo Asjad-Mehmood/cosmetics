@@ -6,3 +6,4 @@ export * from "./dto";
 export * from "./enums";
 export * from "./money";
 export * from "./prescription";
+export * from "./courier";

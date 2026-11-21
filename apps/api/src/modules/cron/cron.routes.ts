@@ -8,6 +8,7 @@ import { sendCartReminders } from "../engagement/abandoned-carts";
 import { sendDailyDigest } from "../engagement/digest";
 import { expireUnpaidOrders } from "../orders/lifecycle";
 import { sendDueReviewRequests } from "../reviews/review-request";
+import { syncAllTcsTracking } from "../couriers/tcs.service";
 
 const digest = (s: string) => createHash("sha256").update(s).digest();
 
@@ -16,6 +17,7 @@ const DAILY_JOBS = {
   expireOrders: () => expireUnpaidOrders(),
   cartReminders: () => sendCartReminders(),
   reviewRequests: () => sendDueReviewRequests(),
+  tcsTracking: () => syncAllTcsTracking(),
   dailyDigest: () => sendDailyDigest(),
 } satisfies Record<string, () => Promise<unknown>>;
 

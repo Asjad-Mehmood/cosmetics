@@ -55,6 +55,25 @@ If you add a custom domain, also add `STOREFRONT_URL` = `https://your-domain`.
 Optional: `REDIS_URL` (e.g. a free Upstash Redis) shares rate limits between
 function instances. Without it each instance keeps its own.
 
+Optional, for booking parcels with **TCS** from the admin. TCS provides these
+when you sign up for API access. Add them for **Production** only, and only
+when you are ready to book real parcels:
+
+| Name                   | Value                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| `TCS_ENV`              | `sandbox` while testing, `production` once TCS approves it |
+| `TCS_CLIENT_ID`        | client ID from TCS                                         |
+| `TCS_CLIENT_SECRET`    | client secret from TCS                                     |
+| `TCS_USERNAME`         | API username from TCS                                      |
+| `TCS_PASSWORD`         | API password from TCS                                      |
+| `TCS_ACCOUNT_NUMBER`   | your TCS account number, e.g. `04011K1`                    |
+| `TCS_COST_CENTER_CODE` | cost center code TCS set up for your pickup address        |
+
+The TCS login is kept only here, never in the database or the admin, so nobody
+can read it from the website. After adding or changing them, **redeploy**. Then
+in the admin, **Settings → TCS courier**: check the pickup details, turn TCS on
+and press **Test connection**.
+
 ## 4. Deploy
 
 **Deployments → Redeploy** (or push to `main`). The build:

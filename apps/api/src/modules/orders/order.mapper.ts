@@ -68,6 +68,7 @@ export function toOrderDTO(o: FullOrder, returnWindowDays = 14): OrderDTO {
     paymentStatus: o.payments[0]?.status ?? null,
     trackingNumber: o.trackingNumber,
     courier: o.courier,
+    courierStatus: o.courierStatus,
     customerNote: o.customerNote,
     timeline: timeline(o),
     payBy: canPay(o) ? o.reservedUntil!.toISOString() : null,
@@ -101,6 +102,7 @@ export function toTracking(o: FullOrder): OrderTrackingDTO {
     city: (o.shippingAddress as unknown as OrderAddressDTO).city,
     trackingNumber: o.trackingNumber,
     courier: o.courier,
+    courierStatus: o.courierStatus,
     items: o.items.map((i) => ({
       title: i.productTitle,
       size: i.size,

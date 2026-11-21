@@ -122,6 +122,7 @@ describe("daily cron", () => {
       "expireOrders",
       "cartReminders",
       "reviewRequests",
+      "tcsTracking",
       "dailyDigest",
     ]);
     expect(Object.values(res.body.data)).not.toContain("failed");

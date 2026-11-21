@@ -10,3 +10,4 @@ export * from "./product";
 export * from "./taxonomy";
 export * from "./upload";
 export * from "./prescription";
+export * from "./courier";

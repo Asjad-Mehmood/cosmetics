@@ -620,3 +620,25 @@ Each phase is one pull request (or two for the large ones), merged only with CI 
 - The customer's tracker (order page and Track order) shows six steps with the date and time of each, vertical on phones and horizontal on wider screens. "In transit" shows on the Shipped step.
 - When an order goes out for delivery, the customer is emailed that it arrives today and, for Cash on Delivery, how much cash to keep ready.
 - Admin: the usual next step is the main button and the others are secondary. "To fulfil" includes packed orders, and the "With courier" filter shows shipped, in-transit and out-for-delivery orders.
+
+## TCS courier integration
+
+Built from TCS's API User Guide v1.0 (sandbox `devconnect.tcscourier.com`, production `ociconnect.tcscourier.com`).
+
+- **Setup:** the TCS API login is kept **only in Vercel environment variables**: `TCS_ENV` (sandbox/production), `TCS_CLIENT_ID`, `TCS_CLIENT_SECRET`, `TCS_USERNAME`, `TCS_PASSWORD`, `TCS_ACCOUNT_NUMBER` and `TCS_COST_CENTER_CODE`. See DEPLOYMENT.md. It is never stored in the database, never sent to the browser, and can't be seen or changed in the admin, so a stolen admin login can't reveal it. In the admin, **Settings → TCS courier** (Super Admin) shows which of these are set or missing. It's also where you turn TCS on, set the service code and the pickup details, and press **Test connection**, which logs in to TCS and loads its city list.
+- **Booking** (order page → **TCS courier → Book with TCS**): the dialog suggests the TCS city matching the delivery address and the usual weight, and shows the cash the rider collects (the order total for unpaid Cash on Delivery, otherwise nothing). Booking saves the consignment number as the tracking number and marks the order **Packed**.
+- **Airway bill:** "Print airway bill" opens TCS's label PDF.
+- **Cancel:** a booking can be cancelled while the order is still Packed, before TCS collects it.
+- **Tracking:** TCS checkpoints move the order forward automatically, and never backwards:
+  - Arrived/departed TCS facility → **In transit**
+  - Out for delivery → **Out for delivery**
+  - Delivered → **Delivered**, and the cash is marked collected
+  - The usual customer emails go out at each step.
+  - Returns and refusals aren't applied automatically. TCS's wording shows on the order for staff to act on.
+- **When tracking is checked:** whenever a customer opens their order or Track order (at most every 30 minutes), when staff press **Refresh tracking**, and in the daily scheduled job for every parcel still with TCS.
+- **Customers** see the TCS consignment number and TCS's latest update on their order and on Track order.
+- **Migration** `20261121170000_courier_booking` adds three nullable columns to `Order` (`courierBookedAt`, `courierStatus`, `courierSyncedAt`) and one index.
+- **To go live:**
+  1. Get sandbox (UAT) credentials from TCS and book a test parcel.
+  2. Ask TCS for production access; TCS says approval takes at least three working days.
+  3. Set `TCS_ENV=production` and the production credentials in Vercel, then redeploy.

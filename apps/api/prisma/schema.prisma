@@ -405,6 +405,12 @@ model Order {
   shippingMethod    String
   trackingNumber    String?
   courier           String?
+  /// When the parcel was booked through a courier's API (TCS), so it can be cancelled or its label printed.
+  courierBookedAt   DateTime?
+  /// The courier's latest tracking status, e.g. "Arrived at TCS Facility, LAHORE".
+  courierStatus     String?
+  /// When tracking was last fetched from the courier.
+  courierSyncedAt   DateTime?
   customerNote      String?
   adminNotes        String?
   /// Stock reservation deadline for unpaid online orders.
@@ -435,6 +441,7 @@ model Order {
   @@index([status, reservedUntil])
   @@index([email])
   @@index([cartId])
+  @@index([courier, status])
 }
 
 model OrderItem {
