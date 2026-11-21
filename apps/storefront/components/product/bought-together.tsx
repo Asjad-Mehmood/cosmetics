@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { api, ApiError } from "@/lib/api";
 import { useUi } from "@/store/ui";
-import { PlusIcon } from "../icons";
+import { reducedMotion } from "@/lib/motion";
+import { CheckIcon, PlusIcon } from "../icons";
 import { isSingleOption } from "./quick-add";
 
 interface Item {
@@ -38,6 +39,7 @@ export function BoughtTogether({
   const addToCart = useAddToCart();
   const openCart = useUi((s) => s.openCart);
   const [adding, setAdding] = useState(false);
+  const [done, setDone] = useState<Set<string>>(() => new Set());
 
   const mine = product.variants.find((v) => v.stockStatus !== "out_of_stock");
   const others = related.filter(isSingleOption).slice(0, 2);
@@ -69,6 +71,7 @@ export function BoughtTogether({
 
   async function addAll() {
     setAdding(true);
+    setDone(new Set());
     try {
       for (const item of chosen) {
         let variantId = item.variantId;
@@ -77,7 +80,11 @@ export function BoughtTogether({
           variantId = detail.variants.find((v) => v.stockStatus !== "out_of_stock")?.id;
         }
         if (variantId) await addToCart.mutateAsync({ variantId, quantity: 1 });
+        // A ✓ on each photo as it goes in, one after another.
+        setDone((s) => new Set(s).add(item.key));
+        if (!reducedMotion()) await new Promise((r) => setTimeout(r, 120));
       }
+      if (!reducedMotion()) await new Promise((r) => setTimeout(r, 350));
       openCart();
     } catch (err) {
       toast.error(
@@ -91,9 +98,10 @@ export function BoughtTogether({
   return (
     <section
       aria-labelledby="together-heading"
+      data-gsap="reveal"
       className="border-line mt-14 rounded-3xl border p-5 sm:p-7"
     >
-      <h2 id="together-heading" className="text-xl font-bold tracking-tight">
+      <h2 id="together-heading" data-gsap="split" className="text-xl font-bold tracking-tight">
         Frequently bought together
       </h2>
       <div className="mt-5 grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
@@ -109,6 +117,11 @@ export function BoughtTogether({
               >
                 {item.image && (
                   <Image src={item.image} alt="" fill sizes="96px" className="object-cover" />
+                )}
+                {done.has(item.key) && (
+                  <span className="bg-success/85 animate-fade-in absolute inset-0 grid place-items-center text-white">
+                    <CheckIcon width={28} height={28} className="animate-check-in" />
+                  </span>
                 )}
               </span>
             </li>

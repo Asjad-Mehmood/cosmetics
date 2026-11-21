@@ -1,6 +1,6 @@
 # Animation Plan: Amazon Group storefront
 
-> **Status: phases 1–3 are built** (see the notes under each). Phases 4–8 are not started.
+> **Status: all eight phases are built** (see the notes under each).
 
 ## Goal
 
@@ -161,6 +161,17 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - These run off the existing React Query mutation states, with no fake delays.
 - Screen readers still hear the same text announcements; these already exist through `sonner` and live regions.
 
+> **Built (phase 4).** Shared pieces are in `apps/storefront/app/motion.css`,
+> `apps/storefront/lib/motion.ts` (`flyToCart`, `useFlash`, `shake`,
+> `useTweenedNumber`, `useSlidingHighlight`) and `apps/storefront/components/motion.tsx`
+> (`RollingNumber`, `TweenedMoney`, `DrawnCheck`, `Burst`, `Confetti`).
+>
+> - **Differences from the plan:**
+>   - The fly-to-cart takes 650 ms, not 450 ms. It is easier to follow.
+>   - The cart opens when the photo lands.
+>   - A removed cart line folds away while the request runs, and comes back if the request fails.
+>   - The coupon shake uses the Web Animations API, so the field keeps what was typed and keeps focus.
+
 ## Phase 5: Product page
 
 - **Gallery:**
@@ -171,6 +182,16 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - **Details tabs and accordion:** on mobile, sections open with an animated height using `interpolate-size: allow-keywords`; other browsers just open instantly. On desktop, the tab underline slides between tabs.
 - **Frequently bought together:** "Add all" adds the items one after another, 80 ms apart, with a ✓ on each.
 - **Reviews:** star bars fill when they scroll into view, once.
+
+> **Built (phase 5).**
+>
+> - **Gallery:** the photo cross-fades and the thumbnail ring slides.
+> - **Hover zoom:** eases in over 500 ms.
+> - **Sticky bar:** slides up instead of appearing.
+> - **Details:** the tab underline slides; on phones the accordion opens with an animated height (`.details-animated`).
+> - **Frequently bought together:** "Add all" puts a ✓ on each photo in turn.
+> - **Reviews:** the star bars fill as they scroll into view.
+> - **Low stock:** the dot pings.
 
 ## Phase 6: Home and listing pages
 
@@ -195,6 +216,16 @@ All of these come from the shared `Dialog` and the header components. Fix them o
   - The results count ticks to the new number.
 - **Shop by category / concern tiles:** the hover ring and icon lift already exist. Add a press effect on mobile.
 
+> **Built (phase 6).**
+>
+> - **Hero:** each slide's text comes in line by line, and the photo drifts closer.
+> - **Hero dot and timer:** the active dot fills as a progress bar, and the slide changes when it is full. Pausing on hover, on focus or in a hidden tab freezes both together.
+> - **`<Reveal>`** (`components/reveal.tsx`): sections and rails fade up the first time they scroll into view, and cards come in one after another. It uses an IntersectionObserver instead of scroll-driven CSS, because rails scroll sideways and the CSS version would not work inside them. Content on screen at load, content without JavaScript, and content under Reduce motion is never hidden.
+> - **Rails:** edge fades show there is more to scroll.
+> - **Cards and tiles:** cards lift on hover, cards and tiles press in on touch, and sale badges slide in.
+> - **Filters:** the results dim and blur slightly while loading, then the new cards fade up in turn. The first load is not animated, so LCP is not delayed.
+> - **Counts and chips:** the count ticks to its new value, and filter chips scale in.
+
 ## Phase 7: Checkout, orders and account
 
 - **Checkout:**
@@ -207,6 +238,13 @@ All of these come from the shared `Dialog` and the header components. Fix them o
 - **Order progress timeline:** the line fills up to the current step; the current step pulses gently twice.
 - **Account:** the address book, wishlist and returns lists use the same remove-collapse and add-fade as the cart.
 
+> **Built (phase 7).**
+>
+> - **Checkout:** sections fade up in turn, and the one being filled in is highlighted. A form error shakes so it is noticed after the scroll up. Checkout is one page, not separate steps, so the planned sliding between steps does not apply.
+> - **Order placed:** the check draws itself, confetti in the logo colours, and the text fades in.
+> - **Order progress:** the steps fill one after another, and the current step pulses twice.
+> - **Address book:** addresses fade in, and fade and shrink away while being deleted.
+
 ## Phase 8: Admin (keep it calm)
 
 Staff use the admin all day, so motion stays minimal:
@@ -215,6 +253,55 @@ Staff use the admin all day, so motion stays minimal:
 - Table rows fade when filtered.
 - Save buttons go spinner → ✓.
 - Nothing else.
+
+> **Built (phase 8).**
+>
+> - **Table rows:** new admin table rows fade in.
+> - **Save buttons:** a button that started a successful save shows a ✓ for 1.2 s. This is done once, in the admin's React Query `MutationCache`, so every save button gets it without changes to each form.
+
+## GSAP layer
+
+Added on request, on top of phases 1–8. GSAP 3.15 (free for commercial use, all plugins included) is used where CSS cannot do the job well.
+
+**Loading (`apps/storefront/lib/gsap.ts`)**
+
+- GSAP and its plugins (ScrollTrigger, SplitText, MotionPath, Physics2D, CustomEase) are loaded with a dynamic import after the page is interactive. They are not in the first-load JavaScript.
+- GSAP is never loaded at all with Reduce motion.
+- House easings are `ag.out` (0.16, 1, 0.3, 1) and `ag.pop`.
+
+**Scroll scenes (`components/gsap-scenes.tsx`)**
+
+- Switched on with `data-gsap` attributes, so server components can use them:
+  - `split`: heading words rise out of a mask, line by line.
+  - `reveal`: a block fades and rises into place.
+  - `stagger`: children arrive one by one, in ScrollTrigger batches.
+  - `zoom`: a panel grows into place, tied to the scroll.
+  - `parallax`: the photo inside moves slower than the page.
+  - `tilt`: 3D tilt towards the pointer.
+  - `magnetic`: a button is pulled towards the pointer and springs back.
+- They are set up again after each page change and for content that arrives later, and cleaned up with `gsap.context().revert()`.
+- Content on screen at load is never hidden or delayed, and nothing is hidden before GSAP has loaded.
+- SplitText keeps the heading's accessible name (`aria-label` on the heading, and the split pieces are `aria-hidden`).
+
+**Hero**
+
+- As the page scrolls, the text lifts away (with a slight blur instead of a fade, so contrast stays) and the photo moves slower.
+- Each new slide's headline comes in letter by letter.
+- The main button is magnetic.
+
+**Promise ticker** (`components/home/promise-marquee.tsx`)
+
+- An endless navy ticker that speeds up while scrolling, runs backwards when scrolling up, and slows on hover.
+- Without GSAP it is a still, wrapping row.
+
+**Fly to cart:** the photo pops, then follows a MotionPath curve into the cart icon, spinning and shrinking. A ring and a "+1" answer at the icon. If GSAP cannot load, the Web Animations version is used instead.
+
+**Order placed:** about 90 pieces of confetti in the logo colours, thrown up and falling with gravity (Physics2D).
+
+**Checks**
+
+- axe passes with GSAP running on the home, shop, category and product pages (after scrolling through every scene).
+- Full-motion tests cover GSAP loading, scroll-triggered entrances and the ticker.
 
 ## Testing and quality checks (every phase)
 

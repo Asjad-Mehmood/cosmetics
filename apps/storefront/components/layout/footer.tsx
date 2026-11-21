@@ -32,7 +32,10 @@ export function Footer({
       </div>
 
       <div className="bg-brand-700 text-white">
-        <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:py-14 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+        <Container
+          data-gsap="stagger"
+          className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:py-14 lg:grid-cols-[1.4fr_repeat(4,1fr)]"
+        >
           <div className="col-span-2 lg:col-span-1">
             <span className="text-ink inline-block rounded-xl bg-white px-3 py-2">
               <Logo imgClassName="h-9" />
@@ -100,7 +103,11 @@ export function NewsletterBand() {
     <section aria-labelledby="newsletter-heading" className="bg-blush">
       <Container className="grid items-center gap-6 py-12 md:grid-cols-2">
         <div>
-          <h2 id="newsletter-heading" className="text-2xl font-bold tracking-tight">
+          <h2
+            id="newsletter-heading"
+            data-gsap="split"
+            className="text-2xl font-bold tracking-tight"
+          >
             Get offers and new arrivals first
           </h2>
           <p className="text-muted mt-2">

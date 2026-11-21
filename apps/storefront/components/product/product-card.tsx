@@ -33,7 +33,7 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "border-line bg-canvas hover:shadow-(--shadow-card) group relative flex h-full flex-col rounded-2xl border p-2.5 transition hover:-translate-y-0.5 sm:p-3",
+        "border-line bg-canvas hover:shadow-(--shadow-card) group relative flex h-full flex-col rounded-2xl border p-2.5 transition duration-300 hover:-translate-y-1 active:scale-[.98] sm:p-3",
         className,
       )}
     >
@@ -66,7 +66,7 @@ export function ProductCard({
               </span>
             )}
             {product.inStock && product.discountPercent > 0 && (
-              <span className="bg-accent-700 rounded-full px-2.5 py-1 text-[11px] font-bold text-white">
+              <span className="bg-accent-700 animate-badge-in rounded-full px-2.5 py-1 text-[11px] font-bold text-white">
                 -{product.discountPercent}%
               </span>
             )}
@@ -142,7 +142,10 @@ export function ProductGrid({
   priorityCount?: number;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+    <div
+      data-gsap="stagger"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+    >
       {products.map((p, i) => (
         <ProductCard key={p.id} product={p} priority={i < priorityCount} />
       ))}

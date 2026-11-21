@@ -1,10 +1,12 @@
 import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
 import { Container } from "@store/ui";
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { BuyAgain } from "@/components/home/buy-again";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { JustForYou } from "@/components/home/just-for-you";
+import { PromiseMarquee } from "@/components/home/promise-marquee";
 import {
   ChevronRightIcon,
   ClockIcon,
@@ -17,6 +19,7 @@ import {
 import { NewsletterBand } from "@/components/layout/footer";
 import { ProductRail } from "@/components/product/product-rail";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
+import { Reveal } from "@/components/reveal";
 import { VoucherStrip } from "@/components/vouchers";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe, getList } from "@/lib/server-api";
@@ -51,7 +54,7 @@ export default async function HomePage() {
       "@type": "OnlineStore",
       name: siteConfig.name,
       url: siteConfig.url,
-      logo: `${siteConfig.url}/icon.svg`,
+      logo: `${siteConfig.url}/brand/logo.png`,
       description: siteConfig.description,
       areaServed: "PK",
       currenciesAccepted: "PKR",
@@ -98,6 +101,10 @@ export default async function HomePage() {
         )}
       </Container>
 
+      <div className="pt-6">
+        <PromiseMarquee />
+      </div>
+
       <Container className="pt-6">
         <VoucherStrip title="Collect vouchers" />
       </Container>
@@ -106,18 +113,33 @@ export default async function HomePage() {
         <section aria-labelledby="categories-heading">
           <Container className="pt-12">
             <div className="mb-6 flex items-end justify-between">
-              <h2 id="categories-heading" className="text-2xl font-bold tracking-tight">
+              <h2
+                id="categories-heading"
+                data-gsap="split"
+                className="text-2xl font-bold tracking-tight"
+              >
                 Shop by category
               </h2>
               <Link href="/shop" className="text-brand-700 text-sm font-semibold hover:underline">
                 All products
               </Link>
             </div>
-            <ul className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-6 sm:px-0">
+            <Reveal
+              as="ul"
+              stagger
+              className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-6 sm:px-0"
+            >
               {categories.map((c, i) => (
-                <li key={c.id} className="w-24 shrink-0 sm:w-auto">
-                  <Link href={`/categories/${c.slug}`} className="group block text-center">
-                    <span className="bg-blush ring-line group-hover:ring-brand-600 relative mx-auto block aspect-square w-full overflow-hidden rounded-full ring-1 transition group-hover:ring-2 sm:w-36">
+                <li
+                  key={c.id}
+                  style={{ "--i": i } as CSSProperties}
+                  className="reveal-item w-24 shrink-0 sm:w-auto"
+                >
+                  <Link
+                    href={`/categories/${c.slug}`}
+                    className="group block text-center transition-transform active:scale-95"
+                  >
+                    <span className="bg-blush ring-line group-hover:ring-brand-600 group-hover:shadow-(--shadow-card) relative mx-auto block aspect-square w-full overflow-hidden rounded-full ring-1 transition duration-300 group-hover:-translate-y-1 group-hover:ring-2 sm:w-36">
                       {c.imageUrl && (
                         <Image
                           src={c.imageUrl}
@@ -138,7 +160,7 @@ export default async function HomePage() {
                   </Link>
                 </li>
               ))}
-            </ul>
+            </Reveal>
           </Container>
         </section>
       )}
@@ -159,17 +181,21 @@ export default async function HomePage() {
 
       <section aria-labelledby="concerns-heading">
         <Container className="pt-14">
-          <h2 id="concerns-heading" className="mb-6 text-2xl font-bold tracking-tight">
+          <h2
+            id="concerns-heading"
+            data-gsap="split"
+            className="mb-6 text-2xl font-bold tracking-tight"
+          >
             Shop by concern
           </h2>
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {CONCERNS.map(({ label, q, icon: Icon, tone }) => (
-              <li key={label}>
+          <Reveal as="ul" stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {CONCERNS.map(({ label, q, icon: Icon, tone }, i) => (
+              <li key={label} style={{ "--i": i } as CSSProperties} className="reveal-item">
                 <Link
                   href={`/search?q=${encodeURIComponent(q)}`}
-                  className={`${tone} hover:shadow-(--shadow-card) group flex h-full items-center gap-3 rounded-2xl px-4 py-4 transition`}
+                  className={`${tone} hover:shadow-(--shadow-card) group flex h-full items-center gap-3 rounded-2xl px-4 py-4 transition duration-300 hover:-translate-y-0.5 active:scale-[.97]`}
                 >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/80">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/80 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                     <Icon width={20} height={20} />
                   </span>
                   <span className="text-ink text-sm font-semibold group-hover:underline">
@@ -178,7 +204,7 @@ export default async function HomePage() {
                 </Link>
               </li>
             ))}
-          </ul>
+          </Reveal>
         </Container>
       </section>
 
@@ -194,7 +220,7 @@ export default async function HomePage() {
 
       {(makeup || wellness) && (
         <Container className="pt-14">
-          <div className="grid gap-4 md:grid-cols-2">
+          <Reveal stagger className="grid gap-4 md:grid-cols-2">
             {[
               makeup && {
                 c: makeup,
@@ -212,11 +238,13 @@ export default async function HomePage() {
               },
             ]
               .filter((x) => !!x)
-              .map(({ c, bg, eyebrow, title, cta }) => (
+              .map(({ c, bg, eyebrow, title, cta }, i) => (
                 <Link
                   key={c.id}
                   href={`/categories/${c.slug}`}
-                  className={`${bg} group relative flex min-h-56 overflow-hidden rounded-3xl`}
+                  style={{ "--i": i } as CSSProperties}
+                  data-gsap="tilt"
+                  className={`${bg} reveal-item hover:shadow-(--shadow-card) group relative flex min-h-56 overflow-hidden rounded-3xl active:scale-[.99]`}
                 >
                   <div className="relative z-10 flex w-3/5 flex-col justify-center p-6 sm:p-8">
                     <p className="text-brand-700 text-xs font-semibold uppercase tracking-widest">
@@ -224,23 +252,31 @@ export default async function HomePage() {
                     </p>
                     <p className="mt-2 text-xl font-bold leading-tight sm:text-2xl">{title}</p>
                     <span className="text-brand-700 mt-4 inline-flex items-center gap-1 text-sm font-semibold group-hover:underline">
-                      {cta} <ChevronRightIcon width={16} height={16} />
+                      {cta}{" "}
+                      <ChevronRightIcon
+                        width={16}
+                        height={16}
+                        className="transition-transform group-hover:translate-x-1"
+                      />
                     </span>
                   </div>
                   {c.imageUrl && (
-                    <div className="absolute inset-y-0 right-0 w-2/5">
+                    <div
+                      data-gsap="parallax"
+                      className="absolute inset-y-0 right-0 w-2/5 overflow-hidden"
+                    >
                       <Image
                         src={c.imageUrl}
                         alt=""
                         fill
                         sizes="(min-width: 768px) 20vw, 40vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
                   )}
                 </Link>
               ))}
-          </div>
+          </Reveal>
         </Container>
       )}
 
@@ -258,14 +294,25 @@ export default async function HomePage() {
 
       <Container className="pt-14">
         <section
+          data-gsap="zoom"
           aria-labelledby="pharmacy-heading"
           className="bg-brand-700 grid gap-6 overflow-hidden rounded-3xl px-6 py-8 text-white sm:px-10 md:grid-cols-[auto_1fr_auto] md:items-center"
         >
-          <span className="grid size-16 place-items-center rounded-2xl bg-white/10">
-            <PillIcon width={32} height={32} />
+          <span className="relative grid size-16 place-items-center rounded-2xl bg-white/10">
+            <PillIcon
+              width={32}
+              height={32}
+              className="motion-safe:animate-[float_4s_ease-in-out_infinite]"
+            />
+            <span
+              aria-hidden
+              className="bg-accent-500 absolute -right-1 -top-1 size-3 rounded-full"
+            >
+              <span className="bg-accent-500 absolute inset-0 animate-ping rounded-full" />
+            </span>
           </span>
           <div>
-            <h2 id="pharmacy-heading" className="text-2xl font-bold">
+            <h2 id="pharmacy-heading" data-gsap="split" className="text-2xl font-bold">
               Prescription medicines are coming soon
             </h2>
             <p className="mt-2 max-w-2xl text-white/85">

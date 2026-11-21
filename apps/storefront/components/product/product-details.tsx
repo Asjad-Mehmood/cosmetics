@@ -2,6 +2,7 @@
 
 import { cn } from "@store/ui";
 import { useId, useRef, useState } from "react";
+import { useSlidingHighlight } from "@/lib/motion";
 import { ChevronDownIcon } from "../icons";
 
 export interface DetailSection {
@@ -17,6 +18,7 @@ export function ProductDetails({ sections }: { sections: DetailSection[] }) {
   const [active, setActive] = useState(0);
   const id = useId();
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const underline = useSlidingHighlight(active, '[aria-selected="true"]');
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -44,10 +46,17 @@ export function ProductDetails({ sections }: { sections: DetailSection[] }) {
       {/* Wide screens: tabs */}
       <div className="hidden lg:block">
         <div
+          ref={underline.ref}
           role="tablist"
           aria-label="Product information"
-          className="border-line flex gap-1 border-b"
+          className="border-line relative flex gap-1 border-b"
         >
+          {/* The underline slides to the chosen tab. */}
+          <span
+            aria-hidden
+            className="border-brand-600 pointer-events-none absolute left-0 top-0 border-b-2"
+            style={underline.style}
+          />
           {sections.map((s, i) => (
             <button
               key={s.title}
@@ -64,7 +73,7 @@ export function ProductDetails({ sections }: { sections: DetailSection[] }) {
               className={cn(
                 "-mb-px border-b-2 px-5 py-3 text-sm font-semibold transition",
                 i === active
-                  ? "border-brand-600 text-brand-700"
+                  ? cn("text-brand-700", underline.box ? "border-transparent" : "border-brand-600")
                   : "text-muted hover:text-ink border-transparent",
               )}
             >
@@ -80,7 +89,7 @@ export function ProductDetails({ sections }: { sections: DetailSection[] }) {
             aria-labelledby={`${id}-tab-${i}`}
             hidden={i !== active}
             tabIndex={0}
-            className="text-muted max-w-3xl space-y-3 py-6 leading-relaxed"
+            className="text-muted animate-fade-up max-w-3xl space-y-3 py-6 leading-relaxed"
           >
             {paragraphs(s.body)}
           </div>
@@ -90,10 +99,10 @@ export function ProductDetails({ sections }: { sections: DetailSection[] }) {
       {/* Phones and tablets: accordion */}
       <div className="divide-line border-line divide-y border-y lg:hidden">
         {sections.map((s, i) => (
-          <details key={s.title} open={i === 0} className="group py-4">
+          <details key={s.title} open={i === 0} className="details-animated group py-4">
             <summary className="flex cursor-pointer list-none items-center justify-between font-semibold [&::-webkit-details-marker]:hidden">
               {s.title}
-              <ChevronDownIcon className="text-muted transition-transform group-open:rotate-180" />
+              <ChevronDownIcon className="text-muted transition-transform duration-300 group-open:rotate-180" />
             </summary>
             <div className="text-muted mt-3 space-y-3 leading-relaxed">{paragraphs(s.body)}</div>
           </details>

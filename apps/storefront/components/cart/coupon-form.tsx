@@ -2,10 +2,12 @@
 
 import type { AppliedCouponDTO } from "@store/types";
 import { formatMoney } from "@store/types";
-import { Button, Input } from "@store/ui";
-import { useState } from "react";
+import { Button, cn, Input } from "@store/ui";
+import { useRef, useState } from "react";
 import { useApplyCoupon, useRemoveCoupon } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";
+import { shake } from "@/lib/motion";
+import { DrawnCheck } from "../motion";
 
 /** Discount code entry, or the applied code with a remove button. */
 export function CouponForm({
@@ -19,11 +21,19 @@ export function CouponForm({
   const remove = useRemoveCoupon();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const row = useRef<HTMLDivElement>(null);
+  const [justApplied, setJustApplied] = useState(false);
 
   if (coupon) {
     return (
-      <div className="bg-surface flex items-start justify-between gap-3 rounded-lg p-3 text-sm">
-        <div>
+      <div
+        className={cn(
+          "bg-surface flex items-start justify-between gap-3 rounded-lg p-3 text-sm",
+          justApplied && "animate-fade-up",
+        )}
+      >
+        {justApplied && coupon.isValid && <DrawnCheck className="text-success size-6 shrink-0" />}
+        <div className="flex-1">
           <p className="font-semibold">
             {coupon.code}
             {coupon.isValid && coupon.discount > 0 && (
@@ -37,7 +47,14 @@ export function CouponForm({
         <button
           type="button"
           className="text-muted hover:text-ink text-xs underline"
-          onClick={() => remove.mutate(undefined, { onSuccess: onChange })}
+          onClick={() =>
+            remove.mutate(undefined, {
+              onSuccess: () => {
+                setJustApplied(false);
+                onChange?.();
+              },
+            })
+          }
           disabled={remove.isPending}
         >
           Remove
@@ -52,10 +69,13 @@ export function CouponForm({
     apply.mutate(code.trim(), {
       onSuccess: () => {
         setCode("");
+        setJustApplied(true);
         onChange?.();
       },
-      onError: (err) =>
-        setError(err instanceof ApiError ? err.message : "Could not apply the code"),
+      onError: (err) => {
+        setError(err instanceof ApiError ? err.message : "Could not apply the code");
+        shake(row.current);
+      },
     });
   };
 
@@ -66,7 +86,7 @@ export function CouponForm({
       <label htmlFor="coupon-code" className="text-sm font-medium">
         Discount code
       </label>
-      <div className="flex gap-2">
+      <div ref={row} className="flex gap-2">
         <Input
           id="coupon-code"
           value={code}
@@ -87,7 +107,7 @@ export function CouponForm({
         </Button>
       </div>
       {error && (
-        <p id="coupon-error" role="alert" className="text-danger text-sm">
+        <p id="coupon-error" role="alert" className="text-danger animate-fade-in text-sm">
           {error}
         </p>
       )}

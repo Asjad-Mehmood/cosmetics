@@ -215,7 +215,7 @@ export function Reviews({ slug }: { slug: string }) {
 
   return (
     <section id="reviews" className="mt-16 scroll-mt-24" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading" className="text-2xl font-bold tracking-tight">
+      <h2 id="reviews-heading" data-gsap="split" className="text-2xl font-bold tracking-tight">
         Reviews
       </h2>
       <div className="mt-6 grid gap-10 lg:grid-cols-[18rem_1fr]">
@@ -253,7 +253,7 @@ export function Reviews({ slug }: { slug: string }) {
                           aria-hidden
                         >
                           <span
-                            className="bg-ink block h-full rounded-full"
+                            className="bg-accent-500 fill-on-view block h-full rounded-full"
                             style={{ width: `${share}%` }}
                           />
                         </span>

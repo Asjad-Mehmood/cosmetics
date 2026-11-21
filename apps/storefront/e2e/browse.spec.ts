@@ -51,10 +51,17 @@ test("sorting by price orders the grid", async ({ page }) => {
   await page.goto("/shop");
   await page.getByLabel("Sort products").selectOption("price_asc");
   await expect(page).toHaveURL(/sort=price_asc/);
-  await page.waitForLoadState("networkidle");
-  const prices = await page.locator("article [data-price]").allTextContents();
-  const values = prices.map((p) => Number(p.replace(/[^\d]/g, "")));
-  expect(values).toEqual([...values].sort((a, b) => a - b));
+  // The URL changes before the re-sorted grid arrives, so poll until it has.
+  const prices = async () =>
+    (await page.locator("article [data-price]").allTextContents()).map((p) =>
+      Number(p.replace(/[^\d]/g, "")),
+    );
+  await expect
+    .poll(async () => {
+      const values = await prices();
+      return values.length > 1 && values.every((v, i) => i === 0 || values[i - 1]! <= v);
+    })
+    .toBe(true);
 });
 
 test("search finds products", async ({ page }) => {

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@store/ui/theme.css";
+@import "./motion.css";
 
 /* Let Tailwind see the class names used inside the shared UI package. */
 @source "../../../packages/ui/src";

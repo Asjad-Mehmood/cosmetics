@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { AddressDTO } from "@store/types";
 import { addressSchema } from "@store/validation";
-import { Badge, Button, Card, Dialog, Field, Input, Skeleton } from "@store/ui";
+import { Badge, Button, Card, cn, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -157,7 +157,14 @@ export function AddressBook() {
       ) : (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2">
           {addresses.map((a) => (
-            <li key={a.id}>
+            <li
+              key={a.id}
+              className={cn(
+                "animate-fade-up transition duration-300",
+                // Fades and shrinks away while it is being deleted.
+                remove.isPending && remove.variables === a.id && "scale-95 opacity-0",
+              )}
+            >
               <Card className="flex h-full flex-col">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold">{a.fullName}</p>

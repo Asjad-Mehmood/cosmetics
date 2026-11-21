@@ -8,7 +8,7 @@ import type { HTMLAttributes, ReactNode, TdHTMLAttributes, ThHTMLAttributes } fr
 export function Table({ className, children, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="border-line bg-canvas rounded-(--radius-card) overflow-x-auto border">
-      <table className={cn("w-full min-w-max text-left text-sm", className)} {...props}>
+      <table className={cn("admin-table w-full min-w-max text-left text-sm", className)} {...props}>
         {children}
       </table>
     </div>

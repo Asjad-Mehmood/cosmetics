@@ -5,6 +5,7 @@ import { cn } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { loadGsap } from "@/lib/gsap";
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 
 const INTERVAL = 6000;
@@ -19,21 +20,99 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
   const [paused, setPaused] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const touchX = useRef<number | null>(null);
+  const root = useRef<HTMLElement>(null);
+  const [gsapOn, setGsapOn] = useState(false);
+  const firstSlide = useRef(true);
   const count = banners.length;
 
   const go = useCallback((i: number) => setIndex(((i % count) + count) % count), [count]);
 
+  const [hidden, setHidden] = useState(false);
+  const [motion, setMotion] = useState(false);
+  const stopped = paused || userPaused || hidden || !motion;
+
+  // No autoplay with Reduce motion; pause while the tab is in the background.
   useEffect(() => {
-    if (count < 2 || paused || userPaused) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % count), INTERVAL);
-    return () => clearInterval(t);
-  }, [count, paused, userPaused]);
+    setMotion(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const onVis = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  // GSAP: as the page scrolls, the hero's text lifts away and the photo
+  // zooms; each new slide's headline comes in letter by letter.
+  useEffect(() => {
+    const ready = loadGsap();
+    if (!ready || !root.current) return;
+    let revert: (() => void) | undefined;
+    let cancelled = false;
+    void ready.then(({ gsap }) => {
+      if (cancelled || !root.current) return;
+      const el = root.current;
+      // One scrubbed value (0 → 1 as the hero leaves the screen) that the CSS
+      // turns into the text lifting away and the photo moving slower.
+      const ctx = gsap.context(() => {
+        gsap.fromTo(
+          el,
+          { "--hero-lift": 0 },
+          {
+            "--hero-lift": 1,
+            ease: "none",
+            scrollTrigger: { trigger: el, start: "top top+=80", end: "bottom top", scrub: true },
+          },
+        );
+      }, el);
+      setGsapOn(true);
+      revert = () => ctx.revert();
+    });
+    return () => {
+      cancelled = true;
+      revert?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    // The first slide is already on screen when GSAP arrives: leave it as it is.
+    if (firstSlide.current) {
+      firstSlide.current = false;
+      return;
+    }
+    const ready = gsapOn ? loadGsap() : null;
+    const title = root.current?.querySelector<HTMLElement>(
+      `[data-slide="${index}"] [data-hero-title]`,
+    );
+    if (!ready || !title) return;
+    let revert: (() => void) | undefined;
+    void ready.then(({ gsap, SplitText }) => {
+      const split = SplitText.create(title, { type: "chars,words", mask: "words" });
+      const tween = gsap.from(split.chars, {
+        yPercent: 120,
+        rotationX: -70,
+        transformOrigin: "50% 100%",
+        autoAlpha: 0,
+        stagger: 0.022,
+        duration: 0.9,
+        delay: 0.15,
+        onComplete: () => split.revert(),
+      });
+      revert = () => {
+        tween.kill();
+        split.revert();
+      };
+    });
+    return () => revert?.();
+  }, [index, gsapOn]);
+
+  // The active dot fills up as the timer runs; the slide changes when it is full.
+  // (Driven by the dot's animation, so pausing freezes both together.)
+  const next = useCallback(() => setIndex((i) => (i + 1) % count), [count]);
 
   if (!count) return null;
 
   return (
     <section
+      ref={root}
+      data-gsap-hero={gsapOn ? "" : undefined}
       aria-roledescription="carousel"
       aria-label="Featured"
       className="relative overflow-hidden rounded-3xl"
@@ -58,32 +137,44 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
           <div
             key={b.id}
             role="group"
+            data-slide={i}
             aria-roledescription="slide"
             aria-label={`${i + 1} of ${count}`}
             aria-hidden={i !== index}
             inert={i !== index}
             className="bg-brand-700 relative h-[340px] w-full shrink-0 sm:h-[400px] lg:h-[460px]"
           >
+            {/* The photo drifts slowly closer while its slide is showing. */}
             <Image
               src={b.imageUrl}
               alt=""
               fill
               priority={i === 0}
               sizes="(min-width: 1280px) 1250px, 100vw"
-              className="object-cover"
+              className={cn(
+                "hero-photo object-cover transition-[scale] duration-[7s] ease-out",
+                i === index ? "motion-safe:scale-110" : "scale-100",
+              )}
             />
             <span className="from-brand-700/95 via-brand-700/70 absolute inset-0 bg-gradient-to-r to-transparent" />
-            <div className="relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12">
+            <div
+              key={i === index ? `in-${index}` : "out"}
+              className="hero-copy relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12"
+            >
               <p className="text-accent-100 text-xs font-semibold uppercase tracking-widest">
                 Beauty &amp; pharmacy
               </p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+              <h2
+                data-hero-title
+                className="mt-3 text-3xl font-extrabold tracking-tight text-white [perspective:600px] sm:text-5xl"
+              >
                 {b.title}
               </h2>
               {b.subtitle && <p className="mt-4 max-w-md text-white/85 sm:text-lg">{b.subtitle}</p>}
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   href={b.link ?? "/shop"}
+                  data-gsap="magnetic"
                   className="text-ink inline-flex h-12 items-center rounded-full bg-white px-7 font-semibold hover:bg-white/90"
                 >
                   {b.ctaLabel ?? "Shop now"}
@@ -127,10 +218,24 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
                 aria-label={`Show slide ${i + 1}: ${b.title}`}
                 aria-current={i === index}
                 className={cn(
-                  "h-2 rounded-full transition-all",
-                  i === index ? "w-7 bg-white" : "w-2 bg-white/50 hover:bg-white/80",
+                  "relative h-2 overflow-hidden rounded-full transition-all duration-500",
+                  i === index ? "w-10 bg-white/40" : "w-2 bg-white/50 hover:bg-white/80",
                 )}
-              />
+              >
+                {i === index && (
+                  <span
+                    key={index}
+                    aria-hidden
+                    data-testid="hero-progress"
+                    onAnimationEnd={next}
+                    className="absolute inset-0 origin-left rounded-full bg-white"
+                    style={{
+                      animation: motion ? `hero-progress ${INTERVAL}ms linear both` : "none",
+                      animationPlayState: stopped ? "paused" : "running",
+                    }}
+                  />
+                )}
+              </button>
             ))}
             <button
               type="button"

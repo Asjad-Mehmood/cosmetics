@@ -55,10 +55,11 @@ function Section({
   return (
     <section
       aria-labelledby={`step-${step}`}
-      className="border-line bg-canvas rounded-3xl border p-5 sm:p-7"
+      style={{ animationDelay: `${(step - 1) * 70}ms` }}
+      className="border-line bg-canvas animate-fade-up focus-within:border-brand-600/40 focus-within:shadow-(--shadow-card) group rounded-3xl border p-5 transition-[border-color,box-shadow] duration-300 sm:p-7"
     >
       <h2 id={`step-${step}`} className="mb-5 flex items-center gap-3 text-lg font-bold">
-        <span className="bg-brand-600 grid size-8 place-items-center rounded-full text-sm text-white">
+        <span className="bg-brand-600 grid size-8 place-items-center rounded-full text-sm text-white transition-transform duration-300 group-focus-within:scale-110">
           {step}
         </span>
         {title}
@@ -237,7 +238,12 @@ export function CheckoutForm() {
         className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_400px] lg:gap-10"
       >
         <div className="space-y-6">
-          {formError && <FormMessage>{formError}</FormMessage>}
+          {formError && (
+            // Shakes (and re-shakes on each new error) so it is noticed after the scroll up.
+            <div key={formError} className="animate-shake">
+              <FormMessage>{formError}</FormMessage>
+            </div>
+          )}
 
           <Section step={1} title="Contact">
             <div className="grid gap-4 sm:grid-cols-2">

@@ -5,6 +5,7 @@ import { formatMoney } from "@store/types";
 import { cn } from "@store/ui";
 import Link from "next/link";
 import { LockIcon } from "../icons";
+import { TweenedMoney } from "../motion";
 import { CouponForm } from "./coupon-form";
 
 /** Subtotal, discount and the checkout button. */
@@ -19,11 +20,11 @@ export function CartSummary({ cart, showCoupon = false }: { cart: CartDTO; showC
         <div className="flex justify-between">
           <dt className="text-muted">Subtotal</dt>
           <dd data-testid="cart-subtotal" className="tabular-nums">
-            {formatMoney(cart.subtotal)}
+            <TweenedMoney value={cart.subtotal} />
           </dd>
         </div>
         {discount > 0 && (
-          <div className="text-success flex justify-between">
+          <div className="text-success animate-fade-up flex justify-between">
             <dt>Discount ({cart.coupon!.code})</dt>
             <dd className="tabular-nums">−{formatMoney(discount)}</dd>
           </div>
@@ -31,7 +32,7 @@ export function CartSummary({ cart, showCoupon = false }: { cart: CartDTO; showC
         <div className="flex justify-between text-base font-semibold">
           <dt>Total</dt>
           <dd data-testid="cart-total" className="tabular-nums">
-            {formatMoney(cart.total)}
+            <TweenedMoney value={cart.total} />
           </dd>
         </div>
       </dl>

@@ -47,7 +47,13 @@ function VoucherTicket({ v, mode }: { v: VoucherDTO; mode: "copy" | "apply" }) {
 
   const done = mode === "apply" ? applied : copied;
   return (
-    <div className="border-accent-100 bg-canvas relative flex min-w-60 items-stretch overflow-hidden rounded-2xl border">
+    <div
+      key={done ? "done" : "idle"}
+      className={cn(
+        "border-accent-100 bg-canvas hover:shadow-(--shadow-card) relative flex min-w-60 items-stretch overflow-hidden rounded-2xl border transition-shadow",
+        done && "animate-stamp",
+      )}
+    >
       <div className="bg-accent-50 flex flex-1 flex-col justify-center px-4 py-3">
         <p className="text-accent-700 text-lg font-extrabold leading-tight">{voucherTitle(v)}</p>
         <p className="text-muted text-xs">{voucherCondition(v)}</p>
@@ -66,7 +72,7 @@ function VoucherTicket({ v, mode }: { v: VoucherDTO; mode: "copy" | "apply" }) {
             done ? "bg-success/10 text-success" : "bg-accent-700 hover:bg-accent-700/90 text-white",
           )}
         >
-          {done && <CheckIcon width={14} height={14} />}
+          {done && <CheckIcon width={14} height={14} className="animate-check-in" />}
           {mode === "apply" ? (applied ? "Applied" : "Apply") : copied ? "Copied" : "Copy"}
         </button>
       </div>

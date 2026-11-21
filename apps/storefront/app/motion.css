@@ -1,0 +1,311 @@
+/*
+ * Storefront motion (ANIMATION-PLAN.md, phases 4–8): feedback when shopping,
+ * the product page, browsing, checkout and orders. Shared tokens and the
+ * basic keyframes (fade, pop, shake, draw…) live in @store/ui/theme.css.
+ *
+ * Everything here is decoration on top of a page that already works without
+ * it. "Reduce motion" is handled once in globals.css (animations end at once)
+ * plus the few opt-outs at the bottom of this file.
+ */
+
+@theme {
+  --animate-roll-up: roll-up 280ms var(--ease-out) both;
+  --animate-roll-down: roll-down 280ms var(--ease-out) both;
+  --animate-stamp: stamp 480ms var(--ease-spring) both;
+  --animate-check-in: check-in 420ms var(--ease-spring) both;
+  --animate-wiggle: wiggle 520ms var(--ease-out) both;
+  --animate-bar-shine: bar-shine 1.2s var(--ease-out) 200ms both;
+  --animate-pulse-twice: pulse-twice 1.4s var(--ease-out) 2;
+  --animate-slide-in-step-next: step-next var(--duration-slow) var(--ease-out) both;
+  --animate-slide-in-step-back: step-back var(--duration-slow) var(--ease-out) both;
+  --animate-fill-x: fill-x 600ms var(--ease-out) both;
+  --animate-price-in: price-in 520ms var(--ease-spring) both;
+  --animate-badge-in: badge-in 420ms var(--ease-spring) 150ms both;
+
+  /* Numbers that change: the new value rolls in from below (up) or above (down). */
+  @keyframes roll-up {
+    from {
+      transform: translateY(70%);
+      opacity: 0;
+    }
+  }
+  @keyframes roll-down {
+    from {
+      transform: translateY(-70%);
+      opacity: 0;
+    }
+  }
+  /* A rubber stamp: lands slightly big and tilted, then settles. */
+  @keyframes stamp {
+    0% {
+      transform: scale(1.12) rotate(-2deg);
+    }
+    60% {
+      transform: scale(0.98) rotate(0.5deg);
+    }
+  }
+  @keyframes check-in {
+    from {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+  }
+  /* The cart icon jiggles when something lands in it. */
+  @keyframes wiggle {
+    20% {
+      transform: rotate(-12deg) scale(1.1);
+    }
+    45% {
+      transform: rotate(9deg) scale(1.1);
+    }
+    70% {
+      transform: rotate(-4deg);
+    }
+  }
+  /* One highlight sweeping across a progress bar. */
+  @keyframes bar-shine {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
+  }
+  @keyframes pulse-twice {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 10px color-mix(in oklab, currentColor 0%, transparent);
+    }
+  }
+  @keyframes step-next {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+  }
+  @keyframes step-back {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+  }
+  @keyframes price-in {
+    from {
+      transform: translateY(-40%) scale(0.9);
+      opacity: 0;
+    }
+  }
+  @keyframes badge-in {
+    from {
+      opacity: 0;
+      transform: translate(-8px, -8px) scale(0.6);
+    }
+  }
+}
+
+@layer components {
+  /* A burst of six dots around a heart (or a ✓). Put <i> × 6 inside. */
+  .burst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .burst > i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px;
+    border-radius: 9999px;
+    background: var(--color-accent-500);
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 60deg)) translateY(0);
+    animation: burst-dot 560ms var(--ease-out) both;
+  }
+  .burst > i:nth-child(even) {
+    background: var(--color-danger);
+  }
+  @keyframes burst-dot {
+    0% {
+      opacity: 1;
+      transform: rotate(calc(var(--i) * 60deg)) translateY(-6px) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(calc(var(--i) * 60deg)) translateY(-22px) scale(0.4);
+    }
+  }
+
+  /* Heights that animate open and shut (accordions, removed cart lines). */
+  .collapsible {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows var(--duration-slow) var(--ease-out),
+      opacity var(--duration-slow) var(--ease-out);
+  }
+  .collapsible > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .collapsible[data-collapsed="true"] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+
+  /* <details> that open with an animated height (Chrome and Edge; others open at once). */
+  .details-animated {
+    interpolate-size: allow-keywords;
+  }
+  .details-animated::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--duration-slow) var(--ease-out),
+      content-visibility var(--duration-slow) allow-discrete;
+  }
+  .details-animated[open]::details-content {
+    block-size: auto;
+  }
+
+  /* A bar that grows to its width when it first appears (progress bars, star bars). */
+  .grow-x {
+    transition: width 700ms var(--ease-out);
+  }
+  @starting-style {
+    .grow-x {
+      width: 0 !important;
+    }
+  }
+
+  /* Touch: buttons and cards press in slightly. */
+  .press {
+    transition: scale var(--duration-fast) var(--ease-out);
+  }
+  .press:active {
+    scale: 0.97;
+  }
+}
+
+/*
+ * Bars (review stars) fill from the left as they scroll into view, driven by
+ * the scroll position. Browsers without scroll-driven animations show them full.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .fill-on-view {
+      transform-origin: left;
+      animation: fill-x linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+  }
+}
+@keyframes fill-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* A gentle up-and-down float (decorative icons). */
+@keyframes float {
+  50% {
+    transform: translateY(-4px) rotate(-4deg);
+  }
+}
+
+/* Hero: the active dot fills as the slideshow timer runs. */
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+/* GSAP scrubs --hero-lift from 0 to 1 as the hero scrolls away. */
+[data-gsap-hero] .hero-copy {
+  translate: 0 calc(var(--hero-lift, 0) * -90px);
+  /* Blur rather than fade, so the text keeps its contrast. */
+  filter: blur(calc(var(--hero-lift, 0) * 3px));
+}
+[data-gsap-hero] .hero-photo {
+  translate: 0 calc(var(--hero-lift, 0) * 14%);
+}
+/* With GSAP, the headline's letters animate instead of the whole line. */
+[data-gsap-hero] .hero-copy > h2 {
+  animation: none !important;
+}
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+/* Hero: each slide's text comes in line by line when the slide appears. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy > * {
+    animation: hero-in 800ms var(--ease-out) both;
+  }
+  .hero-copy > :nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .hero-copy > :nth-child(3) {
+    animation-delay: 180ms;
+  }
+  .hero-copy > :nth-child(4) {
+    animation-delay: 270ms;
+  }
+}
+
+/* Listing results after a filter change: the new cards fade up in turn. */
+.results-in .grid > * {
+  animation: fade-up 450ms var(--ease-out) both;
+}
+.results-in .grid > :nth-child(2) {
+  animation-delay: 45ms;
+}
+.results-in .grid > :nth-child(3) {
+  animation-delay: 90ms;
+}
+.results-in .grid > :nth-child(4) {
+  animation-delay: 135ms;
+}
+.results-in .grid > :nth-child(5) {
+  animation-delay: 180ms;
+}
+.results-in .grid > :nth-child(6) {
+  animation-delay: 225ms;
+}
+.results-in .grid > :nth-child(n + 7) {
+  animation-delay: 270ms;
+}
+
+/*
+ * Admin (kept calm, staff use it all day): new table rows fade in, and a save
+ * button shows a ✓ for a moment after it worked.
+ */
+.admin-table tbody tr {
+  animation: fade-in 220ms var(--ease-out) both;
+}
+button[data-done] {
+  position: relative;
+}
+button[data-done]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-success)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+    center / 18px no-repeat;
+  animation: fade-in 180ms var(--ease-out) both;
+}
+
+/* Reduce motion: no flying, bursting or confetti at all (not just shortened). */
+@media (prefers-reduced-motion: reduce) {
+  .burst,
+  [data-fly-ghost] {
+    display: none !important;
+  }
+}
