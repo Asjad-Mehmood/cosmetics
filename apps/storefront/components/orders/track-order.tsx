@@ -72,7 +72,7 @@ export function TrackOrder() {
             </div>
             <StatusBadge status={result.status} />
           </div>
-          <OrderProgress status={result.status} />
+          <OrderProgress status={result.status} events={result.timeline} />
           {result.trackingNumber && (
             <p className="text-sm">
               {result.courier ?? "Courier"} tracking number:{" "}

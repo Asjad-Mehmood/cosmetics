@@ -16,6 +16,8 @@ import * as stock from "./stock";
 const STOCK_TAKEN: OrderStatus[] = [
   ...UNSHIPPED_SALE,
   "SHIPPED",
+  "IN_TRANSIT",
+  "OUT_FOR_DELIVERY",
   "DELIVERED",
   "RETURN_REQUESTED",
   "RETURNED",

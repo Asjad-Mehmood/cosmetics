@@ -98,7 +98,7 @@ export function Topbar({
     {
       n: counts?.toFulfil ?? 0,
       text: "orders to fulfil",
-      href: "/orders?status=CONFIRMED,PAID,PROCESSING",
+      href: "/orders?status=CONFIRMED,PAID,PROCESSING,PACKED",
       show: true,
     },
     {

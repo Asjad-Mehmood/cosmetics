@@ -36,7 +36,14 @@ enum OrderStatus {
   CONFIRMED
   PAID
   PROCESSING
+  /// Packed and labelled, waiting for the courier.
+  PACKED
+  /// Handed to the courier.
   SHIPPED
+  /// On its way between the courier's hubs.
+  IN_TRANSIT
+  /// With the rider, arriving today.
+  OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED
   RETURN_REQUESTED

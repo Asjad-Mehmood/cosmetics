@@ -7,7 +7,13 @@ import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/app-error";
 import { afterStockIncrease } from "../engagement/stock-alerts";
 import { getPaymentProvider, type PaymentEvent } from "../payments";
-import { cancelledEmail, confirmationEmail, deliveredEmail, shippedEmail } from "./order.emails";
+import {
+  cancelledEmail,
+  confirmationEmail,
+  deliveredEmail,
+  outForDeliveryEmail,
+  shippedEmail,
+} from "./order.emails";
 import { orderInclude, type FullOrder } from "./order.mapper";
 import * as stock from "./stock";
 
@@ -188,7 +194,7 @@ export async function markPaymentFailed(paymentId: string, reason: string): Prom
 
 // ───────────── Cancellation ─────────────
 
-export const CANCELLABLE: OrderStatus[] = ["PENDING_PAYMENT", "CONFIRMED", "PROCESSING"];
+export const CANCELLABLE: OrderStatus[] = ["PENDING_PAYMENT", "CONFIRMED", "PROCESSING", "PACKED"];
 
 /**
  * Cancels an order and returns its stock: reserved units for unpaid card
@@ -277,8 +283,12 @@ export async function expireUnpaidOrders(now = new Date()): Promise<number> {
 export const NEXT: Partial<Record<OrderStatus, OrderStatus[]>> = {
   CONFIRMED: ["PROCESSING"],
   PAID: ["PROCESSING"],
-  PROCESSING: ["SHIPPED"],
-  SHIPPED: ["DELIVERED"],
+  // Staff can skip a step the courier didn't report (e.g. straight to delivered).
+  PROCESSING: ["PACKED", "SHIPPED"],
+  PACKED: ["SHIPPED"],
+  SHIPPED: ["IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED"],
+  IN_TRANSIT: ["OUT_FOR_DELIVERY", "DELIVERED"],
+  OUT_FOR_DELIVERY: ["DELIVERED"],
 };
 
 export async function updateOrderStatus(
@@ -327,6 +337,7 @@ export async function updateOrderStatus(
 
   const updated = await loadOrder(orderId);
   if (input.status === "SHIPPED") void sendMail(shippedEmail(updated));
+  if (input.status === "OUT_FOR_DELIVERY") void sendMail(outForDeliveryEmail(updated));
   if (input.status === "DELIVERED") {
     // The review request follows a week later (scheduled "review-requests" job).
     void sendMail(deliveredEmail(updated));

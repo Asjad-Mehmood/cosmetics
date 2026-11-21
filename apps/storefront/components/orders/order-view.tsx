@@ -162,7 +162,7 @@ export function OrderView({ number }: { number: string }) {
       )}
 
       <div className="mt-8">
-        <OrderProgress status={o.status} />
+        <OrderProgress status={o.status} events={o.timeline} />
         {o.trackingNumber && (
           <p className="mt-4 text-sm">
             {o.courier ?? "Courier"} tracking number:{" "}

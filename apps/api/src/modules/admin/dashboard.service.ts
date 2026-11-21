@@ -6,7 +6,7 @@ import { adminListInclude, toAdminListItem } from "../orders/admin-orders.servic
 import { lowStock, lowStockCount } from "./inventory.service";
 import { productReport, SALE_STATUSES, salesReport, totalsBetween } from "./reports.service";
 
-const TO_FULFIL = ["CONFIRMED", "PAID", "PROCESSING"] as const;
+const TO_FULFIL = ["CONFIRMED", "PAID", "PROCESSING", "PACKED"] as const;
 
 export async function getDashboard(days: number, now = new Date()): Promise<DashboardDTO> {
   const zone = await storeTimeZone();
