@@ -14,7 +14,7 @@ describe("content endpoints", () => {
     });
     const res = await request(app).get("/api/v1/cms/home");
     expect(res.status).toBe(200);
-    expect(res.body.data.announcement).toMatch(/genuine products/);
+    expect(res.body.data.announcement).toMatch(/Free delivery over Rs 3,000/);
     expect(res.body.data.contact).toEqual({
       phone: expect.any(String),
       email: expect.stringContaining("@"),
