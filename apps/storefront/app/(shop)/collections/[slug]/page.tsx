@@ -2,21 +2,33 @@ import type { CollectionDTO } from "@store/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";
+import { siteConfig } from "@/lib/config";
 import type { SearchParams } from "@/lib/listing";
 import { getData } from "@/lib/server-api";
+import { baseOpenGraph, listingMetadata, metaDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<SearchParams> };
 
 const getCollection = (slug: string) =>
   getData<CollectionDTO>(`/collections/${encodeURIComponent(slug)}`, { revalidate: 300 });
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const collection = await getCollection((await params).slug);
   if (!collection) return {};
   return {
-    title: collection.name,
-    description: collection.description ?? `Shop the ${collection.name} collection.`,
-    alternates: { canonical: `/collections/${collection.slug}` },
+    title: `${collection.name}: Buy Online in Pakistan`,
+    description: metaDescription(
+      collection.description ??
+        `Shop ${collection.name.toLowerCase()} online at ${siteConfig.name}. Delivery across Pakistan with Cash on Delivery.`,
+    ),
+    openGraph: {
+      ...baseOpenGraph,
+      title: collection.name,
+      ...(collection.bannerUrl
+        ? { images: [{ url: collection.bannerUrl, alt: collection.name }] }
+        : {}),
+    },
+    ...listingMetadata(`/collections/${collection.slug}`, await searchParams),
   };
 }
 

@@ -3,6 +3,7 @@ import { Container } from "@store/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getData } from "@/lib/server-api";
+import { metaDescription } from "@/lib/seo";
 import { PageHeader } from "@/components/content/page-header";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -12,7 +13,12 @@ const getPage = (slug: string) =>
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await getPage((await params).slug);
-  return page ? { title: page.title, description: page.seoDescription ?? undefined } : {};
+  if (!page) return {};
+  return {
+    title: page.title,
+    description: metaDescription(page.seoDescription ?? page.content.replace(/^##\s+/gm, "")),
+    alternates: { canonical: `/policies/${page.slug}` },
+  };
 }
 
 /**

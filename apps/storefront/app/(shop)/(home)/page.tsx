@@ -1,6 +1,7 @@
 import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
 import { Container } from "@store/ui";
 import Image from "next/image";
+import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { BuyAgain } from "@/components/home/buy-again";
@@ -26,6 +27,8 @@ import { Reveal } from "@/components/reveal";
 import { VoucherStrip } from "@/components/vouchers";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe, getList } from "@/lib/server-api";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /** "Shop by concern": each tile runs a search for that concern. */
 const CONCERNS = [
@@ -55,18 +58,44 @@ export default async function HomePage() {
     {
       "@context": "https://schema.org",
       "@type": "OnlineStore",
+      "@id": `${siteConfig.url}/#store`,
       name: siteConfig.name,
       url: siteConfig.url,
       logo: `${siteConfig.url}/brand/logo.png`,
+      image: `${siteConfig.url}/opengraph-image`,
       description: siteConfig.description,
-      areaServed: "PK",
+      areaServed: { "@type": "Country", name: "Pakistan" },
       currenciesAccepted: "PKR",
       paymentAccepted: "Cash",
+      ...(home?.contact.phone || home?.contact.email
+        ? {
+            ...(home.contact.phone ? { telephone: home.contact.phone } : {}),
+            ...(home.contact.email ? { email: home.contact.email } : {}),
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer service",
+              areaServed: "PK",
+              availableLanguage: ["English", "Urdu"],
+              ...(home.contact.phone ? { telephone: home.contact.phone } : {}),
+              ...(home.contact.email ? { email: home.contact.email } : {}),
+            },
+          }
+        : {}),
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "PK",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        url: `${siteConfig.url}/policies/returns`,
+      },
     },
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": `${siteConfig.url}/#website`,
       name: siteConfig.name,
+      inLanguage: "en-PK",
+      publisher: { "@id": `${siteConfig.url}/#store` },
       url: siteConfig.url,
       potentialAction: {
         "@type": "SearchAction",

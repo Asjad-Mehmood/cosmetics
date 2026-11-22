@@ -1,6 +1,7 @@
 import type { CategoryDTO, FiltersDTO, ProductCardDTO } from "@store/types";
 import { cn, Container } from "@store/ui";
 import Image from "next/image";
+import { breadcrumbJsonLd, type Crumb, jsonLdHtml } from "@/lib/seo";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { countActiveFilters, parseFilters, toApiQuery, type SearchParams } from "@/lib/listing";
@@ -175,9 +176,13 @@ export async function ProductListing({
   );
 }
 
-export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
     <nav aria-label="Breadcrumb" className="text-muted mb-4 text-sm">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdHtml(breadcrumbJsonLd(items))}
+      />
       <ol className="flex flex-wrap items-center gap-1">
         {items.map((item, i) => (
           <li key={item.label} className="flex items-center gap-1">

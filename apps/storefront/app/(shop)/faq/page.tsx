@@ -6,8 +6,10 @@ import { getDataSafe } from "@/lib/server-api";
 import { PageHeader } from "@/components/content/page-header";
 
 export const metadata: Metadata = {
-  title: "FAQ",
-  description: "Answers about sizing, delivery, payments and returns.",
+  title: "Frequently asked questions",
+  description:
+    "Answers about delivery times, Cash on Delivery, order tracking, prescriptions and returns.",
+  alternates: { canonical: "/faq" },
 };
 
 export default async function FaqPage() {
