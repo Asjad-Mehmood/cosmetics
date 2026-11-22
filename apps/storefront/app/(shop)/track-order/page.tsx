@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/content/page-header";
 export const metadata: Metadata = {
   title: "Track your order",
   description: "Check the status of your order with your order number and email.",
+  alternates: { canonical: "/track-order" },
 };
 
 export default function TrackOrderPage() {

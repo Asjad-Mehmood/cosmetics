@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";
 import type { SearchParams } from "@/lib/listing";
+import { listingMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Offers",
-  description: "Discounts on skincare, makeup, hair care, fragrance and health essentials.",
-  alternates: { canonical: "/offers" },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  return {
+    title: "Offers & Discounts on Beauty and Health Products",
+    description:
+      "Today's discounts on skincare, makeup, hair care, fragrance and health essentials, delivered across Pakistan with Cash on Delivery.",
+    ...listingMetadata("/offers", await searchParams),
+  };
+}
 
 export default async function OffersPage({
   searchParams,

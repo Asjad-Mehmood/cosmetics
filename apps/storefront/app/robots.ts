@@ -5,7 +5,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      // Product photos are served by the API (/api/v1/media/...): search engines
+      // need them for image results and product rich results.
+      allow: ["/", "/api/v1/media/"],
       disallow: [
         "/account",
         "/cart",
@@ -19,9 +21,10 @@ export default function robots(): MetadataRoute.Robots {
         "/track-order",
         "/unsubscribe",
         "/admin",
-        "/api",
+        "/api/",
       ],
     },
     sitemap: `${siteConfig.url}/sitemap.xml`,
+    host: siteConfig.url,
   };
 }

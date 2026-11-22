@@ -153,3 +153,30 @@ Check `https://<your-site>/api/v1/health` shows `"status":"ok"`.
 Add the domain under **Settings → Domains** (e.g. `amazongroup.pk`), set
 `STOREFRONT_URL` = `https://amazongroup.pk`, and redeploy. The admin is then at
 `amazongroup.pk/admin`.
+
+## Search engines (Google and Bing)
+
+The site already serves what search engines need: `/sitemap.xml` (every
+product, category and collection, with product photos), `/robots.txt`,
+canonical URLs, and structured data for products (price, stock, rating,
+returns), breadcrumbs, the store and the FAQ.
+
+1. **Google Search Console** (search.google.com/search-console): add a
+   **URL prefix** property for `https://www.amazongroup.com.pk`, choose the
+   **HTML tag** method and copy only the `content="..."` value. In Vercel add
+   `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` = that value (Production), redeploy,
+   then click **Verify**.
+2. In Search Console → **Sitemaps**, submit `sitemap.xml`.
+3. **Bing Webmaster Tools** (bing.com/webmasters): import the site from Search
+   Console, or use the meta-tag method with
+   `NEXT_PUBLIC_BING_SITE_VERIFICATION`.
+4. Check a product with Google's **Rich Results Test** (search.google.com/test/rich-results).
+
+Only the main domain is indexed: the `*.vercel.app` address answers with
+`X-Robots-Tag: noindex`. Optionally, under **Settings → Domains**, redirect
+`amazon-group.vercel.app` to `www.amazongroup.com.pk` as well.
+
+For good results, give every product its own description (at least two or
+three sentences) and, in the product's SEO fields, a title under 60
+characters and a description under 155. Give categories a description too:
+it is shown on the category page and used as its search snippet.

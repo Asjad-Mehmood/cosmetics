@@ -4,7 +4,11 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { PageHeader } from "@/components/content/page-header";
 
-export const metadata: Metadata = { title: "About us" };
+export const metadata: Metadata = {
+  title: "About us",
+  description: `${siteConfig.name} is an online beauty and pharmacy store for Pakistan: skincare, makeup, hair care, fragrance, vitamins and health essentials with Cash on Delivery.`,
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (

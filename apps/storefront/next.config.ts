@@ -20,6 +20,13 @@ const securityHeaders = [
 
 const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
+/** The site's main host on production deploys (e.g. www.amazongroup.com.pk). */
+const siteHost = (() => {
+  if (process.env.VERCEL_ENV !== "production") return null;
+  const url = process.env.NEXT_PUBLIC_SITE_URL ?? (productionUrl && `https://${productionUrl}`);
+  return url && URL.canParse(url) ? new URL(url).host : null;
+})();
+
 /**
  * The `storefront` service: the shop (app/(shop)) and the admin panel
  * (app/admin). The API is the separate `api` service (apps/api): on Vercel the
@@ -60,6 +67,17 @@ const nextConfig: NextConfig = {
         ],
       },
       { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      // The same site also answers on its *.vercel.app address. Only the main
+      // domain should appear in search results, so other hosts aren't indexed.
+      ...(siteHost
+        ? [
+            {
+              source: "/:path*",
+              missing: [{ type: "host" as const, value: siteHost }],
+              headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+            },
+          ]
+        : []),
     ];
   },
 };

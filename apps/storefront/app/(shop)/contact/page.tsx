@@ -8,7 +8,9 @@ import { getDataSafe } from "@/lib/server-api";
 
 export const metadata: Metadata = {
   title: "Contact us",
-  description: "Questions about an order, a product or returns? Send us a message.",
+  description:
+    "Questions about an order, a product, a prescription or returns? Call, email or send us a message and our team will get back to you.",
+  alternates: { canonical: "/contact" },
 };
 
 export default async function ContactPage() {

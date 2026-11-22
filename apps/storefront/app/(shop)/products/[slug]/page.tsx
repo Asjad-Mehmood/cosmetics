@@ -1,4 +1,4 @@
-import type { ProductCardDTO, ProductDetailDTO } from "@store/types";
+import type { ProductCardDTO, ProductDetailDTO, StockStatus, VariantDTO } from "@store/types";
 import { toMajor } from "@store/types";
 import { Container } from "@store/ui";
 import type { Metadata } from "next";
@@ -11,6 +11,7 @@ import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { Reviews } from "@/components/product/reviews";
 import { Breadcrumbs } from "@/components/shop/product-listing";
 import { siteConfig } from "@/lib/config";
+import { baseOpenGraph, jsonLdHtml, metaDescription, pageTitle } from "@/lib/seo";
 import { getData, getDataSafe } from "@/lib/server-api";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -21,45 +22,81 @@ const getProduct = (slug: string) =>
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct((await params).slug);
   if (!product) return {};
-  const image = product.images[0];
+  const title = pageTitle(product.seoTitle, product.title);
+  const description = metaDescription(product.seoDescription ?? product.description);
+  const images = product.images
+    .slice(0, 4)
+    .map((i) => ({ url: i.url, alt: i.alt ?? product.title }));
   return {
-    title: product.seoTitle ?? product.title,
-    description: product.seoDescription ?? product.description.slice(0, 155),
+    title,
+    description,
     alternates: { canonical: `/products/${product.slug}` },
-    openGraph: {
-      type: "website",
-      title: product.title,
-      images: image ? [{ url: image.url, alt: image.alt ?? product.title }] : [],
+    openGraph: { ...baseOpenGraph, title, description, images },
+    twitter: { card: "summary_large_image", title, description, images: images.map((i) => i.url) },
+    other: {
+      "product:price:amount": String(toMajor(product.price)),
+      "product:price:currency": siteConfig.currency,
+      "product:availability": product.inStock ? "in stock" : "out of stock",
     },
   };
 }
 
-/** schema.org Product data so search engines can show price and stock. */
+const AVAILABILITY: Record<StockStatus, string> = {
+  in_stock: "https://schema.org/InStock",
+  low_stock: "https://schema.org/LimitedAvailability",
+  out_of_stock: "https://schema.org/OutOfStock",
+};
+
+/**
+ * schema.org Product data, so search results can show the price, stock,
+ * rating and return window. One Offer per variant (size/shade) with its SKU.
+ */
 function productJsonLd(p: ProductDetailDTO) {
   const url = `${siteConfig.url}/products/${p.slug}`;
+  const returnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "PK",
+    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: 7,
+    returnMethod: "https://schema.org/ReturnByMail",
+    url: `${siteConfig.url}/policies/returns`,
+  };
+  const variantName = (v: VariantDTO) =>
+    [v.size, v.color].filter((x) => x && !/^(default|one size|standard)$/i.test(x)).join(" / ");
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.title,
-    description: p.description,
+    description: metaDescription(p.description, 5000),
     image: p.images.map((i) => i.url),
+    url,
     sku: p.variants[0]?.sku,
-    brand: { "@type": "Brand", name: siteConfig.name },
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: siteConfig.currency,
-      lowPrice: toMajor(Math.min(...p.variants.map((v) => v.price), p.price)),
-      highPrice: toMajor(Math.max(...p.variants.map((v) => v.price), p.price)),
-      offerCount: p.variants.length,
-      availability: p.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    ...(p.categories[0] ? { category: p.categories[0].name } : {}),
+    offers: (p.variants.length ? p.variants : [null]).map((v) => ({
+      "@type": "Offer",
       url,
-    },
+      priceCurrency: siteConfig.currency,
+      price: toMajor(v?.price ?? p.price),
+      itemCondition: "https://schema.org/NewCondition",
+      availability: v
+        ? AVAILABILITY[v.stockStatus]
+        : p.inStock
+          ? AVAILABILITY.in_stock
+          : AVAILABILITY.out_of_stock,
+      ...(v
+        ? { sku: v.sku, ...(variantName(v) ? { name: `${p.title} (${variantName(v)})` } : {}) }
+        : {}),
+      seller: { "@type": "Organization", name: siteConfig.name },
+      hasMerchantReturnPolicy: returnPolicy,
+    })),
     ...(p.reviewCount > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: p.avgRating,
+            ratingValue: Number(p.avgRating.toFixed(1)),
             reviewCount: p.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
           },
         }
       : {}),
@@ -93,10 +130,8 @@ export default async function ProductPage({ params }: Props) {
     <Container className="pb-8 pt-4 sm:py-8">
       <script
         type="application/ld+json"
-        // JSON.stringify output is safe here apart from "<", which is escaped.
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd(product)).replace(/</g, "\\u003c"),
-        }}
+        // JSON.stringify output is safe here apart from "<", which jsonLdHtml escapes.
+        dangerouslySetInnerHTML={jsonLdHtml(productJsonLd(product))}
       />
       <Breadcrumbs
         items={[

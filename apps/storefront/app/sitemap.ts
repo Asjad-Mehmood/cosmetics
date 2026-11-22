@@ -30,23 +30,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: url("/"), changeFrequency: "daily", priority: 1 },
     { url: url("/shop"), changeFrequency: "daily", priority: 0.9 },
-    ...flatten(categories).map((c) => ({
-      url: url(`/categories/${c.slug}`),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
-    ...collections.map((c) => ({
-      url: url(`/collections/${c.slug}`),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
+    { url: url("/offers"), changeFrequency: "daily", priority: 0.8 },
+    { url: url("/prescription"), changeFrequency: "monthly", priority: 0.7 },
+    // Empty categories and collections are thin pages; leave them out until they have products.
+    ...flatten(categories)
+      .filter((c) => c.productCount > 0)
+      .map((c) => ({
+        url: url(`/categories/${c.slug}`),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+        ...(c.imageUrl ? { images: [c.imageUrl] } : {}),
+      })),
+    ...collections
+      .filter((c) => c.productCount > 0)
+      .map((c) => ({
+        url: url(`/collections/${c.slug}`),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+        ...(c.bannerUrl ? { images: [c.bannerUrl] } : {}),
+      })),
+    // Product photos go in the sitemap too, so they show in Google Images.
     ...products.map((p) => ({
       url: url(`/products/${p.slug}`),
       changeFrequency: "weekly" as const,
       priority: 0.7,
+      images: [p.image?.url, p.hoverImage?.url].filter((i): i is string => !!i),
     })),
     ...[
-      "/offers",
       "/faq",
       "/about",
       "/contact",

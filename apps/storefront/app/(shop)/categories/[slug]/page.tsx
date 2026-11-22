@@ -2,21 +2,31 @@ import type { CategoryDTO } from "@store/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, ProductListing } from "@/components/shop/product-listing";
+import { siteConfig } from "@/lib/config";
 import type { SearchParams } from "@/lib/listing";
 import { getData } from "@/lib/server-api";
+import { baseOpenGraph, listingMetadata, metaDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<SearchParams> };
 
 const getCategory = (slug: string) =>
   getData<CategoryDTO>(`/categories/${encodeURIComponent(slug)}`, { revalidate: 300 });
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const category = await getCategory((await params).slug);
   if (!category) return {};
   return {
-    title: category.name,
-    description: category.description ?? `Shop ${category.name.toLowerCase()}.`,
-    alternates: { canonical: `/categories/${category.slug}` },
+    title: `${category.name}: Buy Online in Pakistan`,
+    description: metaDescription(
+      category.description ??
+        `Shop ${category.name.toLowerCase()} online at ${siteConfig.name}. Delivery across Pakistan with Cash on Delivery.`,
+    ),
+    openGraph: {
+      ...baseOpenGraph,
+      title: category.name,
+      ...(category.imageUrl ? { images: [{ url: category.imageUrl, alt: category.name }] } : {}),
+    },
+    ...listingMetadata(`/categories/${category.slug}`, await searchParams),
   };
 }
 
