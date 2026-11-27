@@ -20,7 +20,14 @@ export const isSingleOption = (p: ProductCardDTO) =>
  * The card's buy button. Single-option products go straight into the cart;
  * anything with a choice to make opens the product page.
  */
-export function QuickAdd({ product }: { product: ProductCardDTO }) {
+export function QuickAdd({
+  product,
+  overlay = false,
+}: {
+  product: ProductCardDTO;
+  /** The button that sits on the card's photo in the minimal design. */
+  overlay?: boolean;
+}) {
   const router = useRouter();
   const addToCart = useAddToCart();
   const openCart = useUi((s) => s.openCart);
@@ -29,6 +36,24 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
   const href = `/products/${product.slug}`;
   const base = "w-full";
 
+  if (overlay && !product.inStock) {
+    return (
+      <OverlayButton
+        href={href}
+        label="Notify me"
+        aria-label={`Notify me: ${product.title} is sold out`}
+      />
+    );
+  }
+  if (overlay && !isSingleOption(product)) {
+    return (
+      <OverlayButton
+        href={href}
+        label="Choose options"
+        aria-label={`Choose options for ${product.title}`}
+      />
+    );
+  }
   if (!product.inStock) {
     return (
       <Link
@@ -74,6 +99,17 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
     }
   }
 
+  if (overlay) {
+    return (
+      <OverlayButton
+        onClick={add}
+        disabled={loading}
+        label={added ? "Added" : loading ? "Adding…" : "Add to cart"}
+        aria-label={`Add to cart: ${product.title}`}
+      />
+    );
+  }
+
   return (
     <Button
       variant="brand"
@@ -94,5 +130,47 @@ export function QuickAdd({ product }: { product: ProductCardDTO }) {
         </>
       )}
     </Button>
+  );
+}
+
+/**
+ * The photo's buy button: a white pill that fills black from the left on hover
+ * (a round bag icon on phones). A link when there are options to choose.
+ */
+function OverlayButton({
+  href,
+  label,
+  onClick,
+  disabled,
+  "aria-label": ariaLabel,
+}: {
+  href?: string;
+  label: string;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  "aria-label": string;
+}) {
+  const content = (
+    <>
+      <BagIcon width={18} height={18} data-overlay-icon aria-hidden />
+      <span data-overlay-label>{label}</span>
+    </>
+  );
+  const className = "sweep-btn";
+  return href ? (
+    <Link href={href} data-overlay-btn className={className} aria-label={ariaLabel}>
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      data-overlay-btn
+      className={className}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+    >
+      {content}
+    </button>
   );
 }

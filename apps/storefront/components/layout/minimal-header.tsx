@@ -43,7 +43,7 @@ export function MinimalHeader({
   contact,
 }: NavData & { contact: { phone: string | null; email: string | null } }) {
   return (
-    <header className="border-line bg-canvas sticky top-0 z-40 border-b">
+    <header className="border-line bg-canvas relative z-40 border-b">
       <div className="relative">
         <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-20">
           <div className="flex items-center gap-5 text-[15px]">

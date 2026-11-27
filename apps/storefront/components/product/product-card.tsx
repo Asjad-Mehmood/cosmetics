@@ -80,7 +80,7 @@ export function ProductCard({
           <h3 className="line-clamp-2 min-h-[2.5em] text-sm font-semibold leading-snug group-hover:underline">
             {product.title}
           </h3>
-          <p className="text-muted flex h-4 items-center gap-1.5 text-xs">
+          <p className="text-muted flex h-4 items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs">
             {product.reviewCount > 0 ? (
               <>
                 <Stars rating={product.avgRating} size={12} />
@@ -105,7 +105,7 @@ export function ProductCard({
             from={product.hasPriceRange}
             className="text-[15px]"
           />
-          <p className="flex h-5 items-center gap-2 text-xs">
+          <p data-card-extra className="flex h-5 items-center gap-2 text-xs">
             {saving > 0 && (
               <span className="text-success font-semibold">Save {formatMoney(saving)}</span>
             )}
@@ -131,8 +131,12 @@ export function ProductCard({
           )}
         </ul>
       )}
-      <div className="mt-3">
+      <div data-card-buy className="mt-3">
         <QuickAdd product={product} />
+      </div>
+      {/* Minimal design only: the buy button sits on the photo (see globals.css). */}
+      <div data-card-overlay className="hidden">
+        <QuickAdd product={product} overlay />
       </div>
     </article>
   );
