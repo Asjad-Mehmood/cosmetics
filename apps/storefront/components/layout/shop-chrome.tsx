@@ -63,6 +63,8 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           <PhotoTransition />
           <SmoothScroll />
           <ThemeAttr theme={theme} />
+          {/* At the very top, in the page flow, so it never covers buttons. */}
+          {preview && <ThemePreviewBar theme={theme} />}
           {minimal ? (
             <>
               <MinimalTopBar text={home?.announcement ?? null} />
@@ -81,7 +83,6 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
           <BottomNav />
           <CartDrawer />
           <Preloader />
-          {preview && <ThemePreviewBar theme={theme} />}
         </SiteProvider>
       </Providers>
     </div>
