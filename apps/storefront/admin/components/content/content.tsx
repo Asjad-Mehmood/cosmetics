@@ -7,6 +7,8 @@ import type {
   AnnouncementDTO,
   ApiResponse,
   FlashSaleSettingsDTO,
+  StoreTheme,
+  ThemeSettingsDTO,
 } from "@store/types";
 import { Badge, Button, Dialog, Field, Input, Skeleton } from "@store/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -117,6 +119,145 @@ function Announcement() {
       <Button disabled={!dirty} loading={save.isPending} onClick={() => save.mutate()}>
         Save announcement
       </Button>
+    </Section>
+  );
+}
+
+// ───────────── Store design ─────────────
+
+const DESIGNS: {
+  id: StoreTheme;
+  name: string;
+  description: string;
+  /** A tiny drawing of the design: header bar, accent and page colours. */
+  swatch: { bar: string; header: string; accent: string; centred: boolean; font: string };
+}[] = [
+  {
+    id: "classic",
+    name: "Classic",
+    description:
+      "Navy and orange, rounded cards, search bar in the header and the animated home page.",
+    swatch: {
+      bar: "#0f1d38",
+      header: "#ffffff",
+      accent: "#f47b20",
+      centred: false,
+      font: "Plus Jakarta Sans",
+    },
+  },
+  {
+    id: "minimal",
+    name: "Minimal",
+    description:
+      "Black and white with a centred logo, a menu row under it, frameless product cards, an edge-to-edge banner and three-column product grids.",
+    swatch: {
+      bar: "#111111",
+      header: "#ffffff",
+      accent: "#e03131",
+      centred: true,
+      font: "Instrument Sans",
+    },
+  },
+];
+
+function DesignSwatch({ swatch }: { swatch: (typeof DESIGNS)[number]["swatch"] }) {
+  return (
+    <div aria-hidden className="border-line overflow-hidden rounded-lg border bg-white">
+      <div className="h-2" style={{ background: swatch.bar }} />
+      <div
+        className="flex h-7 items-center gap-2 px-3"
+        style={{
+          background: swatch.header,
+          justifyContent: swatch.centred ? "center" : "flex-start",
+        }}
+      >
+        <span className="h-2.5 w-12 rounded-sm" style={{ background: swatch.bar }} />
+        {!swatch.centred && <span className="bg-surface h-3 flex-1 rounded-full" />}
+      </div>
+      <div
+        className="h-14"
+        style={{
+          background: swatch.centred ? "#d9d9d9" : "#dce4f2",
+          margin: swatch.centred ? 0 : "0 8px",
+          borderRadius: swatch.centred ? 0 : 8,
+        }}
+      />
+      <div className="grid grid-cols-3 gap-2 p-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="space-y-1">
+            <div
+              className="bg-surface aspect-square"
+              style={{ borderRadius: swatch.centred ? 2 : 8 }}
+            />
+            <div className="h-1.5 w-3/4 rounded-sm bg-black/30" />
+            <div className="h-1.5 w-1/2 rounded-sm" style={{ background: swatch.accent }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StoreDesign() {
+  const qc = useQueryClient();
+  const query = useQuery({
+    queryKey: ["admin", "theme"],
+    queryFn: async () => (await api<ApiResponse<ThemeSettingsDTO>>("/admin/theme")).data,
+  });
+  const save = useMutation({
+    mutationFn: (theme: StoreTheme) =>
+      api<ApiResponse<ThemeSettingsDTO>>("/admin/theme", { method: "PUT", body: { theme } }),
+    onSuccess: (res) => {
+      qc.setQueryData(["admin", "theme"], res.data);
+      toast.success("Design changed. Visitors see it within about five minutes.");
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  if (query.isError)
+    return <ErrorState message={errorMessage(query.error)} onRetry={() => void query.refetch()} />;
+  if (!query.data) return <Skeleton className="h-64" />;
+  const live = query.data.theme;
+
+  return (
+    <Section
+      title="Store design"
+      description="Choose how the shop looks. Preview opens the shop in a new tab with that design, only for you, so you can check every page before switching."
+    >
+      <div className="grid gap-4 md:grid-cols-2">
+        {DESIGNS.map((d) => (
+          <div
+            key={d.id}
+            className={`rounded-xl border p-4 ${live === d.id ? "border-brand-700 ring-brand-700 ring-1" : "border-line"}`}
+          >
+            <DesignSwatch swatch={d.swatch} />
+            <div className="mt-4 flex items-center gap-2">
+              <p className="font-semibold">{d.name}</p>
+              {live === d.id && <Badge tone="success">Live</Badge>}
+            </div>
+            <p className="text-muted mt-1 text-sm">{d.description}</p>
+            <p className="text-muted mt-1 text-xs">Font: {d.swatch.font}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a
+                href={`/theme-preview?theme=${d.id}`}
+                target="_blank"
+                rel="noopener"
+                className="border-line hover:bg-surface inline-flex h-9 items-center rounded-lg border px-3 text-sm font-medium"
+              >
+                Preview
+              </a>
+              {live !== d.id && (
+                <Button
+                  size="sm"
+                  loading={save.isPending && save.variables === d.id}
+                  onClick={() => save.mutate(d.id)}
+                >
+                  Use this design
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </Section>
   );
 }
@@ -743,6 +884,7 @@ export function Content() {
       />
       {tab === "" && (
         <div className="space-y-6">
+          <StoreDesign />
           <Announcement />
           <FlashSale />
           <Banners />

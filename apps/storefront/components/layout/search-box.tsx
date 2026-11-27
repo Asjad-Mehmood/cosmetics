@@ -35,8 +35,13 @@ export function focusSiteSearch() {
   const boxes = document.querySelectorAll<HTMLInputElement>("[data-site-search]");
   const visible = [...boxes].find((b) => b.offsetParent !== null);
   window.scrollTo({ top: 0, behavior: "smooth" });
-  visible?.focus();
+  // The minimal design keeps its search box folded away until it is asked for.
+  if (visible) visible.focus();
+  else window.dispatchEvent(new Event(OPEN_SEARCH_EVENT));
 }
+
+/** Asks a folded-away search box (minimal design) to open. */
+export const OPEN_SEARCH_EVENT = "site-search:open";
 
 /**
  * Header search with suggestions as you type (WAI-ARIA combobox): products with

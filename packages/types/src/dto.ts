@@ -257,6 +257,8 @@ export interface HomeContentDTO {
   delivery: DeliveryZoneDTO[];
   /** A running flash sale (switched on in the admin and not yet ended), or null. */
   flashSale: { title: string; subtitle: string | null; endsAt: string } | null;
+  /** The shop design chosen in the admin (Content → Store design). */
+  theme: "classic" | "minimal";
 }
 
 export interface PageDTO {

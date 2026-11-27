@@ -4,10 +4,12 @@ import type {
   AdminPageDTO,
   AnnouncementDTO,
   FlashSaleSettingsDTO,
+  ThemeSettingsDTO,
 } from "@store/types";
 import {
   announcementSchema,
   flashSaleSchema,
+  themeSettingsSchema,
   createBannerSchema,
   createFaqSchema,
   createPageSchema,
@@ -303,6 +305,36 @@ export const adminContentRouter = defineRoutes("/admin", "Admin: Content", [
       });
       await audit(req, "flashSale.update", "Setting", "flashSale", body);
       return ok<FlashSaleSettingsDTO>(body);
+    },
+  }),
+
+  // Store design (which of the shop's two looks visitors see)
+  route({
+    method: "get",
+    path: "/theme",
+    summary: "The shop design in use",
+    access: "MANAGER",
+    handler: async () => {
+      const s = await getSettings({ "storefront.theme": "classic" as ThemeSettingsDTO["theme"] });
+      return ok<ThemeSettingsDTO>({ theme: s["storefront.theme"] });
+    },
+  }),
+  route({
+    method: "put",
+    path: "/theme",
+    summary: "Change the shop design",
+    description:
+      "`classic` is the original design; `minimal` is the black-and-white design with a centred logo. The shop switches within a few minutes (pages are cached for up to 5).",
+    access: "MANAGER",
+    body: themeSettingsSchema,
+    handler: async ({ req, body }) => {
+      await prisma.setting.upsert({
+        where: { key: "storefront.theme" },
+        create: { key: "storefront.theme", value: body.theme },
+        update: { value: body.theme },
+      });
+      await audit(req, "theme.update", "Setting", "storefront.theme", body);
+      return ok<ThemeSettingsDTO>(body);
     },
   }),
 ]);

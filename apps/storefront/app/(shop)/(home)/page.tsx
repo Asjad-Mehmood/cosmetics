@@ -25,8 +25,10 @@ import { ProductRail } from "@/components/product/product-rail";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { Reveal } from "@/components/reveal";
 import { VoucherStrip } from "@/components/vouchers";
+import { MinimalHome } from "@/components/home/minimal-home";
 import { siteConfig } from "@/lib/config";
 import { getData, getDataSafe, getList } from "@/lib/server-api";
+import { resolveTheme } from "@/lib/theme";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
@@ -105,15 +107,37 @@ export default async function HomePage() {
     },
   ];
 
+  const jsonLd = (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+      }}
+    />
+  );
+  const h1 = <h1 className="sr-only">{siteConfig.name}: beauty and pharmacy store in Pakistan</h1>;
+
+  if ((await resolveTheme(home)).theme === "minimal") {
+    return (
+      <>
+        {jsonLd}
+        {h1}
+        <MinimalHome
+          home={home}
+          categories={categories ?? []}
+          bestSellers={bestSellers.data}
+          newArrivals={newArrivals.data}
+          topRated={forYou.data}
+          offers={offers.data}
+        />
+      </>
+    );
+  }
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
-        }}
-      />
-      <h1 className="sr-only">{siteConfig.name}: beauty and pharmacy store in Pakistan</h1>
+      {jsonLd}
+      {h1}
 
       <Container className="pt-4 sm:pt-6">
         {banners.length > 0 ? (

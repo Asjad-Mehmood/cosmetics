@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { siteConfig } from "@/lib/config";
 import { baseOpenGraph } from "@/lib/seo";
-import { brandFont } from "./fonts";
+import { brandFont, minimalFont } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -51,7 +51,11 @@ export const viewport: Viewport = { themeColor: "#0f1d38" };
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-PK" className={brandFont.variable} suppressHydrationWarning>
+    <html
+      lang="en-PK"
+      className={`${brandFont.variable} ${minimalFont.variable}`}
+      suppressHydrationWarning
+    >
       <body>
         {children}
         {/* Cookie-free page-view analytics and Core Web Vitals (only active on Vercel). */}

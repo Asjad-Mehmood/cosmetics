@@ -16,7 +16,14 @@ const INTERVAL = 6000;
  * seconds, pauses on hover, focus or when motion is reduced, and can be
  * swiped on touch screens.
  */
-export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
+export function HeroCarousel({
+  banners,
+  bleed = false,
+}: {
+  banners: BannerDTO[];
+  /** Edge to edge with square corners (minimal design). */
+  bleed?: boolean;
+}) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
@@ -119,7 +126,7 @@ export function HeroCarousel({ banners }: { banners: BannerDTO[] }) {
       data-gsap-hero={gsapOn ? "" : undefined}
       aria-roledescription="carousel"
       aria-label="Featured"
-      className="relative overflow-hidden rounded-3xl"
+      className={cn("relative overflow-hidden", !bleed && "rounded-3xl")}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}

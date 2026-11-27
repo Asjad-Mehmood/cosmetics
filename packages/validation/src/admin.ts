@@ -305,6 +305,9 @@ export const flashSaleSchema = z.object({
   endsAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
+/** The shop design chosen in the admin. */
+export const themeSettingsSchema = z.object({ theme: z.enum(["classic", "minimal"]) });
+
 // ───────────── Messages ─────────────
 
 export const messageListQuerySchema = paginationSchema.extend({

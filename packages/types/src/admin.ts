@@ -275,6 +275,14 @@ export interface FlashSaleSettingsDTO {
   endsAt: string | null;
 }
 
+/** The shop's look: the original design, or the minimal black-and-white one. */
+export const STORE_THEMES = ["classic", "minimal"] as const;
+export type StoreTheme = (typeof STORE_THEMES)[number];
+
+export interface ThemeSettingsDTO {
+  theme: StoreTheme;
+}
+
 export interface ContactMessageDTO {
   id: string;
   name: string;

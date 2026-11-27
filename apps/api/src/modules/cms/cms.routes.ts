@@ -29,7 +29,7 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
     access: "public",
     handler: async () => {
       const now = new Date();
-      const [banners, enabled, text, store, zones, coupons, sale] = await Promise.all([
+      const [banners, enabled, text, store, zones, coupons, sale, theme] = await Promise.all([
         prisma.banner.findMany({
           where: {
             isActive: true,
@@ -57,6 +57,7 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           take: 12,
         }),
         getSetting<FlashSaleSettingsDTO>("flashSale"),
+        getSetting<string>("storefront.theme"),
       ]);
       const saleLive = !!(
         sale?.enabled &&
@@ -92,6 +93,7 @@ export const cmsRouter = defineRoutes("/cms", "Content", [
           freeOverAmount: z.freeOverAmount,
           codFee: z.codEnabled ? z.codFee : 0,
         })),
+        theme: theme === "minimal" ? "minimal" : "classic",
         flashSale: saleLive
           ? { title: sale!.title, subtitle: sale!.subtitle || null, endsAt: sale!.endsAt! }
           : null,
