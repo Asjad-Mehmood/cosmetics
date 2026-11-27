@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource-variable/instrument-sans": "5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "5.2.8",
     "@gsap/react": "2.1.2",
     "@hookform/resolvers": "^5.9.2",

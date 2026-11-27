@@ -20,6 +20,7 @@ export default function robots(): MetadataRoute.Robots {
         "/orders",
         "/track-order",
         "/unsubscribe",
+        "/theme-preview",
         "/admin",
         "/api/",
       ],

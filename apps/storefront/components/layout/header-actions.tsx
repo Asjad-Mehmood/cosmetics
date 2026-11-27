@@ -21,7 +21,8 @@ const Count = ({ n, testId }: { n: number; testId?: string }) => (
   </span>
 );
 
-export function HeaderActions() {
+/** Account, wishlist and cart. `iconsOnly` drops the text labels (minimal design). */
+export function HeaderActions({ iconsOnly = false }: { iconsOnly?: boolean }) {
   const me = useMe();
   const cart = useCart();
   const openCart = useUi((s) => s.openCart);
@@ -34,11 +35,16 @@ export function HeaderActions() {
     <div className="ml-auto flex items-center gap-1 sm:gap-2">
       <Link
         href={me.data ? "/account" : "/login"}
-        className="hover:bg-surface hidden items-center gap-2.5 rounded-full p-2 sm:flex lg:pr-3"
+        className={cn(
+          "hover:bg-surface hidden items-center gap-2.5 rounded-full p-2 sm:flex",
+          !iconsOnly && "lg:pr-3",
+        )}
       >
         <UserIcon />
-        <span className="sr-only lg:hidden">{me.data ? "My account" : "Sign in"}</span>
-        <span className="hidden text-left leading-tight lg:block">
+        <span className={cn("sr-only", !iconsOnly && "lg:hidden")}>
+          {me.data ? "My account" : "Sign in"}
+        </span>
+        <span className={cn("hidden text-left leading-tight", !iconsOnly && "lg:block")}>
           <span className="text-muted block text-[11px]">
             {firstName ? `Hi, ${firstName}` : "Welcome"}{" "}
           </span>
@@ -56,7 +62,10 @@ export function HeaderActions() {
       <button
         type="button"
         onClick={openCart}
-        className="hover:bg-surface flex items-center gap-2.5 rounded-full p-2 lg:pr-3"
+        className={cn(
+          "hover:bg-surface flex items-center gap-2.5 rounded-full p-2",
+          !iconsOnly && "lg:pr-3",
+        )}
       >
         <span
           data-cart-target
@@ -66,8 +75,8 @@ export function HeaderActions() {
           <BagIcon />
           {count > 0 && <Count n={count} testId="cart-count" />}
         </span>
-        <span className="sr-only lg:hidden">Cart</span>
-        <span className="hidden text-left leading-tight lg:block">
+        <span className={cn("sr-only", !iconsOnly && "lg:hidden")}>Cart</span>
+        <span className={cn("hidden text-left leading-tight", !iconsOnly && "lg:block")}>
           <span className="text-muted block text-[11px]">Cart </span>
           <span className="block text-sm font-semibold tabular-nums">
             <TweenedMoney value={cart.data?.total ?? 0} />

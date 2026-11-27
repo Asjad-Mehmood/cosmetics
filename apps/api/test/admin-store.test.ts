@@ -237,6 +237,24 @@ describe("content", () => {
 
     await agent.put("/api/v1/admin/flash-sale").send(original);
   });
+
+  it("switches the shop design", async () => {
+    const { agent } = await signedInAgent("MANAGER");
+    const original = (await agent.get("/api/v1/admin/theme")).body.data;
+    expect(original.theme).toMatch(/^(classic|minimal)$/);
+
+    expect((await agent.put("/api/v1/admin/theme").send({ theme: "neon" })).status).toBe(422);
+    expect((await agent.put("/api/v1/admin/theme").send({ theme: "minimal" })).status).toBe(200);
+    expect((await request(app).get("/api/v1/cms/home")).body.data.theme).toBe("minimal");
+    await agent.put("/api/v1/admin/theme").send({ theme: "classic" });
+    expect((await request(app).get("/api/v1/cms/home")).body.data.theme).toBe("classic");
+
+    const support = await signedInAgent("SUPPORT");
+    expect((await support.agent.put("/api/v1/admin/theme").send({ theme: "minimal" })).status).toBe(
+      403,
+    );
+    await agent.put("/api/v1/admin/theme").send(original);
+  });
 });
 
 describe("messages", () => {

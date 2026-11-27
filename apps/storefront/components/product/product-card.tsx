@@ -32,6 +32,7 @@ export function ProductCard({
 
   return (
     <article
+      data-product-card
       className={cn(
         "border-line bg-canvas hover:shadow-(--shadow-card) group relative flex h-full flex-col rounded-2xl border p-2.5 transition duration-300 hover:-translate-y-1 active:scale-[.98] sm:p-3",
         className,
