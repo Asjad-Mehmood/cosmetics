@@ -1,4 +1,4 @@
-import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
+import type { CategoryDTO, HomeContentDTO, ProductCardDTO, StoreReviewsDTO } from "@store/types";
 import { Container } from "@store/ui";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -118,6 +118,9 @@ export default async function HomePage() {
   const h1 = <h1 className="sr-only">{siteConfig.name}: beauty and pharmacy store in Pakistan</h1>;
 
   if ((await resolveTheme(home)).theme === "minimal") {
+    const reviews = await getDataSafe<StoreReviewsDTO | null>("/reviews/recent", null, {
+      revalidate: 300,
+    });
     return (
       <>
         {jsonLd}
@@ -129,6 +132,7 @@ export default async function HomePage() {
           newArrivals={newArrivals.data}
           topRated={forYou.data}
           offers={offers.data}
+          reviews={reviews}
         />
       </>
     );

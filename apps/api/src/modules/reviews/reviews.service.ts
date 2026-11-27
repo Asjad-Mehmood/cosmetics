@@ -5,6 +5,7 @@ import type {
   ReviewEligibilityDTO,
   ReviewsPageDTO,
   ReviewSummaryDTO,
+  StoreReviewsDTO,
 } from "@store/types";
 import type {
   adminReviewListQuerySchema,
@@ -73,10 +74,10 @@ export async function refreshRating(productId: string) {
   });
 }
 
-async function summary(productId: string): Promise<ReviewSummaryDTO> {
+async function summary(productId?: string): Promise<ReviewSummaryDTO> {
   const groups = await prisma.review.groupBy({
     by: ["rating"],
-    where: { productId, isApproved: true },
+    where: { ...(productId ? { productId } : {}), isApproved: true },
     _count: { _all: true },
   });
   const count = groups.reduce((n, g) => n + g._count._all, 0);
@@ -88,6 +89,29 @@ async function summary(productId: string): Promise<ReviewSummaryDTO> {
       rating,
       count: groups.find((g) => g.rating === rating)?._count._all ?? 0,
     })),
+  };
+}
+
+/**
+ * The newest approved 4 and 5 star reviews across the store, with the product
+ * each is about, for the home page's "What our customers say" slider.
+ */
+export async function recentReviews(limit = 12): Promise<StoreReviewsDTO> {
+  const [rows, stats] = await Promise.all([
+    prisma.review.findMany({
+      where: { isApproved: true, rating: { gte: 4 }, product: { status: "ACTIVE" } },
+      include: {
+        user: { select: { name: true } },
+        product: { select: { title: true, slug: true } },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: limit,
+    }),
+    summary(),
+  ]);
+  return {
+    reviews: rows.map((r) => ({ ...toReview(r), product: r.product })),
+    summary: { average: stats.average, count: stats.count },
   };
 }
 

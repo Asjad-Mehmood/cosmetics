@@ -32,6 +32,17 @@ export interface ReviewsPageDTO {
   summary: ReviewSummaryDTO;
 }
 
+/** A review on the home page slider, with the product it is about. */
+export interface StoreReviewDTO extends ReviewDTO {
+  product: { title: string; slug: string };
+}
+
+export interface StoreReviewsDTO {
+  reviews: StoreReviewDTO[];
+  /** Every approved review in the store. */
+  summary: { average: number; count: number };
+}
+
 export interface MyReviewDTO {
   id: string;
   rating: number;

@@ -79,6 +79,15 @@ describe("reviews", () => {
     expect(list.body.summary.distribution).toContainEqual({ rating: 4, count: 1 });
     const card = (await request(app).get(`/api/v1/products/${product.slug}`)).body.data;
     expect(card).toMatchObject({ avgRating: 4, reviewCount: 1 });
+    // The home page slider shows it, with its product.
+    const recent = (await request(app).get("/api/v1/reviews/recent")).body.data;
+    expect(recent.reviews).toContainEqual(
+      expect.objectContaining({
+        title: "Cosy",
+        product: { title: product.title, slug: product.slug },
+      }),
+    );
+    expect(recent.summary.count).toBeGreaterThan(0);
 
     // Editing sends it back to moderation and out of the average.
     await agent.put(base).send({ rating: 2, body: "Changed my mind, it pilled." });

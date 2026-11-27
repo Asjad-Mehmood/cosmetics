@@ -153,7 +153,11 @@ export function HeroCarousel({
             aria-label={`${i + 1} of ${count}`}
             aria-hidden={i !== index}
             inert={i !== index}
-            className="bg-brand-700 relative h-[340px] w-full shrink-0 sm:h-[400px] lg:h-[460px]"
+            className={cn(
+              "bg-brand-700 relative w-full shrink-0",
+              // Edge to edge (minimal design): a wide 16:9 banner, as tall as most screens.
+              bleed ? "h-[clamp(360px,56.25vw,820px)]" : "h-[340px] sm:h-[400px] lg:h-[460px]",
+            )}
           >
             {/* The photo drifts slowly closer while its slide is showing. */}
             <Image
@@ -170,7 +174,10 @@ export function HeroCarousel({
             <span className="from-brand-700/95 via-brand-700/70 absolute inset-0 bg-gradient-to-r to-transparent" />
             <div
               key={i === index ? `in-${index}` : "out"}
-              className="hero-copy relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12"
+              className={cn(
+                "hero-copy relative flex h-full max-w-xl flex-col justify-center px-6 sm:px-12",
+                bleed && "lg:max-w-2xl lg:px-20 xl:px-28",
+              )}
             >
               <p className="text-accent-100 text-xs font-semibold uppercase tracking-widest">
                 Beauty &amp; pharmacy

@@ -105,3 +105,114 @@
 :root[data-store-theme="minimal"] [data-product-card] [data-card-photo] {
   border-radius: 0.375rem;
 }
+/*
+ * The buy button lives on the photo, as on the reference design. On a mouse
+ * it is a white pill that slides up on hover and fills black from one side;
+ * on touch screens it is a round bag button that is always there, with the
+ * heart above it. The heart only shows on hover with a mouse.
+ */
+:root[data-store-theme="minimal"] [data-product-card] :is([data-card-buy], [data-card-extra]) {
+  display: none;
+}
+:root[data-store-theme="minimal"] [data-product-card] [data-card-overlay] {
+  display: block;
+  position: absolute;
+  inset: 0 0 auto;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+.sweep-btn {
+  position: absolute;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 9999px;
+  background: #fff;
+  color: #111;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.25);
+  transition:
+    color 0.35s ease,
+    opacity 0.3s ease,
+    translate 0.3s ease;
+}
+.sweep-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #111;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.sweep-btn:is(:hover, :focus-visible) {
+  color: #fff;
+}
+.sweep-btn:is(:hover, :focus-visible)::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.sweep-btn:disabled {
+  cursor: progress;
+}
+@media (hover: hover) and (min-width: 768px) {
+  .sweep-btn {
+    inset: auto 0.875rem 0.875rem;
+    height: 3rem;
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+  .sweep-btn [data-overlay-icon] {
+    display: none;
+  }
+  :root[data-store-theme="minimal"] [data-product-card]:is(:hover, :focus-within) .sweep-btn {
+    opacity: 1;
+    translate: 0 0;
+  }
+  :root[data-store-theme="minimal"] [data-product-card] > button[aria-pressed] {
+    top: 0.875rem;
+    right: 0.875rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  :root[data-store-theme="minimal"]
+    [data-product-card]:is(:hover, :focus-within)
+    > button[aria-pressed],
+  :root[data-store-theme="minimal"] [data-product-card] > button[aria-pressed="true"] {
+    opacity: 1;
+  }
+}
+@media not ((hover: hover) and (min-width: 768px)) {
+  .sweep-btn {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .sweep-btn [data-overlay-label] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* Just above the bag button: the photo is square, so its height is the card's width. */
+  :root[data-store-theme="minimal"] [data-product-card] {
+    container-type: inline-size;
+  }
+  :root[data-store-theme="minimal"] [data-product-card] > button[aria-pressed] {
+    top: calc(100cqw - 5.5rem);
+    right: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}

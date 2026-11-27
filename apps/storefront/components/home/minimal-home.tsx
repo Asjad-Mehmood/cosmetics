@@ -1,4 +1,4 @@
-import type { CategoryDTO, HomeContentDTO, ProductCardDTO } from "@store/types";
+import type { CategoryDTO, HomeContentDTO, ProductCardDTO, StoreReviewsDTO } from "@store/types";
 import { Container } from "@store/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,10 +6,12 @@ import type { ReactNode } from "react";
 import { FlashSale } from "@/components/home/flash-sale";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { PromiseMarquee } from "@/components/home/promise-marquee";
+import { Slider } from "@/components/home/slider";
 import { ChatIcon, PillIcon, RefreshIcon, TruckIcon } from "@/components/icons";
 import { NewsletterBand } from "@/components/layout/footer";
 import { ProductCard } from "@/components/product/product-card";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
+import { Stars } from "@/components/product/stars";
 import { VoucherStrip } from "@/components/vouchers";
 import { siteConfig } from "@/lib/config";
 
@@ -25,7 +27,11 @@ function SectionTitle({
 }) {
   return (
     <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-10">
-      <h2 id={id} data-gsap="split" className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h2
+        id={id}
+        data-gsap="split"
+        className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl"
+      >
         {title}
       </h2>
       {children && <p className="text-muted mt-3 text-[15px] leading-relaxed">{children}</p>}
@@ -75,11 +81,87 @@ const SERVICES = [
   },
 ];
 
+const reviewDate = new Intl.DateTimeFormat("en-PK", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+/** "What our customers say": real, approved reviews from this store. */
+function CustomerReviews({ data }: { data: StoreReviewsDTO }) {
+  return (
+    <section aria-labelledby="reviews-heading" className="pt-16 sm:pt-20">
+      <Container>
+        <SectionTitle id="reviews-heading" title="What our customers say" />
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[15rem_minmax(0,1fr)]">
+          <div className="border-line flex items-center gap-4 lg:h-full lg:border-r lg:pr-8">
+            <Image
+              src="/brand/logo.png"
+              alt=""
+              width={112}
+              height={40}
+              className="h-auto w-28 shrink-0 object-contain"
+            />
+            <div>
+              <p className="text-ink font-semibold uppercase">{siteConfig.name}</p>
+              <Stars rating={data.summary.average} size={18} />
+              <p className="text-ink mt-0.5 text-sm font-semibold">
+                {data.summary.average.toFixed(1)} from {data.summary.count}{" "}
+                {data.summary.count === 1 ? "review" : "reviews"}
+              </p>
+            </div>
+          </div>
+          <Slider
+            label="Customer reviews"
+            arrows
+            autoplay={5000}
+            slideClassName="basis-[85%] sm:basis-1/2 xl:basis-1/4"
+          >
+            {data.reviews.map((r) => (
+              <figure key={r.id} className="bg-surface flex h-full flex-col rounded-lg p-5">
+                <figcaption className="flex items-center gap-3">
+                  <span
+                    aria-hidden
+                    className="bg-ink grid size-10 shrink-0 place-items-center rounded-full text-sm font-semibold text-white"
+                  >
+                    {r.author.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="text-ink block truncate text-sm font-semibold">
+                      {r.author}
+                    </span>
+                    <span className="text-muted block text-xs">
+                      {reviewDate.format(new Date(r.createdAt))}
+                    </span>
+                  </span>
+                </figcaption>
+                <Stars rating={r.rating} size={18} className="mt-3" />
+                <blockquote className="mt-2 line-clamp-4 flex-1 text-sm leading-relaxed">
+                  {r.title && <strong className="text-ink">{r.title}. </strong>}
+                  {r.body}
+                </blockquote>
+                <Link
+                  href={`/products/${r.product.slug}#reviews`}
+                  className="text-muted hover:text-ink mt-3 line-clamp-1 text-xs underline-offset-2 hover:underline"
+                >
+                  {r.product.title}
+                </Link>
+              </figure>
+            ))}
+          </Slider>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 /**
- * The home page in the minimal design: an edge-to-edge banner, centred
- * section titles, roomy three-column product grids, a split welcome block and
- * a black promise ticker. Content comes from the same admin data as the
- * classic design (banners, categories, best sellers, offers).
+ * The home page in the minimal design, in the reference store's order: a
+ * full-width banner, a sliding range of categories, featured products, a split
+ * welcome block, popular picks, best sellers beside a large photo, a black
+ * promise ticker, customer reviews and the service promises. The store's own
+ * extras (vouchers, flash sale, offers, prescriptions) follow the reviews.
+ * Content comes from the same admin data as the classic design.
  */
 export function MinimalHome({
   home,
@@ -88,6 +170,7 @@ export function MinimalHome({
   newArrivals,
   topRated,
   offers,
+  reviews,
 }: {
   home: HomeContentDTO | null;
   categories: CategoryDTO[];
@@ -95,11 +178,14 @@ export function MinimalHome({
   newArrivals: ProductCardDTO[];
   topRated: ProductCardDTO[];
   offers: ProductCardDTO[];
+  reviews: StoreReviewsDTO | null;
 }) {
   const banners = home?.banners ?? [];
-  const tiles = categories.filter((c) => c.imageUrl).slice(0, 8);
-  const welcomeImage =
-    categories.find((c) => c.slug === "skincare")?.imageUrl ?? tiles[0]?.imageUrl ?? null;
+  const tiles = categories.filter((c) => c.imageUrl);
+  const imageOf = (slug: string) => categories.find((c) => c.slug === slug)?.imageUrl;
+  const welcomeImage = imageOf("skincare") ?? tiles[0]?.imageUrl ?? null;
+  const lookbookImage = banners[1]?.imageUrl ?? imageOf("makeup") ?? tiles[1]?.imageUrl ?? null;
+  const featured = newArrivals.length >= 3 ? newArrivals : bestSellers;
 
   return (
     <>
@@ -125,54 +211,48 @@ export function MinimalHome({
         <section aria-labelledby="range-heading" className="pt-16 sm:pt-20">
           <Container>
             <SectionTitle id="range-heading" title="Explore our range">
-              Skincare, makeup, hair care, fragrance and everyday health essentials, all in one
-              place.
+              &ldquo;Genuine skincare, makeup, hair care, fragrance and health essentials, from the
+              brands you trust to your door.&rdquo;
             </SectionTitle>
-            <ul className="no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-6 sm:overflow-visible sm:px-0">
+            <Slider label="Shop by category" slideClassName="basis-full sm:basis-1/2 lg:basis-1/4">
               {tiles.map((c) => (
-                <li key={c.id} className="w-40 shrink-0 snap-start sm:w-auto">
-                  <Link href={`/categories/${c.slug}`} className="group block text-center">
-                    <div className="bg-surface relative aspect-square overflow-hidden rounded-md">
-                      <Image
-                        src={c.imageUrl!}
-                        alt=""
-                        fill
-                        sizes="(min-width: 640px) 25vw, 160px"
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    </div>
-                    <p className="mt-4 text-[15px] font-semibold group-hover:underline">{c.name}</p>
-                  </Link>
-                </li>
+                <Link key={c.id} href={`/categories/${c.slug}`} className="group block text-center">
+                  <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden">
+                    <Image
+                      src={c.imageUrl!}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                  <p className="text-ink mt-5 text-base font-semibold group-hover:underline">
+                    {c.name}
+                  </p>
+                </Link>
               ))}
-            </ul>
+            </Slider>
           </Container>
         </section>
       )}
 
-      {(home?.vouchers.length ?? 0) > 0 && (
-        <Container className="pt-12">
-          <VoucherStrip title="Collect vouchers" />
-        </Container>
-      )}
-
-      {bestSellers.length > 0 && (
+      {featured.length > 0 && (
         <section aria-labelledby="featured-heading" className="pt-16 sm:pt-20">
           <Container>
             <SectionTitle id="featured-heading" title="Featured products">
-              Our customers&apos; favourites, chosen again and again.
+              Quality you can trust, picked for you.
             </SectionTitle>
-            <ProductGrid3 products={bestSellers.slice(0, 6)} />
-            <ViewAll href="/collections/best-sellers">View all best sellers</ViewAll>
+            <ProductGrid3 products={featured.slice(0, 6)} />
+            <ViewAll href="/shop">View all products</ViewAll>
           </Container>
         </section>
       )}
 
       <section aria-labelledby="welcome-heading" className="pt-16 sm:pt-20">
         <Container>
-          <div className="bg-surface grid overflow-hidden rounded-md md:grid-cols-2">
+          <div className="bg-surface grid overflow-hidden md:grid-cols-2">
             {welcomeImage && (
-              <div className="relative min-h-72 md:min-h-[28rem]">
+              <div className="relative min-h-80 md:min-h-[40rem]">
                 <Image
                   src={welcomeImage}
                   alt=""
@@ -182,28 +262,38 @@ export function MinimalHome({
                 />
               </div>
             )}
-            <div className="flex flex-col items-center justify-center px-6 py-12 text-center sm:px-12">
-              <p className="text-ink text-xs font-semibold uppercase tracking-widest">
-                Beauty · Pharmacy · Wellness
-              </p>
+            <div className="flex flex-col items-center justify-center px-6 py-14 text-center sm:px-10 lg:px-14">
+              <p className="text-ink text-sm font-semibold">Beauty, Health &amp; Wellness</p>
               <h2
                 id="welcome-heading"
-                className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl"
+                className="text-ink mt-3 text-3xl font-semibold tracking-tight sm:text-4xl"
               >
-                Welcome to {siteConfig.name}
+                Welcome to {siteConfig.name}, Care You Can Trust
               </h2>
-              <p className="text-muted mt-4 max-w-md leading-relaxed">
-                We bring together the skincare, makeup, hair care, fragrance and health products
-                Pakistan trusts, from brands and their authorised distributors. Every order is
-                checked before it ships and paid for in cash when it reaches you.
+              <p className="mt-5 max-w-xl leading-relaxed">
+                Welcome to <strong className="text-ink">{siteConfig.name}</strong>, your trusted
+                destination for skincare, makeup, hair care, fragrance and everyday health
+                essentials. We stock genuine products from the brands and their authorised
+                distributors, so what you put on your skin and in your medicine cabinet is always
+                the real thing.
               </p>
-              <p className="text-muted mt-3 max-w-md leading-relaxed">
-                Need medicines? Upload your prescription and our pharmacist will call you to
-                confirm.
+              <h3 className="text-ink mt-7 text-2xl font-semibold tracking-tight">
+                Why choose {siteConfig.name}?
+              </h3>
+              <p className="mt-4 max-w-xl leading-relaxed">
+                At <strong className="text-ink">{siteConfig.name}</strong>, every order is checked
+                before it ships, delivered across Pakistan and paid for in cash when it reaches you.
+                Not sure what suits you? Our team and pharmacist are a message away, and medicines
+                can be ordered with a photo of your prescription.
               </p>
+              <p className="mt-4 max-w-xl leading-relaxed">
+                Explore our range of skincare, makeup, hair care, fragrance and wellness products,
+                all in one place.
+              </p>
+              <p className="text-ink mt-5 font-semibold">Look good. Feel good.</p>
               <Link
                 href="/shop"
-                className="bg-ink mt-8 inline-flex h-12 items-center rounded-full px-8 text-sm font-semibold text-white hover:bg-black/85"
+                className="bg-ink mt-7 inline-flex h-12 items-center rounded-full px-14 text-[15px] font-semibold text-white hover:bg-black/85"
               >
                 Shop now
               </Link>
@@ -212,20 +302,48 @@ export function MinimalHome({
         </Container>
       </section>
 
-      {home?.flashSale && offers.length > 0 && (
-        <Container className="pt-16 sm:pt-20">
-          <FlashSale sale={home.flashSale} products={offers} />
-        </Container>
+      {topRated.length > 0 && (
+        <section aria-labelledby="popular-heading" className="pt-16 sm:pt-20">
+          <Container>
+            <SectionTitle id="popular-heading" title="Popular picks">
+              Our best-rated products, loved by customers again and again.
+            </SectionTitle>
+            <ProductGrid3 products={topRated.slice(0, 6)} />
+          </Container>
+        </section>
       )}
 
-      {newArrivals.length > 0 && (
-        <section aria-labelledby="new-heading" className="pt-16 sm:pt-20">
+      {bestSellers.length > 0 && (
+        <section aria-labelledby="bestsellers-heading" className="pt-16 sm:pt-20">
           <Container>
-            <SectionTitle id="new-heading" title="New arrivals">
-              Fresh launches and restocks.
-            </SectionTitle>
-            <ProductGrid3 products={newArrivals.slice(0, 6)} />
-            <ViewAll href="/collections/new-arrivals">View all new arrivals</ViewAll>
+            <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2">
+              <div className="min-w-0">
+                <SectionTitle id="bestsellers-heading" title="Shop our bestsellers">
+                  Explore our top-selling products. Whether you are looking for everyday skincare, a
+                  new shade or a health essential, find what works for you.
+                </SectionTitle>
+                <Slider label="Best sellers" slideClassName="basis-1/2">
+                  {bestSellers.slice(0, 8).map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </Slider>
+              </div>
+              {lookbookImage && (
+                <Link
+                  href="/collections/best-sellers"
+                  aria-label="Shop all best sellers"
+                  className="group relative hidden aspect-[4/4.2] overflow-hidden lg:block"
+                >
+                  <Image
+                    src={lookbookImage}
+                    alt=""
+                    fill
+                    sizes="50vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  />
+                </Link>
+              )}
+            </div>
           </Container>
         </section>
       )}
@@ -234,15 +352,18 @@ export function MinimalHome({
         <PromiseMarquee />
       </div>
 
-      {topRated.length > 0 && (
-        <section aria-labelledby="popular-heading" className="pt-16 sm:pt-20">
-          <Container>
-            <SectionTitle id="popular-heading" title="Popular picks">
-              The best-rated products in the store.
-            </SectionTitle>
-            <ProductGrid3 products={topRated.slice(0, 6)} />
-          </Container>
-        </section>
+      {reviews && reviews.reviews.length > 0 && <CustomerReviews data={reviews} />}
+
+      {(home?.vouchers.length ?? 0) > 0 && (
+        <Container className="pt-16">
+          <VoucherStrip title="Collect vouchers" />
+        </Container>
+      )}
+
+      {home?.flashSale && offers.length > 0 && (
+        <Container className="pt-16 sm:pt-20">
+          <FlashSale sale={home.flashSale} products={offers} />
+        </Container>
       )}
 
       {!home?.flashSale && offers.length > 0 && (
@@ -285,7 +406,7 @@ export function MinimalHome({
       <section aria-labelledby="comfort-heading" className="pb-4 pt-16 sm:pt-20">
         <Container>
           <SectionTitle id="comfort-heading" title="Your comfort, our priority">
-            Reliable delivery, easy returns and real help whenever you need it.
+            With reliable delivery, easy returns and real help, we make shopping stress-free.
           </SectionTitle>
           <ul className="grid gap-10 sm:grid-cols-3">
             {SERVICES.map(({ icon: Icon, title, body }) => (

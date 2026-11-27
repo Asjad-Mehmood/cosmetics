@@ -51,6 +51,17 @@ export const productReviewsRouter = defineRoutes("/products", "Reviews", [
   }),
 ]);
 
+/** Store-wide reviews, mounted at /reviews. */
+export const storeReviewsRouter = defineRoutes("/reviews", "Reviews", [
+  route({
+    method: "get",
+    path: "/recent",
+    summary: "The newest approved 4 and 5 star reviews across the store, with the overall rating",
+    access: "public",
+    handler: async () => ok(await reviews.recentReviews()),
+  }),
+]);
+
 export const adminReviewsRouter = defineRoutes("/admin/reviews", "Admin: Reviews", [
   route({
     method: "get",

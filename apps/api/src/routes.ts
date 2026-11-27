@@ -44,7 +44,11 @@ import {
   emailPreferencesRouter,
 } from "./modules/engagement/engagement.routes";
 import { adminReturnsRouter } from "./modules/returns/returns.routes";
-import { adminReviewsRouter, productReviewsRouter } from "./modules/reviews/reviews.routes";
+import {
+  adminReviewsRouter,
+  productReviewsRouter,
+  storeReviewsRouter,
+} from "./modules/reviews/reviews.routes";
 import { wishlistRouter } from "./modules/wishlist/wishlist.routes";
 
 /** API v1 router. Admin routes are under /admin and require a staff role. */
@@ -55,6 +59,7 @@ apiRouter.use("/auth", authRouter);
 apiRouter.use("/me", accountRouter);
 apiRouter.use("/products", productsRouter);
 apiRouter.use("/products", productReviewsRouter);
+apiRouter.use("/reviews", storeReviewsRouter);
 apiRouter.use("/search", searchRouter);
 apiRouter.use("/media", mediaRouter);
 apiRouter.use("/cron", cronRouter);
