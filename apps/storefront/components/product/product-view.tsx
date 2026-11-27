@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAddToCart } from "@/hooks/use-cart";
 import { ApiError } from "@/lib/api";
@@ -216,6 +217,11 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
   const openCart = useUi((s) => s.openCart);
   const buyBox = useRef<HTMLDivElement>(null);
   const [showBar, setShowBar] = useState(false);
+  // The buy bar renders straight into <body>: inside the page, an ancestor
+  // being animated (page fade, scroll effects) would pin it to that ancestor
+  // instead of the screen, so it could float over the content.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [color, setColor] = useState(
     () => firstAvailable(product.variants)?.color ?? product.colors[0]?.name ?? "",
@@ -301,12 +307,14 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-2 lg:gap-14">
-      <div className="md:sticky md:top-36 md:self-start">
+    // grid-cols-1/min-w-0: the side-scrolling voucher row must scroll inside
+    // its column, not stretch the column (and the whole page) on phones.
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-14">
+      <div className="min-w-0 md:sticky md:top-36 md:self-start">
         <Gallery key={color} images={images} title={product.title} />
       </div>
 
-      <div>
+      <div className="min-w-0">
         {category && (
           <Link
             href={`/categories/${category.slug}`}
@@ -553,36 +561,39 @@ export function ProductView({ product }: { product: ProductDetailDTO }) {
       </div>
 
       {/* Phones: sticky buy bar above the tab bar once the main buttons are off screen */}
-      {product.inStock && (
-        <div
-          aria-hidden={!showBar}
-          inert={!showBar}
-          className={cn(
-            "border-line bg-canvas/95 fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t px-4 py-3 backdrop-blur transition-[translate,opacity] duration-300 ease-out md:hidden",
-            showBar
-              ? "translate-y-0 opacity-100"
-              : "pointer-events-none translate-y-full opacity-0",
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{product.title}</p>
-              <p className="text-sm">
-                {formatMoney(price)}
-                {size && <span className="text-muted"> · {size}</span>}
-              </p>
+      {product.inStock &&
+        mounted &&
+        createPortal(
+          <div
+            aria-hidden={!showBar}
+            inert={!showBar}
+            className={cn(
+              "border-line bg-canvas/95 fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t px-4 py-3 backdrop-blur transition-[translate,opacity] duration-300 ease-out md:hidden",
+              showBar
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-full opacity-0",
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{product.title}</p>
+                <p className="text-sm">
+                  {formatMoney(price)}
+                  {size && <span className="text-muted"> · {size}</span>}
+                </p>
+              </div>
+              <Button
+                variant="brand"
+                pill
+                onClick={() => add("cart")}
+                aria-label={`Add to cart: ${product.title}`}
+              >
+                Add to cart
+              </Button>
             </div>
-            <Button
-              variant="brand"
-              pill
-              onClick={() => add("cart")}
-              aria-label={`Add to cart: ${product.title}`}
-            >
-              Add to cart
-            </Button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

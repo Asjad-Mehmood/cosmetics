@@ -5,7 +5,7 @@ export function ThemePreviewBar({ theme }: { theme: string }) {
   return (
     <div
       role="status"
-      className="bg-ink fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-center gap-3 px-4 py-2.5 text-sm text-white shadow-lg md:bottom-0"
+      className="flex items-center justify-center gap-3 bg-[#2b5cff] px-4 py-2 text-xs text-white sm:text-sm"
     >
       <span>
         Previewing the <strong className="capitalize">{theme}</strong> design. Visitors still see
